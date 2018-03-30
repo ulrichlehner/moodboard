@@ -1,0 +1,10 @@
+<h2>Spaces</h2>
+<button (click)="addSpace()">Add Space</button>
+<ul>
+  <li *ngFor="let space of spaces$ | async" (click)="selectSpace(space)" [class.selected]="space === (activeSpace$ | async)">
+    <h3>{{ space.name }}</h3>
+  </li>
+</ul>
+<div *ngIf="activeSpace$ | async as s">
+  <strong>Selected: </strong>{{ s.name }}
+</div>

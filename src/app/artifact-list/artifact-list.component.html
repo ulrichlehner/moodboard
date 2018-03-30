@@ -1,0 +1,12 @@
+<h2>Artifacts</h2>
+<button (click)="addArtifact()">Add Artifact</button>
+<ul>
+  <li *ngFor="let artifact of artifacts$ | async" (click)="selectArtifact(artifact)" [class.selected]="artifact === (activeArtifact$ | async)">
+    <h3>{{ artifact.name }}</h3>
+  </li>
+</ul>
+<div *ngIf="activeArtifact$ | async as a">
+  <strong>Selected: </strong>{{ a.name }}
+</div>
+<!-- <app-artifact-detail [artifact]="activeArtifact"></app-artifact-detail> -->
+<app-artifact-detail></app-artifact-detail>

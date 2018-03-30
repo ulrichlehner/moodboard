@@ -1,0 +1,9 @@
+<div *ngIf="artifact$ | async as a" style="padding: 0.5rem; border: 1px solid silver">
+  <h2>{{ a.name }}</h2>
+  <div>
+    <label>Name:
+      <input [(ngModel)]="a.name" placeholder="Name" />
+    </label>
+  </div>
+  <button (click)="deleteArtifact(a)">Delete</button>
+</div>
