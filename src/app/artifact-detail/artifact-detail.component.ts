@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, ChangeDetectionStrategy } from '@angular/core';
 
 import * as ArtifactActions from '../store/actions/artifact.actions';
 
@@ -8,6 +8,7 @@ import { Observable } from 'rxjs/Observable';
 import { selectActiveArtifact } from '../store/reducers/artifact.reducer';
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-artifact-detail',
   templateUrl: './artifact-detail.component.html',
   styleUrls: ['./artifact-detail.component.css']

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { SpaceState, selectAllSpaces } from '../store/reducers/space.reducer';
 import { Observable } from 'rxjs/Observable';
@@ -6,6 +6,7 @@ import { Space } from '../models/space';
 import * as SpaceActions from '../store/actions/space.actions';
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-space-list',
   templateUrl: './space-list.component.html',
   styleUrls: ['./space-list.component.css']

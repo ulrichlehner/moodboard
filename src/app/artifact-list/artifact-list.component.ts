@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 
 import { ArtifactService } from '../artifact.service';
 import { Artifact } from '../models/artifact';
@@ -9,6 +9,7 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-artifact-list',
   templateUrl: './artifact-list.component.html',
   styleUrls: ['./artifact-list.component.css']
