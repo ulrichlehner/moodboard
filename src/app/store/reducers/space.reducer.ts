@@ -37,7 +37,11 @@ export function spaceReducer(state: SpaceState = initialState, action: spaceActi
       }, state);
 
     case spaceActions.DELETE:
-      return spaceAdapter.removeOne(action.id, state);
+      let newState: SpaceState = spaceAdapter.removeOne(action.id, state);;
+      if (state.activeSpaceId === action.id) {
+        newState.activeSpaceId = null;
+      }
+      return newState;
 
     case spaceActions.SELECT:
       return { ...state, activeSpaceId: action.id }
