@@ -25,7 +25,7 @@ export class ArtifactDetailComponent implements OnInit {
   }
 
   deleteArtifact(artifact: Artifact) {
-    this.store.dispatch(new ArtifactActions.Delete(artifact.id));
+    this.store.dispatch(new ArtifactActions.Delete(artifact));
     console.log(`Artifact deleted: ${artifact.name}`);
   }
 

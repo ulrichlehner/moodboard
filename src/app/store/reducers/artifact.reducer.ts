@@ -25,20 +25,32 @@ export const selectActiveArtifact = createSelector(
   selectEntities, selectActiveArtifactId, (artifact, id) => artifact[id]
 );
 
-export function artifactReducer(state: ArtifactState = initialState, action: artifactActions.ArtifactActions) {
+export function artifactReducer(state: ArtifactState = initialState, action: artifactActions.All) {
   switch (action.type) {
+    case artifactActions.LOAD:
+      return { ...state };
+
+    case artifactActions.LOAD_SUCCESS:
+      return artifactAdapter.addAll(action.artifacts, state);
+
     case artifactActions.CREATE:
       return artifactAdapter.addOne(action.artifact, state);
+
+    case artifactActions.CREATE_SUCCESS:
+      return artifactAdapter.updateOne({
+        id: action.artifact.id,
+        changes: action.artifact
+      }, state);
 
     case artifactActions.UPDATE:
       return artifactAdapter.updateOne({
         id: action.id,
-        changes: action.changes
+        changes: { ...action.changes, updateDate: new Date() }
       }, state);
 
     case artifactActions.DELETE:
-      let newState: ArtifactState = artifactAdapter.removeOne(action.id, state);
-      if (state.activeArtifactId === action.id) {
+      let newState: ArtifactState = artifactAdapter.removeOne(action.artifact.id, state);
+      if (state.activeArtifactId === action.artifact.id) {
         newState.activeArtifactId = null;
       }
       return newState;

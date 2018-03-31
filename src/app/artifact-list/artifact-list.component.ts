@@ -7,6 +7,7 @@ import { selectAllArtifacts, selectActiveArtifact, ArtifactState } from '../stor
 
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
+import * as UUID from 'uuidjs';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -30,6 +31,9 @@ export class ArtifactListComponent implements OnInit {
     // this.getArtifacts();
     this.artifacts$ = this.store.select(selectAllArtifacts);
     this.activeArtifact$ = this.store.select(selectActiveArtifact);
+
+    // Dispatch LOAD_ARTIFACTS https://www.youtube.com/watch?v=xkUOQeGqIGI (2:24)
+    this.store.dispatch(new ArtifactActions.Load());
   }
 
   selectArtifact(artifact: Artifact) {
@@ -43,7 +47,7 @@ export class ArtifactListComponent implements OnInit {
   // }
 
   addArtifact() {
-    let id: string = new Date().getUTCMilliseconds().toString();
+    let id: string = UUID.generate();
     const artifact: Artifact = {
       id: id,
       name: `Artifact @${id}`,
