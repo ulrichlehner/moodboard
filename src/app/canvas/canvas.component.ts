@@ -19,7 +19,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
 
   // scaleFactor = 1.07;
   freeDrawingPadding = 10;
-  mediaShadow = {
+  artifactShadow = {
     color: 'rgba(0, 0, 0, 0.2)',
     blur: 10,
     offsetX: 0,
@@ -521,6 +521,35 @@ export class CanvasComponent implements OnInit, OnDestroy {
       // save current state
       this.updateAllMedia();
       this.dragStart = null;
+    }
+  }
+
+  uploadFile(event) {
+    // console.log(event.target.result);
+    if (event.target.files.length) {
+      for (let i = 0; i < event.target.files.length; i++) {
+        const file: File = event.target.files[i];
+        // console.log(file);
+
+        const imgObj = new Image();
+        imgObj.src = URL.createObjectURL(file);
+        imgObj.onload = () => {
+          // console.log('img loaded');
+          const img = new fabric.Image(imgObj);
+          img.set({
+            angle: 0,
+            left: 10,
+            top: 10,
+            lockUniScaling: true,
+            name: 'test',
+            centeredRotation: true
+          }).scale(0.1).setShadow(this.artifactShadow);
+          this.fabricCanvas.add(img);
+
+          // Release image object
+          imgObj.remove();
+        };
+      }
     }
   }
   //#endregion

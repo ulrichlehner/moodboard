@@ -1,4 +1,11 @@
-<div id="canvas-wrapper" class="canvas-wrapper" (mousewheel)="mouseWheel($event)" (mousedown)="mouseDown($event)" (mousemove)="mouseMove($event)" (mouseup)="mouseUp($event)">
+<div class="w-50 position-fixed mt-2 mr-2" style="right: 0; z-index: 9999">
+  <div class="custom-file">
+    <input type="file" multiple class="custom-file-input" id="upload" (change)="uploadFile($event)">
+    <label class="custom-file-label" for="upload">Choose file</label>
+  </div>
+</div>
+<div id="canvas-wrapper" class="canvas-wrapper" (mousewheel)="mouseWheel($event)" (mousedown)="mouseDown($event)" (mousemove)="mouseMove($event)"
+  (mouseup)="mouseUp($event)">
   <canvas id="canvas" class="canvas"></canvas>
 </div>
 <div class="media-dropzone"></div>
