@@ -13,7 +13,7 @@ import { fromPromise } from 'rxjs/observable/fromPromise';
 // CAUTION: There is currently no up-to-date "Definitely Typed" set of interfaces for
 // PouchDB. So, in an effort to help me learn about the PouchDB API, I'm providing a few
 // tiny interfaces here so I can get a better idea of what data is available.
-export interface IPouchDBAllDocsResult { 
+export interface IPouchDBAllDocsResult {
   offset: number;
   total_rows: number;
   rows: IPouchDBRow[];
@@ -70,7 +70,7 @@ export class ArtifactService {
 
   getAll(): Observable<Artifact[]> {
     // console.log(`Loading all artifacts`);
-    return fromPromise(this.db.allDocs({ include_docs: true })).pipe(map( (docs: IPouchDBAllDocsResult) => { 
+    return fromPromise(this.db.allDocs({ include_docs: true })).pipe(map( (docs: IPouchDBAllDocsResult) => {
       // console.log(docs);
       return docs.rows.map(row => row.doc);
     }));

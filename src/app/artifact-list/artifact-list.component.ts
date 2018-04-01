@@ -47,7 +47,7 @@ export class ArtifactListComponent implements OnInit {
   // }
 
   addArtifact() {
-    let id: string = UUID.generate();
+    const id: string = UUID.generate();
     const artifact: Artifact = {
       id: id,
       name: `Artifact @${id}`,

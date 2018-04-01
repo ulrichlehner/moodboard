@@ -1,10 +1,10 @@
 import { createSelector, createFeatureSelector, ActionReducerMap } from '@ngrx/store';
 import { createEntityAdapter, EntityState, EntityAdapter } from '@ngrx/entity';
 import { Artifact } from '../../models/artifact';
-import * as artifactActions from '../actions/artifact.actions'
+import * as artifactActions from '../actions/artifact.actions';
 
 export interface ArtifactState extends EntityState<Artifact> {
-  activeArtifactId: string | null
+  activeArtifactId: string | null;
 }
 
 export const artifactAdapter: EntityAdapter<Artifact> = createEntityAdapter<Artifact>();
@@ -49,14 +49,14 @@ export function artifactReducer(state: ArtifactState = initialState, action: art
       }, state);
 
     case artifactActions.DELETE:
-      let newState: ArtifactState = artifactAdapter.removeOne(action.artifact.id, state);
+      const newState: ArtifactState = artifactAdapter.removeOne(action.artifact.id, state);
       if (state.activeArtifactId === action.artifact.id) {
         newState.activeArtifactId = null;
       }
       return newState;
 
     case artifactActions.SELECT:
-      return { ...state, activeArtifactId: action.id }
+      return { ...state, activeArtifactId: action.id };
 
     default:
       return state;
