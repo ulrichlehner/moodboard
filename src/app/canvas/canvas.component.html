@@ -1,4 +1,4 @@
-<div id="canvas-wrapper" class="canvas-wrapper">
+<div id="canvas-wrapper" class="canvas-wrapper" (mousewheel)="mouseWheel($event)" (mousedown)="mouseDown($event)" (mousemove)="mouseMove($event)" (mouseup)="mouseUp($event)">
   <canvas id="canvas" class="canvas"></canvas>
 </div>
 <div class="media-dropzone"></div>
