@@ -17,6 +17,7 @@ import { environment } from '../environments/environment';
 import { SpaceListComponent } from './space-list/space-list.component'; // Angular CLI environemnt
 import { EffectsModule } from '@ngrx/effects';
 import { CanvasComponent } from './canvas/canvas.component';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
 @NgModule({
   declarations: [
@@ -28,6 +29,7 @@ import { CanvasComponent } from './canvas/canvas.component';
     CanvasComponent
   ],
   imports: [
+    NgbModule.forRoot(),
     BrowserModule,
     FormsModule,
     AppRoutingModule,
