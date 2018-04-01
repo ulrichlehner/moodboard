@@ -30,7 +30,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
 
   //#region Member variables
   fabricCanvas = null;
-  canvas;
+  domCanvas;
 
   zoomLevel = 1;
 
@@ -167,48 +167,14 @@ export class CanvasComponent implements OnInit, OnDestroy {
     }
 
     // take index [1] since fabric.js produces an extra canvas (buffer technique?)
-    this.canvas = document.getElementsByTagName('canvas')[1];
-    this.canvas.width = canvasDomWidth;
-    this.canvas.height = canvasDomHeight;
+    this.domCanvas = document.getElementsByTagName('canvas')[1];
+    this.domCanvas.width = canvasDomWidth;
+    this.domCanvas.height = canvasDomHeight;
     this.fabricCanvas.setWidth(canvasDomWidth);
     this.fabricCanvas.setHeight(canvasDomHeight);
 
-    this.lastX = this.canvas.width / 2,
-    this.lastY = this.canvas.height / 2;
-
-    // this.canvas.addEventListener('mousedown', function (evt) {
-    //   if (this.spacePressed) {
-    //     document.body.style.msUserSelect = document.body.style.webkitUserSelect = document.body.style.userSelect = 'none';
-    //     this.lastX = evt.offsetX || (evt.pageX - this.canvas.offsetLeft);
-    //     this.lastY = evt.offsetY || (evt.pageY - this.canvas.offsetTop);
-    //     this.dragStart = {
-    //       x: this.lastX,
-    //       y: this.lastY
-    //     };
-    //   }
-    // }, false);
-
-    // this.canvas.addEventListener('mousemove', function (evt) {
-    //   if (this.dragStart) {
-    //     this.lastX = evt.offsetX || (evt.pageX - this.canvas.offsetLeft);
-    //     this.lastY = evt.offsetY || (evt.pageY - this.canvas.offsetTop);
-    //     this.translate(this.lastX - this.dragStart.x, this.lastY - this.dragStart.y);
-    //     this.dragStart = {
-    //       x: this.lastX,
-    //       y: this.lastY
-    //     };
-    //   }
-    // }, false);
-
-    // this.canvas.addEventListener('mouseup', function (evt) {
-    //   if (this.dragStart) {
-    //     // save current state
-    //     this.updateAllMedia();
-    //     this.dragStart = null;
-    //   }
-    // }, false);
-
-    // window.addEventListener('mousewheel', this.handleScroll, false);
+    this.lastX = this.domCanvas.width / 2,
+    this.lastY = this.domCanvas.height / 2;
 
     // window.addEventListener('beforeunload', this.postSessionCanvas);
 
@@ -572,8 +538,8 @@ export class CanvasComponent implements OnInit, OnDestroy {
     if (this.spacePressed) {
       this.fabricCanvas.discardActiveObject();
       const delta = event.wheelDelta ? event.wheelDelta / 40 : event.detail ? -event.detail : 0;
-      const originX = event.offsetX || (event.pageX - this.canvas.offsetLeft);
-      const originY = event.offsetY || (event.pageY - this.canvas.offsetTop);
+      const originX = event.offsetX || (event.pageX - this.domCanvas.offsetLeft);
+      const originY = event.offsetY || (event.pageY - this.domCanvas.offsetTop);
       if (delta > 0) {
         this.zoomIn(originX, originY);
       } else {
@@ -592,8 +558,8 @@ export class CanvasComponent implements OnInit, OnDestroy {
     // console.log(event);
     if (this.spacePressed) {
       document.body.style.msUserSelect = document.body.style.webkitUserSelect = document.body.style.userSelect = 'none';
-      this.lastX = event.offsetX || (event.pageX - this.canvas.offsetLeft);
-      this.lastY = event.offsetY || (event.pageY - this.canvas.offsetTop);
+      this.lastX = event.offsetX || (event.pageX - this.domCanvas.offsetLeft);
+      this.lastY = event.offsetY || (event.pageY - this.domCanvas.offsetTop);
       this.dragStart = {
         x: this.lastX,
         y: this.lastY
@@ -604,8 +570,8 @@ export class CanvasComponent implements OnInit, OnDestroy {
   mouseMove(event) {
     // console.log('mouse move');
     if (this.dragStart) {
-      this.lastX = event.offsetX || (event.pageX - this.canvas.offsetLeft);
-      this.lastY = event.offsetY || (event.pageY - this.canvas.offsetTop);
+      this.lastX = event.offsetX || (event.pageX - this.domCanvas.offsetLeft);
+      this.lastY = event.offsetY || (event.pageY - this.domCanvas.offsetTop);
       this.translate(this.lastX - this.dragStart.x, this.lastY - this.dragStart.y);
       this.dragStart = {
         x: this.lastX,
