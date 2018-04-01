@@ -16,8 +16,8 @@ export class ArtifactEffects {
     switchMap(() => {
       return this.db.getAll().pipe(
         map(artifacts => {
-          return new artifactActions.LoadSuccess(artifacts)
-        })//,
+          return new artifactActions.LoadSuccess(artifacts);
+        }) // ,
         // catchError(error => of(new artifactActions.LoadFail(artifacts)))
       );
     })
