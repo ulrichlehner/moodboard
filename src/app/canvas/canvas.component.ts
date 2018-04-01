@@ -17,7 +17,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
   // spacebar: 32, pageup: 33, pagedown: 34, end: 35, home: 36
   static keys = { 37: 1, 38: 1, 39: 1, 40: 1 };
 
-  scaleFactor = 1.07;
+  // scaleFactor = 1.07;
   freeDrawingPadding = 10;
   mediaShadow = {
     color: 'rgba(0, 0, 0, 0.2)',
@@ -25,11 +25,14 @@ export class CanvasComponent implements OnInit, OnDestroy {
     offsetX: 0,
     offsetY: 0
   };
+  private readonly zoomStep = 0.10;
   //#endregion
 
   //#region Member variables
   fabricCanvas = null;
   canvas;
+
+  zoomLevel = 1;
 
   lastX;
   lastY;
@@ -41,6 +44,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
   // splashScreen = $('.splash-screen');
   drawnPathObjects = new Array();
   activeSession;
+
   //#endregion
 
   //#region Disable scrolling
@@ -259,132 +263,135 @@ export class CanvasComponent implements OnInit, OnDestroy {
   }
 
   translate(x, y) {
-    const objects: Array<any> = this.fabricCanvas.getObjects();
-    objects.forEach(object => {
-      const left = object.left;
-      const top = object.top;
+    // const objects: Array<any> = this.fabricCanvas.getObjects();
+    // objects.forEach(object => {
+    //   const left = object.left;
+    //   const top = object.top;
 
-      const tempLeft = left + x;
-      const tempTop = top + y;
+    //   const tempLeft = left + x;
+    //   const tempTop = top + y;
 
-      object.left = tempLeft;
-      object.top = tempTop;
+    //   object.left = tempLeft;
+    //   object.top = tempTop;
 
-      object.setCoords();
-    });
-    this.fabricCanvas.renderAll();
+    //   object.setCoords();
+    // });
+    // this.fabricCanvas.renderAll();
+    this.fabricCanvas.relativePan({ x: x, y: y});
   }
 
   zoomIn(originX, originY) {
-    // canvasScale = canvasScale * scaleFactor;
-    this.translate(-originX, -originY);
+    // this.translate(-originX, -originY);
 
-    const objects: Array<any> = this.fabricCanvas.getObjects();
-    objects.forEach(object => {
-      const scaleX = object.scaleX;
-      const scaleY = object.scaleY;
-      const left = object.left;
-      const top = object.top;
+    // const objects: Array<any> = this.fabricCanvas.getObjects();
+    // objects.forEach(object => {
+    //   const scaleX = object.scaleX;
+    //   const scaleY = object.scaleY;
+    //   const left = object.left;
+    //   const top = object.top;
 
-      const tempScaleX = scaleX * this.scaleFactor;
-      const tempScaleY = scaleY * this.scaleFactor;
-      const tempLeft = left * this.scaleFactor;
-      const tempTop = top * this.scaleFactor;
+    //   const tempScaleX = scaleX * this.scaleFactor;
+    //   const tempScaleY = scaleY * this.scaleFactor;
+    //   const tempLeft = left * this.scaleFactor;
+    //   const tempTop = top * this.scaleFactor;
 
-      object.scaleX = tempScaleX;
-      object.scaleY = tempScaleY;
-      object.left = tempLeft;
-      object.top = tempTop;
+    //   object.scaleX = tempScaleX;
+    //   object.scaleY = tempScaleY;
+    //   object.left = tempLeft;
+    //   object.top = tempTop;
 
-      object.setCoords();
-    });
+    //   object.setCoords();
+    // });
 
-    this.translate(originX, originY);
+    // this.translate(originX, originY);
 
 
-    this.fabricCanvas.renderAll();
+    // this.fabricCanvas.renderAll();
+    this.zoomLevel += this.zoomStep;
+    this.fabricCanvas.zoomToPoint({ x: originX, y: originY}, this.zoomLevel);
   }
 
   zoomOut(originX, originY) {
-    // canvasScale = canvasScale / scaleFactor;
-    this.translate(-originX, -originY);
+    // this.translate(-originX, -originY);
 
-    const objects: Array<any> = this.fabricCanvas.getObjects();
-    objects.forEach(object => {
-      const scaleX = object.scaleX;
-      const scaleY = object.scaleY;
-      const left = object.left;
-      const top = object.top;
+    // const objects: Array<any> = this.fabricCanvas.getObjects();
+    // objects.forEach(object => {
+    //   const scaleX = object.scaleX;
+    //   const scaleY = object.scaleY;
+    //   const left = object.left;
+    //   const top = object.top;
 
-      const tempScaleX = scaleX * (1 / this.scaleFactor);
-      const tempScaleY = scaleY * (1 / this.scaleFactor);
-      const tempLeft = left * (1 / this.scaleFactor);
-      const tempTop = top * (1 / this.scaleFactor);
+    //   const tempScaleX = scaleX * (1 / this.scaleFactor);
+    //   const tempScaleY = scaleY * (1 / this.scaleFactor);
+    //   const tempLeft = left * (1 / this.scaleFactor);
+    //   const tempTop = top * (1 / this.scaleFactor);
 
-      object.scaleX = tempScaleX;
-      object.scaleY = tempScaleY;
-      object.left = tempLeft;
-      object.top = tempTop;
+    //   object.scaleX = tempScaleX;
+    //   object.scaleY = tempScaleY;
+    //   object.left = tempLeft;
+    //   object.top = tempTop;
 
-      object.setCoords();
-    });
+    //   object.setCoords();
+    // });
 
-    this.translate(originX, originY);
-    this.fabricCanvas.renderAll();
+    // this.translate(originX, originY);
+    // this.fabricCanvas.renderAll();
+    this.zoomLevel -= this.zoomStep;
+    this.fabricCanvas.zoomToPoint({ x: originX, y: originY}, this.zoomLevel);
   }
 
-  scale(scale) {
-    const vcx = this.fabricCanvas.getWidth() / 2;
-    const vcy = this.fabricCanvas.getHeight() / 2;
+  // scale(scale) {
+  //   const vcx = this.fabricCanvas.getWidth() / 2;
+  //   const vcy = this.fabricCanvas.getHeight() / 2;
 
-    this.translate(-vcx, -vcy);
-    const objects: Array<any> = this.fabricCanvas.getObjects();
-    objects.forEach(object => {
-      const scaleX = object.scaleX;
-      const scaleY = object.scaleY;
-      const left = object.left;
-      const top = object.top;
+  //   this.translate(-vcx, -vcy);
+  //   const objects: Array<any> = this.fabricCanvas.getObjects();
+  //   objects.forEach(object => {
+  //     const scaleX = object.scaleX;
+  //     const scaleY = object.scaleY;
+  //     const left = object.left;
+  //     const top = object.top;
 
-      const tempScaleX = scaleX * scale;
-      const tempScaleY = scaleY * scale;
-      const tempLeft = left * scale;
-      const tempTop = top * scale;
+  //     const tempScaleX = scaleX * scale;
+  //     const tempScaleY = scaleY * scale;
+  //     const tempLeft = left * scale;
+  //     const tempTop = top * scale;
 
-      object.scaleX = tempScaleX;
-      object.scaleY = tempScaleY;
-      object.left = tempLeft;
-      object.top = tempTop;
+  //     object.scaleX = tempScaleX;
+  //     object.scaleY = tempScaleY;
+  //     object.left = tempLeft;
+  //     object.top = tempTop;
 
-      object.setCoords();
-    });
-    this.translate(vcx, vcy);
-    this.fabricCanvas.renderAll();
-  }
+  //     object.setCoords();
+  //   });
+  //   this.translate(vcx, vcy);
+  //   this.fabricCanvas.renderAll();
+  // }
 
   resetView() {
-    this.fabricCanvas.deactivateAllWithDispatch();
-    const bound = this.calculateBounds();
+    // this.fabricCanvas.discardActiveObject();
+    // const bound = this.calculateBounds();
 
-    const vw = this.fabricCanvas.getWidth();
-    const vh = this.fabricCanvas.getHeight();
-    const vr = vw / vh;
+    // const vw = this.fabricCanvas.getWidth();
+    // const vh = this.fabricCanvas.getHeight();
+    // const vr = vw / vh;
 
-    const bw = bound.width;
-    const bh = bound.height;
-    const bx = bound.left;
-    const by = bound.top;
-    const br = bw / bh;
+    // const bw = bound.width;
+    // const bh = bound.height;
+    // const bx = bound.left;
+    // const by = bound.top;
+    // const br = bw / bh;
 
-    // Translate to center
-    const dx = vw / 2 - bx - bw / 2;
-    const dy = vh / 2 - by - bh / 2;
-    this.translate(dx, dy);
+    // // Translate to center
+    // const dx = vw / 2 - bx - bw / 2;
+    // const dy = vh / 2 - by - bh / 2;
+    // this.translate(dx, dy);
 
-    // Scale to fit bounds
-    const s = vr < br ? vw / bw : vh / bh;
-    this.scale(s * 0.95);
+    // // Scale to fit bounds
+    // const s = vr < br ? vw / bw : vh / bh;
+    // this.scale(s * 0.95);
 
-    this.updateAllMedia();
+    // this.updateAllMedia();
   }
 
   sendObject(where) {
@@ -560,21 +567,23 @@ export class CanvasComponent implements OnInit, OnDestroy {
   // @HostListener('window:scroll', ['$event'])
   mouseWheel(event: any) {
     // console.log('mousewheel');
-    event.preventDefault();
+    // event.preventDefault();
 
     if (this.spacePressed) {
-      // this.fabricCanvas.deactivateAllWithDispatch();
+      this.fabricCanvas.discardActiveObject();
       const delta = event.wheelDelta ? event.wheelDelta / 40 : event.detail ? -event.detail : 0;
+      const originX = event.offsetX || (event.pageX - this.canvas.offsetLeft);
+      const originY = event.offsetY || (event.pageY - this.canvas.offsetTop);
       if (delta > 0) {
-        this.zoomIn(this.lastX, this.lastY);
+        this.zoomIn(originX, originY);
       } else {
-        this.zoomOut(this.lastX, this.lastY);
+        this.zoomOut(originX, originY);
       }
 
       // save current state
       this.updateAllMedia();
 
-      return event.preventDefault() && false;
+      // return event.preventDefault() && false;
     }
   }
 
