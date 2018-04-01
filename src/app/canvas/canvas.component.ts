@@ -525,6 +525,8 @@ export class CanvasComponent implements OnInit, OnDestroy {
   }
 
   uploadFile(event) {
+    // PouchDB -> https://pouchdb.com/guides/attachments.html
+
     // console.log(event.target.result);
     if (event.target.files.length) {
       for (let i = 0; i < event.target.files.length; i++) {
