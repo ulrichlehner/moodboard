@@ -139,6 +139,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
 
       this.fabricCanvas.on('object:modified', function (event) {
         // this.updateMedia(event.target);
+        console.log('object:modified');
       });
 
       this.fabricCanvas.on('object:added', function (event) {
@@ -183,13 +184,18 @@ export class CanvasComponent implements OnInit, OnDestroy {
 
   createDemoObjects() {
     const circle = new fabric.Circle({
-      radius: 20, fill: 'green', left: 100, top: 100
-    });
-    const triangle = new fabric.Triangle({
-      width: 20, height: 30, fill: 'blue', left: 50, top: 50
+      radius: 50, fill: 'green', left: 80, top: 80
     });
 
-    this.fabricCanvas.add(circle, triangle);
+    const triangle = new fabric.Triangle({
+      width: 50, height: 50, fill: 'blue', left: 50, top: 50
+    });
+
+    const rect = new fabric.Rect({
+      width: 50, height: 50, fill: 'red', left: 20, top: 20
+    });
+
+    this.fabricCanvas.add(circle, triangle, rect);
   }
   //#endregion
 
@@ -229,79 +235,15 @@ export class CanvasComponent implements OnInit, OnDestroy {
   }
 
   translate(x, y) {
-    // const objects: Array<any> = this.fabricCanvas.getObjects();
-    // objects.forEach(object => {
-    //   const left = object.left;
-    //   const top = object.top;
-
-    //   const tempLeft = left + x;
-    //   const tempTop = top + y;
-
-    //   object.left = tempLeft;
-    //   object.top = tempTop;
-
-    //   object.setCoords();
-    // });
-    // this.fabricCanvas.renderAll();
     this.fabricCanvas.relativePan({ x: x, y: y});
   }
 
   zoomIn(originX, originY) {
-    // this.translate(-originX, -originY);
-
-    // const objects: Array<any> = this.fabricCanvas.getObjects();
-    // objects.forEach(object => {
-    //   const scaleX = object.scaleX;
-    //   const scaleY = object.scaleY;
-    //   const left = object.left;
-    //   const top = object.top;
-
-    //   const tempScaleX = scaleX * this.scaleFactor;
-    //   const tempScaleY = scaleY * this.scaleFactor;
-    //   const tempLeft = left * this.scaleFactor;
-    //   const tempTop = top * this.scaleFactor;
-
-    //   object.scaleX = tempScaleX;
-    //   object.scaleY = tempScaleY;
-    //   object.left = tempLeft;
-    //   object.top = tempTop;
-
-    //   object.setCoords();
-    // });
-
-    // this.translate(originX, originY);
-
-
-    // this.fabricCanvas.renderAll();
     this.zoomLevel += this.zoomStep;
     this.fabricCanvas.zoomToPoint({ x: originX, y: originY}, this.zoomLevel);
   }
 
   zoomOut(originX, originY) {
-    // this.translate(-originX, -originY);
-
-    // const objects: Array<any> = this.fabricCanvas.getObjects();
-    // objects.forEach(object => {
-    //   const scaleX = object.scaleX;
-    //   const scaleY = object.scaleY;
-    //   const left = object.left;
-    //   const top = object.top;
-
-    //   const tempScaleX = scaleX * (1 / this.scaleFactor);
-    //   const tempScaleY = scaleY * (1 / this.scaleFactor);
-    //   const tempLeft = left * (1 / this.scaleFactor);
-    //   const tempTop = top * (1 / this.scaleFactor);
-
-    //   object.scaleX = tempScaleX;
-    //   object.scaleY = tempScaleY;
-    //   object.left = tempLeft;
-    //   object.top = tempTop;
-
-    //   object.setCoords();
-    // });
-
-    // this.translate(originX, originY);
-    // this.fabricCanvas.renderAll();
     this.zoomLevel -= this.zoomStep;
     this.fabricCanvas.zoomToPoint({ x: originX, y: originY}, this.zoomLevel);
   }
@@ -361,8 +303,8 @@ export class CanvasComponent implements OnInit, OnDestroy {
   }
 
   sendObject(where) {
-    if (this.fabricCanvas.getActiveGroup()) {
-      this.fabricCanvas.getActiveGroup().forEachObject( (obj: any) => {
+    if (this.fabricCanvas.getActiveObjects()) {
+      this.fabricCanvas.getActiveObjects().forEach( (obj: any) => {
         switch (where) {
           case 'backward':
             this.fabricCanvas.sendBackwards(obj);
@@ -370,7 +312,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
           case 'back':
             this.fabricCanvas.sendToBack(obj);
             break;
-          case 'forwad':
+          case 'forward':
             this.fabricCanvas.bringForward(obj);
             break;
           case 'front':
@@ -378,26 +320,28 @@ export class CanvasComponent implements OnInit, OnDestroy {
             break;
         }
       });
-      this.fabricCanvas.discardActiveGroup().renderAll();
-      this.updateAllMedia();
-    } else if (this.fabricCanvas.getActiveObject()) {
-      const obj = this.fabricCanvas.getActiveObject();
-      switch (where) {
-        case 'backward':
-          this.fabricCanvas.sendBackwards(obj);
-          break;
-        case 'back':
-          this.fabricCanvas.sendToBack(obj);
-          break;
-        case 'forward':
-          this.fabricCanvas.bringForward(obj);
-          break;
-        case 'front':
-          this.fabricCanvas.bringToFront(obj);
-          break;
-      }
+      // this.fabricCanvas.discardActiveGroup().renderAll();
+      // this.fabricCanvas.discardActiveObject();
       this.updateAllMedia();
     }
+    // else if (this.fabricCanvas.getActiveObject()) {
+    //   const obj = this.fabricCanvas.getActiveObject();
+    //   switch (where) {
+    //     case 'backward':
+    //       this.fabricCanvas.sendBackwards(obj);
+    //       break;
+    //     case 'back':
+    //       this.fabricCanvas.sendToBack(obj);
+    //       break;
+    //     case 'forward':
+    //       this.fabricCanvas.bringForward(obj);
+    //       break;
+    //     case 'front':
+    //       this.fabricCanvas.bringToFront(obj);
+    //       break;
+    //   }
+    //   this.updateAllMedia();
+    // }
   }
 
   setSelection(selection) {
@@ -536,7 +480,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
     // event.preventDefault();
 
     if (this.spacePressed) {
-      this.fabricCanvas.discardActiveObject();
+      // this.fabricCanvas.discardActiveObject();
       const delta = event.wheelDelta ? event.wheelDelta / 40 : event.detail ? -event.detail : 0;
       const originX = event.offsetX || (event.pageX - this.domCanvas.offsetLeft);
       const originY = event.offsetY || (event.pageY - this.domCanvas.offsetTop);
