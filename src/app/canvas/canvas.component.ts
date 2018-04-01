@@ -25,14 +25,14 @@ export class CanvasComponent implements OnInit, OnDestroy {
     offsetX: 0,
     offsetY: 0
   };
-  private readonly zoomStep = 0.10;
+  // private readonly zoomStep = 0.10;
   //#endregion
 
   //#region Member variables
   fabricCanvas = null;
   domCanvas;
 
-  zoomLevel = 1;
+  // zoomLevel = 1;
 
   lastX;
   lastY;
@@ -238,14 +238,8 @@ export class CanvasComponent implements OnInit, OnDestroy {
     this.fabricCanvas.relativePan({ x: x, y: y});
   }
 
-  zoomIn(originX, originY) {
-    this.zoomLevel += this.zoomStep;
-    this.fabricCanvas.zoomToPoint({ x: originX, y: originY}, this.zoomLevel);
-  }
-
-  zoomOut(originX, originY) {
-    this.zoomLevel -= this.zoomStep;
-    this.fabricCanvas.zoomToPoint({ x: originX, y: originY}, this.zoomLevel);
+  zoom(originX, originY, delta) {
+    this.fabricCanvas.zoomToPoint({ x: originX, y: originY}, this.fabricCanvas.getZoom() + delta / 20);
   }
 
   // scale(scale) {
@@ -484,11 +478,8 @@ export class CanvasComponent implements OnInit, OnDestroy {
       const delta = event.wheelDelta ? event.wheelDelta / 40 : event.detail ? -event.detail : 0;
       const originX = event.offsetX || (event.pageX - this.domCanvas.offsetLeft);
       const originY = event.offsetY || (event.pageY - this.domCanvas.offsetTop);
-      if (delta > 0) {
-        this.zoomIn(originX, originY);
-      } else {
-        this.zoomOut(originX, originY);
-      }
+
+      this.zoom(originX, originY, delta);
 
       // save current state
       this.updateAllMedia();
