@@ -1,9 +1,9 @@
-import { Artifact } from "./models/artifact";
+import { Artifact } from './models/artifact';
 
 export const ARTIFACTS: Artifact[] = [
   {
-    id: "1",
-    name: "First",
+    id: '1',
+    name: 'First',
     transform: {
       order: 0,
       x: 0,
@@ -15,8 +15,8 @@ export const ARTIFACTS: Artifact[] = [
     createDate: new Date(),
     updateDate: new Date()
   }, {
-    id: "2",
-    name: "Second",
+    id: '2',
+    name: 'Second',
     transform: {
       order: 0,
       x: 0,
@@ -28,8 +28,8 @@ export const ARTIFACTS: Artifact[] = [
     createDate: new Date(),
     updateDate: new Date()
   }, {
-    id: "3",
-    name: "Third",
+    id: '3',
+    name: 'Third',
     transform: {
       order: 0,
       x: 0,

@@ -16,6 +16,7 @@ import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { environment } from '../environments/environment';
 import { SpaceListComponent } from './space-list/space-list.component'; // Angular CLI environemnt
 import { EffectsModule } from '@ngrx/effects';
+import { CanvasComponent } from './canvas/canvas.component';
 
 @NgModule({
   declarations: [
@@ -23,7 +24,8 @@ import { EffectsModule } from '@ngrx/effects';
     ArtifactListComponent,
     ArtifactDetailComponent,
     MessagesComponent,
-    SpaceListComponent
+    SpaceListComponent,
+    CanvasComponent
   ],
   imports: [
     BrowserModule,
