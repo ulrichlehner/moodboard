@@ -130,22 +130,22 @@ code {
   padding-right: 7px;
 }
 
-h2 {
-  font-weight: 800;
-}
+// h2 {
+//   font-weight: 800;
+// }
 
-.btn {
-  border-radius: 0;
-  outline: none !important;
+// .btn {
+//   border-radius: 0;
+//   outline: none !important;
 
-  &:active {
-    box-shadow: none;
-  }
-}
+//   &:active {
+//     box-shadow: none;
+//   }
+// }
 
-.fileupload {
-  display: none;
-}
+// .fileupload {
+//   display: none;
+// }
 
 .top-toolbar {
   height: 55px;
@@ -170,28 +170,28 @@ h2 {
   padding: 10px 10px 10px 5px;
 }
 
-.btn {
-  transition: color 0.2s, border-color 0.2s;
-  height: 35px;
-  line-height: 32px;
-  padding: 0 15px;
-  color: $btn-color;
-  margin-right: 10px;
-  background-color: transparent;
-  border: none;
-  border-bottom: 1px solid $btn-color;
-  &:hover {
-    cursor: pointer;
-    color: $btn-color-hover;
-    border-bottom-color: $btn-color-hover;
-  }
-  &:last-child {
-    margin-right: 0;
-  }
-  i {
-    margin-left: 6px;
-  }
-} 
+// .btn {
+//   transition: color 0.2s, border-color 0.2s;
+//   height: 35px;
+//   line-height: 32px;
+//   padding: 0 15px;
+//   color: $btn-color;
+//   margin-right: 10px;
+//   background-color: transparent;
+//   border: none;
+//   border-bottom: 1px solid $btn-color;
+//   &:hover {
+//     cursor: pointer;
+//     color: $btn-color-hover;
+//     border-bottom-color: $btn-color-hover;
+//   }
+//   &:last-child {
+//     margin-right: 0;
+//   }
+//   i {
+//     margin-left: 6px;
+//   }
+// } 
 
 .btn-main-menu {
   line-height: 35px;
