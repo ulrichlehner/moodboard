@@ -25,7 +25,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
 
   // left: 37, up: 38, right: 39, down: 40,
   // spacebar: 32, pageup: 33, pagedown: 34, end: 35, home: 36
-  static keys = { 37: 1, 38: 1, 39: 1, 40: 1 };
+  private static readonly keys = { 37: 1, 38: 1, 39: 1, 40: 1 };
 
   // scaleFactor = 1.07;
   // freeDrawingPadding = 10;
@@ -166,6 +166,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
       this.fabricCanvas.on('object:modified', function (event) {
         // this.updateMedia(event.target);
         console.log('object:modified');
+        console.log(event);
       });
 
       this.fabricCanvas.on('object:added', function (event) {
@@ -608,18 +609,13 @@ export class CanvasComponent implements OnInit, OnDestroy {
           },
           createDate: new Date(),
           updateDate: new Date(),
-          _attachments: {
-            'test.jpeg': {
-              content_type: file.type,
-              data: file
-            }
-          }
+          _attachments: {}
         };
         // console.log(artifact);
-        // artifact._attachments[`${id}.${this.getExtensionFromType(file.type)}`] = {
-        //   content_type: file.type,
-        //   data: file
-        // };
+        artifact._attachments[`${id}.${this.getExtensionFromType(file.type)}`] = {
+          content_type: file.type,
+          data: file
+        };
 
         this.addArtifactToCanvas(artifact, () => {
           this.store.dispatch(new ArtifactActions.Create(artifact));

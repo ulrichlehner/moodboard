@@ -97,40 +97,28 @@ export class ArtifactService {
   // }
 
   getAll(): Observable<Artifact[]> {
-    // console.log(`Loading all artifacts`);
-
-    // return fromPromise(this.db.getAttachment('ac66201d-51ad-4ebe-b556-d29ceb6bf63f', 'test.jpeg')).pipe(map( obj => {
-    //   console.log(obj);
-    //   return [];
-    // }));
-
     // see https://codereview.stackexchange.com/questions/152897/switchmap-with-array-of-observables
     return fromPromise(this.db.allDocs({ include_docs: true })).pipe(
       map((docs: IPouchDBAllDocsResult) => {
-        // console.log(docs);
         return docs.rows.map(row => row.doc);
       }),
       concatAll(),
       concatMap((artifact: any) => {
-        // return of(artifact);
-        return this.getAttachment(artifact.id, 'test.jpeg').pipe(map(attachment => {
-          // console.log(`adding attachment to ${artifact.id}:`);
-          // console.log(attachment);
-          artifact._attachments['test.jpeg'] = {
-            content_type: attachment.type,
-            // data: attachment
-            data: new File([attachment], 'test.jpeg')
-          };
-          return artifact;
-        }), catchError((err: any) => {
-          // console.log(`no attachment for ${artifact.id}`);
-          return of(artifact);
-        }));
+        for (const fileName in artifact._attachments) {
+          if (fileName) {
+            return this.getAttachment(artifact.id, fileName).pipe(map(attachment => {
+              artifact._attachments[fileName] = {
+                content_type: attachment.type,
+                data: new File([attachment], fileName)
+              };
+              return artifact;
+            }), catchError((err: any) => {
+              return of(artifact);
+            }));
+          }
+        }
       }),
-      reduce( (acc: Artifact[], value: Artifact) => {
-        // console.log('---');
-        // console.log(acc);
-        // console.log(value);
+      reduce((acc: Artifact[], value: Artifact) => {
         acc.push(value);
         return acc;
       }, []));
