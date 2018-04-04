@@ -1,4 +1,4 @@
-import { map, switchMap } from 'rxjs/operators';
+import { map, switchMap, flatMap, catchError, mergeMap, concatMap, concatAll, mergeAll, combineAll, reduce } from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 import { Artifact } from './models/artifact';
 // import { ARTIFACTS } from './mock-artifacts';
@@ -68,12 +68,76 @@ export class ArtifactService {
     return fromPromise(this.db.remove({ ...artifact, _id: artifact.id }));
   }
 
+  // getAll(): Observable<Artifact[]> {
+  //   return fromPromise(this.db.allDocs({ include_docs: true })).pipe(
+  //     map((docs: IPouchDBAllDocsResult) => {
+  //       console.log(docs);
+  //       return docs.rows.map(row => row.doc);
+  //     }),
+  //     concatAll(),
+  //     mergeMap((artifact: any) => this.db.getAttachment(artifact._id, 'test.jpeg'),
+  //       (artifact, attachment: any) => {
+  //         artifact._attachments['test.jpeg'] = {
+  //           content_type: attachment.type,
+  //           // data: attachment
+  //           data: new File([attachment], 'test.jpeg')
+  //         };
+  //         return artifact;
+  //       }), catchError((err: any) => {
+  //         // console.log(`no attachment`);
+  //         return [];
+  //       }),
+  //       reduce( (acc: Artifact[], value: Artifact) => {
+  //         // console.log('---');
+  //         // console.log(acc);
+  //         // console.log(value);
+  //         acc.push(value);
+  //         return acc;
+  //       }, []));
+  // }
+
   getAll(): Observable<Artifact[]> {
     // console.log(`Loading all artifacts`);
-    return fromPromise(this.db.allDocs({ include_docs: true })).pipe(map( (docs: IPouchDBAllDocsResult) => {
-      // console.log(docs);
-      return docs.rows.map(row => row.doc);
-    }));
+
+    // return fromPromise(this.db.getAttachment('ac66201d-51ad-4ebe-b556-d29ceb6bf63f', 'test.jpeg')).pipe(map( obj => {
+    //   console.log(obj);
+    //   return [];
+    // }));
+
+    // see https://codereview.stackexchange.com/questions/152897/switchmap-with-array-of-observables
+    return fromPromise(this.db.allDocs({ include_docs: true })).pipe(
+      map((docs: IPouchDBAllDocsResult) => {
+        // console.log(docs);
+        return docs.rows.map(row => row.doc);
+      }),
+      concatAll(),
+      concatMap((artifact: any) => {
+        // return of(artifact);
+        return this.getAttachment(artifact.id, 'test.jpeg').pipe(map(attachment => {
+          // console.log(`adding attachment to ${artifact.id}:`);
+          // console.log(attachment);
+          artifact._attachments['test.jpeg'] = {
+            content_type: attachment.type,
+            // data: attachment
+            data: new File([attachment], 'test.jpeg')
+          };
+          return artifact;
+        }), catchError((err: any) => {
+          // console.log(`no attachment for ${artifact.id}`);
+          return of(artifact);
+        }));
+      }),
+      reduce( (acc: Artifact[], value: Artifact) => {
+        // console.log('---');
+        // console.log(acc);
+        // console.log(value);
+        acc.push(value);
+        return acc;
+      }, []));
+  }
+
+  getAttachment(docId: string, attachmentId): Observable<Blob> {
+    return fromPromise(this.db.getAttachment(docId, attachmentId));
   }
 
   // getChanges(): Observable<any> {

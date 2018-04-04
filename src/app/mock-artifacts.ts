@@ -11,7 +11,6 @@ export const ARTIFACTS: Artifact[] = [
       angle: 0,
       scale: 1.0
     },
-    attachment: null,
     createDate: new Date(),
     updateDate: new Date()
   }, {
@@ -24,7 +23,6 @@ export const ARTIFACTS: Artifact[] = [
       angle: 0,
       scale: 1.0
     },
-    attachment: null,
     createDate: new Date(),
     updateDate: new Date()
   }, {
@@ -37,7 +35,6 @@ export const ARTIFACTS: Artifact[] = [
       angle: 0,
       scale: 1.0
     },
-    attachment: null,
     createDate: new Date(),
     updateDate: new Date()
   }

@@ -1,10 +1,20 @@
-import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
+import { skip } from 'rxjs/operators';
+import { Observable } from 'rxjs/Observable';
+import { selectAllArtifacts, selectActiveArtifact, ArtifactState } from '../store/reducers/artifact.reducer';
+import { Store } from '@ngrx/store';
+import { Artifact } from './../models/artifact';
+import { Component, OnInit, OnDestroy, HostListener, ChangeDetectionStrategy } from '@angular/core';
 import 'fabric';
+import * as ArtifactActions from '../store/actions/artifact.actions';
+import * as UUID from 'uuidjs';
+import { Subscription } from 'rxjs/Subscription';
+
 declare const fabric: any;
 
 // Fabric w/ Angular -> https://stackoverflow.com/questions/45941730/using-fabric-js-with-angular-4
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-canvas',
   templateUrl: './canvas.component.html',
   styleUrls: ['./canvas.component.css']
@@ -18,8 +28,8 @@ export class CanvasComponent implements OnInit, OnDestroy {
   static keys = { 37: 1, 38: 1, 39: 1, 40: 1 };
 
   // scaleFactor = 1.07;
-  freeDrawingPadding = 10;
-  artifactShadow = {
+  // freeDrawingPadding = 10;
+  private readonly artifactShadow = {
     color: 'rgba(0, 0, 0, 0.2)',
     blur: 10,
     offsetX: 0,
@@ -29,10 +39,9 @@ export class CanvasComponent implements OnInit, OnDestroy {
   //#endregion
 
   //#region Member variables
+  artifacts$: Observable<Artifact[]>;
   fabricCanvas = null;
   domCanvas;
-
-  // zoomLevel = 1;
 
   lastX;
   lastY;
@@ -44,6 +53,8 @@ export class CanvasComponent implements OnInit, OnDestroy {
   // splashScreen = $('.splash-screen');
   drawnPathObjects = new Array();
   activeSession;
+
+  artifactSubscription: Subscription;
 
   //#endregion
 
@@ -88,16 +99,31 @@ export class CanvasComponent implements OnInit, OnDestroy {
   //#endregion
 
   //#region Lifecylce events
-  constructor() { }
+  constructor(private store: Store<ArtifactState>) { }
 
   ngOnInit() {
     CanvasComponent.disableScroll();
     this.initCanvas();
-    this.createDemoObjects();
+    // this.createDemoObjects();
+    this.artifacts$ = this.store.select(selectAllArtifacts);
+    this.store.dispatch(new ArtifactActions.Load());
+
+    this.artifactSubscription = this.artifacts$.pipe(skip(1)).subscribe((artifacts: Artifact[]) => {
+      // skip(1) as this is called initially
+      // see https://stackoverflow.com/questions/42698785/ngrx-subscription-to-store-called-once-its-created
+
+      // console.log('Adding artifacts to canvas...');
+      artifacts.forEach((artifact: Artifact) => {
+        // console.log(artifact);
+        this.addArtifactToCanvas(artifact);
+      });
+    });
   }
 
   ngOnDestroy() {
     CanvasComponent.enableScroll();
+    this.artifactSubscription.unsubscribe();
+    // this.fabricCanvas.dispose();
   }
   //#endregion
 
@@ -175,7 +201,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
     this.fabricCanvas.setHeight(canvasDomHeight);
 
     this.lastX = this.domCanvas.width / 2,
-    this.lastY = this.domCanvas.height / 2;
+      this.lastY = this.domCanvas.height / 2;
 
     // window.addEventListener('beforeunload', this.postSessionCanvas);
 
@@ -235,11 +261,11 @@ export class CanvasComponent implements OnInit, OnDestroy {
   }
 
   translate(x, y) {
-    this.fabricCanvas.relativePan({ x: x, y: y});
+    this.fabricCanvas.relativePan({ x: x, y: y });
   }
 
   zoom(originX, originY, delta) {
-    this.fabricCanvas.zoomToPoint({ x: originX, y: originY}, this.fabricCanvas.getZoom() + delta / 20);
+    this.fabricCanvas.zoomToPoint({ x: originX, y: originY }, this.fabricCanvas.getZoom() + delta / 20);
   }
 
   // scale(scale) {
@@ -298,7 +324,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
 
   sendObject(where) {
     if (this.fabricCanvas.getActiveObjects()) {
-      this.fabricCanvas.getActiveObjects().forEach( (obj: any) => {
+      this.fabricCanvas.getActiveObjects().forEach((obj: any) => {
         switch (where) {
           case 'backward':
             this.fabricCanvas.sendBackwards(obj);
@@ -389,6 +415,42 @@ export class CanvasComponent implements OnInit, OnDestroy {
   deleteMedia() {
     console.log('todo');
   }
+
+  addArtifactToCanvas(artifact: Artifact, next?: Function) {
+    // console.log(`Adding ${artifact.name} to canvas`);
+    // console.log(artifact);
+    if (artifact._attachments) {
+      for (const key in artifact._attachments) {
+        if (artifact._attachments[key]) {
+          // console.log(artifact._attachments[key]);
+
+          let imgObj = new Image();
+          imgObj.src = URL.createObjectURL(artifact._attachments[key].data);
+          imgObj.onload = () => {
+            const img = new fabric.Image(imgObj);
+            img.set({
+              angle: artifact.transform.angle,
+              left: artifact.transform.x,
+              top: artifact.transform.y,
+              lockUniScaling: true,
+              name: artifact.name,
+              centeredRotation: true
+            }).scale(artifact.transform.scale).setShadow(this.artifactShadow);
+            this.fabricCanvas.centerObject(img);
+            this.fabricCanvas.add(img);
+
+            // Release image object
+            imgObj.remove();
+            imgObj = null;
+
+            if (next) {
+              next();
+            }
+          };
+        }
+      }
+    }
+  }
   //#endregion
 
   //#region User events
@@ -414,7 +476,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
   onKeyDown(event) {
     // console.log('keydown');
     // prevent browser shortcuts to interfer with app
-    if (event.keyCode === 38 || event.keyCode === 40 || event.keyCode === 33 || event.keyCode === 34 || event.keyCode === 8) {
+    if (event.keyCode === 38 || event.keyCode === 40 || event.keyCode === 33 || event.keyCode === 34 || event.keyCode === 8) {
       event.preventDefault();
     }
 
@@ -532,26 +594,52 @@ export class CanvasComponent implements OnInit, OnDestroy {
       for (let i = 0; i < event.target.files.length; i++) {
         const file: File = event.target.files[i];
         // console.log(file);
-
-        const imgObj = new Image();
-        imgObj.src = URL.createObjectURL(file);
-        imgObj.onload = () => {
-          // console.log('img loaded');
-          const img = new fabric.Image(imgObj);
-          img.set({
+        // console.log('img loaded');
+        const id: string = UUID.generate();
+        const artifact: Artifact = {
+          id: id,
+          name: `Artifact @${id}`,
+          transform: {
+            order: 0,
+            x: 10,
+            y: 10,
             angle: 0,
-            left: 10,
-            top: 10,
-            lockUniScaling: true,
-            name: 'test',
-            centeredRotation: true
-          }).scale(0.1).setShadow(this.artifactShadow);
-          this.fabricCanvas.add(img);
-
-          // Release image object
-          imgObj.remove();
+            scale: 0.1
+          },
+          createDate: new Date(),
+          updateDate: new Date(),
+          _attachments: {
+            'test.jpeg': {
+              content_type: file.type,
+              data: file
+            }
+          }
         };
+        // console.log(artifact);
+        // artifact._attachments[`${id}.${this.getExtensionFromType(file.type)}`] = {
+        //   content_type: file.type,
+        //   data: file
+        // };
+
+        this.addArtifactToCanvas(artifact, () => {
+          this.store.dispatch(new ArtifactActions.Create(artifact));
+        });
       }
+    }
+  }
+  //#endregion
+
+  //#region Helper methods
+  getExtensionFromType(type: string) {
+    switch (type) {
+      case 'image/gif':
+        return 'gif';
+      case 'image/png':
+        return 'png';
+      case 'image/jpeg':
+        return 'jpeg';
+      default:
+        return null;
     }
   }
   //#endregion

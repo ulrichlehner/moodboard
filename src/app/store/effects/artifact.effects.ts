@@ -18,7 +18,7 @@ export class ArtifactEffects {
         map(artifacts => {
           return new artifactActions.LoadSuccess(artifacts);
         }) // ,
-        // catchError(error => of(new artifactActions.LoadFail(artifacts)))
+        // catchError(error => of(new artifactActions.LoadFail(error)))
       );
     })
   );

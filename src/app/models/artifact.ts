@@ -2,13 +2,15 @@ export interface Artifact {
   id: string;
   name: string;
   transform: Transform;
-  attachment?: Attachment;
   createDate: Date;
   updateDate: Date;
 
   // PouchDB fields
   _id?: string;
   _rev?: string;
+  _attachments?: {
+    [index: string]: Attachment;
+  };
 }
 
 interface Transform {
@@ -20,6 +22,6 @@ interface Transform {
 }
 
 interface Attachment {
-  contentType: string;
+  content_type: string;
   data: Blob;
 }
