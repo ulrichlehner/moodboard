@@ -48,6 +48,12 @@ export function artifactReducer(state: ArtifactState = initialState, action: art
         changes: { ...action.changes, updateDate: new Date() }
       }, state);
 
+    case artifactActions.UPDATE_SUCCESS:
+      return artifactAdapter.updateOne({
+        id: action.id,
+        changes: action.changes
+      }, state);
+
     case artifactActions.DELETE:
       const newState: ArtifactState = artifactAdapter.removeOne(action.artifact.id, state);
       if (state.activeArtifactId === action.artifact.id) {

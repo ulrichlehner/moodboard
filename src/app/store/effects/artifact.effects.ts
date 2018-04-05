@@ -36,6 +36,18 @@ export class ArtifactEffects {
     })
   );
 
+  // @Effect({ dispatch: false }) ?
+  @Effect() update$: Observable<Action> = this.actions$.pipe(
+    ofType(artifactActions.UPDATE),
+    switchMap((action: artifactActions.Update) => {
+      return this.db.update(action.id, action.changes).pipe(
+        map((result: any) => {
+          return new artifactActions.UpdateSuccess(action.id, { _rev: result.rev });
+        })
+      );
+    })
+  );
+
   @Effect() delete$: Observable<Action> = this.actions$.pipe(
     ofType(artifactActions.DELETE),
     switchMap((action: artifactActions.Delete) => {

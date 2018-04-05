@@ -8,6 +8,7 @@ import 'fabric';
 import * as ArtifactActions from '../store/actions/artifact.actions';
 import * as UUID from 'uuidjs';
 import { Subscription } from 'rxjs/Subscription';
+import { fromEvent } from 'rxjs/observable/fromEvent';
 
 declare const fabric: any;
 
@@ -115,7 +116,14 @@ export class CanvasComponent implements OnInit, OnDestroy {
       // console.log('Adding artifacts to canvas...');
       artifacts.forEach((artifact: Artifact) => {
         // console.log(artifact);
-        this.addArtifactToCanvas(artifact);
+        const object = this.fabricCanvas.getObjects().filter(obj => obj.id === artifact.id);
+        if (object.length === 0) {
+          this.addArtifactToCanvas(artifact);
+        }
+        // else {
+        //   console.log('update needed');
+        //   object._rev = artifact._rev;
+        // }
       });
     });
   }
@@ -151,29 +159,31 @@ export class CanvasComponent implements OnInit, OnDestroy {
         });
       };
 
-      this.fabricCanvas.on('selection:cleared', function (event) {
-        // $('#btn-delete-media').addClass('hide');
+      // this.fabricCanvas.on('selection:cleared', function (event) {
+      //   // $('#btn-delete-media').addClass('hide');
+      // });
+
+      // this.fabricCanvas.on('selection:created', function (event) {
+      //   // $('#btn-delete-media').removeClass('hide');
+      // });
+
+      // this.fabricCanvas.on('object:selected', function (event) {
+      //   // $('#btn-delete-media').removeClass('hide');
+      // });
+
+      this.fabricCanvas.on('object:modified', (event) => {
+        // console.log('object:modified');
+        // console.log(event);
+        this.objectModified(event);
       });
 
-      this.fabricCanvas.on('selection:created', function (event) {
-        // $('#btn-delete-media').removeClass('hide');
-      });
+      // this.fabricCanvas.on('object:added', function (event) {
+      // });
 
-      this.fabricCanvas.on('object:selected', function (event) {
-        // $('#btn-delete-media').removeClass('hide');
-      });
+      // this.fabricCanvas.on('object:removed', function (event) {
+      // });
 
-      this.fabricCanvas.on('object:modified', function (event) {
-        // this.updateMedia(event.target);
-        console.log('object:modified');
-        console.log(event);
-      });
-
-      this.fabricCanvas.on('object:added', function (event) {
-      });
-
-      this.fabricCanvas.on('object:removed', function (event) {
-      });
+      // fromEvent(this.fabricCanvas, 'object:modified').subscribe(this.objectModified);
 
       this.fabricCanvas.on('path:created', function (event) {
         if (this.fabricCanvas.isDrawingMode) {
@@ -418,7 +428,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
   }
 
   addArtifactToCanvas(artifact: Artifact, next?: Function) {
-    // console.log(`Adding ${artifact.name} to canvas`);
+    console.log(`Adding ${artifact.name} to canvas`);
     // console.log(artifact);
     if (artifact._attachments) {
       for (const key in artifact._attachments) {
@@ -430,14 +440,18 @@ export class CanvasComponent implements OnInit, OnDestroy {
           imgObj.onload = () => {
             const img = new fabric.Image(imgObj);
             img.set({
+              id: artifact.id,
               angle: artifact.transform.angle,
               left: artifact.transform.x,
               top: artifact.transform.y,
               lockUniScaling: true,
               name: artifact.name,
-              centeredRotation: true
+              centeredRotation: true,
+              // PouchDB fields
+              _id: artifact.id,
+              _rev: artifact._rev
             }).scale(artifact.transform.scale).setShadow(this.artifactShadow);
-            this.fabricCanvas.centerObject(img);
+            // this.fabricCanvas.centerObject(img);
             this.fabricCanvas.add(img);
 
             // Release image object
@@ -454,7 +468,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
   }
   //#endregion
 
-  //#region User events
+  //#region User input events
   @HostListener('window:resize', ['$event'])
   onResize(event) {
     this.initCanvas();
@@ -612,7 +626,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
           _attachments: {}
         };
         // console.log(artifact);
-        artifact._attachments[`${id}.${this.getExtensionFromType(file.type)}`] = {
+        artifact._attachments[`${id}${this.getExtensionFromType(file.type)}`] = {
           content_type: file.type,
           data: file
         };
@@ -625,17 +639,34 @@ export class CanvasComponent implements OnInit, OnDestroy {
   }
   //#endregion
 
+  //#region Canvas events
+  objectModified(event) {
+    // console.log(event);
+    this.store.dispatch(new ArtifactActions.Update(event.target.id, {
+      _id: event.target._id,
+      _rev: event.target._rev,
+      transform: {
+        scale: event.target.scaleX,
+        angle: event.target.angle,
+        x: event.target.left,
+        y: event.target.top,
+        order: 0
+      }
+    }));
+  }
+  //#endregion
+
   //#region Helper methods
   getExtensionFromType(type: string) {
     switch (type) {
       case 'image/gif':
-        return 'gif';
+        return '.gif';
       case 'image/png':
-        return 'png';
+        return '.png';
       case 'image/jpeg':
-        return 'jpeg';
+        return '.jpeg';
       default:
-        return null;
+        return 'null';
     }
   }
   //#endregion

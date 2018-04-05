@@ -68,33 +68,19 @@ export class ArtifactService {
     return fromPromise(this.db.remove({ ...artifact, _id: artifact.id }));
   }
 
-  // getAll(): Observable<Artifact[]> {
-  //   return fromPromise(this.db.allDocs({ include_docs: true })).pipe(
-  //     map((docs: IPouchDBAllDocsResult) => {
-  //       console.log(docs);
-  //       return docs.rows.map(row => row.doc);
-  //     }),
-  //     concatAll(),
-  //     mergeMap((artifact: any) => this.db.getAttachment(artifact._id, 'test.jpeg'),
-  //       (artifact, attachment: any) => {
-  //         artifact._attachments['test.jpeg'] = {
-  //           content_type: attachment.type,
-  //           // data: attachment
-  //           data: new File([attachment], 'test.jpeg')
-  //         };
-  //         return artifact;
-  //       }), catchError((err: any) => {
-  //         // console.log(`no attachment`);
-  //         return [];
-  //       }),
-  //       reduce( (acc: Artifact[], value: Artifact) => {
-  //         // console.log('---');
-  //         // console.log(acc);
-  //         // console.log(value);
-  //         acc.push(value);
-  //         return acc;
-  //       }, []));
-  // }
+  update(id: string, changes: Partial<Artifact>): Observable<Artifact> {
+    return fromPromise(this.db.get(id)).pipe(
+      switchMap((doc: any) => {
+        // console.log(doc);
+        // console.log({ ...doc, ...changes });
+        return this.db.put({ ...doc, ...changes, _rev: doc._rev });
+      })
+    );
+  }
+
+  get(id: string): Observable<Artifact> {
+    return fromPromise(this.db.get(id));
+  }
 
   getAll(): Observable<Artifact[]> {
     // see https://codereview.stackexchange.com/questions/152897/switchmap-with-array-of-observables
@@ -143,6 +129,34 @@ export class ArtifactService {
   //   // Todo: send the message _after_ fetching the heroes
   //   this.messageService.add('ArtifactService: fetched artifacts');
   //   return of(ARTIFACTS);
+  // }
+
+  // getAll(): Observable<Artifact[]> {
+  //   return fromPromise(this.db.allDocs({ include_docs: true })).pipe(
+  //     map((docs: IPouchDBAllDocsResult) => {
+  //       console.log(docs);
+  //       return docs.rows.map(row => row.doc);
+  //     }),
+  //     concatAll(),
+  //     mergeMap((artifact: any) => this.db.getAttachment(artifact._id, 'test.jpeg'),
+  //       (artifact, attachment: any) => {
+  //         artifact._attachments['test.jpeg'] = {
+  //           content_type: attachment.type,
+  //           // data: attachment
+  //           data: new File([attachment], 'test.jpeg')
+  //         };
+  //         return artifact;
+  //       }), catchError((err: any) => {
+  //         // console.log(`no attachment`);
+  //         return [];
+  //       }),
+  //       reduce( (acc: Artifact[], value: Artifact) => {
+  //         // console.log('---');
+  //         // console.log(acc);
+  //         // console.log(value);
+  //         acc.push(value);
+  //         return acc;
+  //       }, []));
   // }
 
 }

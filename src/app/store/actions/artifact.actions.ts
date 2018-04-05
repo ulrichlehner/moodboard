@@ -1,5 +1,5 @@
+import { Artifact } from './../../models/artifact';
 import { Action } from '@ngrx/store';
-import { Artifact } from '../../models/artifact';
 
 export const CREATE = '[Artifact] Add';
 export const UPDATE = '[Artifact] Update';
