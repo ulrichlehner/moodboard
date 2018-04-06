@@ -9,6 +9,9 @@ export const CREATE_SUCCESS = '[Artifact] Add success';
 export const UPDATE_SUCCESS = '[Artifact] Update success';
 export const DELETE_SUCCESS = '[Artifact] Delete success';
 export const LOAD_SUCCESS = '[Artifact] Load success';
+export const CREATE_FAIL = '[Artifact] Add fail';
+export const UPDATE_FAIL = '[Artifact] Update fail';
+export const DELETE_FAIL = '[Artifact] Delete fail';
 export const SELECT = '[Artifact] Select';
 
 export class Create implements Action {
@@ -26,7 +29,7 @@ export class Update implements Action {
 export class Delete implements Action {
   readonly type = DELETE;
 
-  constructor(public artifact: Artifact) { }
+  constructor(public id: string) { }
 }
 
 export class CreateSuccess implements Action {
@@ -47,6 +50,12 @@ export class DeleteSuccess implements Action {
   // constructor(public artifact: Artifact) { }
 }
 
+export class DeleteFail implements Action {
+  readonly type = DELETE_FAIL;
+
+  // constructor(public artifact: Artifact) { }
+}
+
 export class Load implements Action {
   readonly type = LOAD;
 }
@@ -63,4 +72,4 @@ export class Select implements Action {
   constructor(public readonly id: string) { }
 }
 
-export type All = Create | CreateSuccess | Update | UpdateSuccess | Delete | DeleteSuccess | Load | LoadSuccess | Select;
+export type All = Create | CreateSuccess | Update | UpdateSuccess | Delete | DeleteSuccess | DeleteFail | Load | LoadSuccess | Select;

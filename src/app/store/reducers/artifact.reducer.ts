@@ -55,8 +55,8 @@ export function artifactReducer(state: ArtifactState = initialState, action: art
       }, state);
 
     case artifactActions.DELETE:
-      const newState: ArtifactState = artifactAdapter.removeOne(action.artifact.id, state);
-      if (state.activeArtifactId === action.artifact.id) {
+      const newState: ArtifactState = artifactAdapter.removeOne(action.id, state);
+      if (state.activeArtifactId === action.id) {
         newState.activeArtifactId = null;
       }
       return newState;

@@ -51,12 +51,18 @@ export class ArtifactEffects {
   @Effect() delete$: Observable<Action> = this.actions$.pipe(
     ofType(artifactActions.DELETE),
     switchMap((action: artifactActions.Delete) => {
-      return this.db.delete(action.artifact).pipe(
+
+      console.log(`delete ${action.id}`);
+      return this.db.deleteById(action.id).pipe(
         map((result: any) => {
-          // console.log(action.artifact);
+          console.log(`delete success ${action.id}`);
           // return new artifactActions.DeleteSuccess({ ...action.artifact, _rev: result.rev });
           return new artifactActions.DeleteSuccess();
-        })
+        }, catchError( (err: any) => {
+          console.log(`fail`);
+          // return null;
+          return of(new artifactActions.DeleteFail());
+        }))
       );
       // return this.db.create(ac)
     })

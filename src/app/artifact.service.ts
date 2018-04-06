@@ -7,6 +7,7 @@ import { of } from 'rxjs/observable/of';
 import { MessageService } from './message.service';
 import PouchDB from 'pouchdb';
 import { fromPromise } from 'rxjs/observable/fromPromise';
+import { concat } from 'rxjs/operators/concat';
 
 // see https://www.bennadel.com/blog/3194-experimenting-with-simple-crud-operations-using-pouchdb-in-angular-2-1-1.htm
 
@@ -58,16 +59,111 @@ export class ArtifactService {
     this.db = new PouchDB('artifact');
   }
 
+  // TODO: probably _id: artifact.id is not needed
   create(artifact: Artifact): Observable<Artifact> {
     // console.log(`Adding to db: ${artifact.name}`);
     // return this.db.put({ ...artifact, _id: artifact.id });
     return fromPromise(this.db.put({ ...artifact, _id: artifact.id }));
   }
 
-  delete(artifact: Artifact): Observable<Artifact> {
-    return fromPromise(this.db.remove({ ...artifact, _id: artifact.id }));
+  deleteById(id: string): Observable<any> {
+    // console.log(`deleteById ${id}`);
+    return fromPromise(this.db.get(id)).pipe(
+      concat(),
+      concatMap((doc: any) => {
+        console.log(`checking for attachments on ${id}`);
+        if (doc._attachments) {
+          console.log(`iterating through attachments ${id}`);
+          for (const attachmentId in doc._attachments) {
+            if (attachmentId) {
+              return this.removeAttachment(id, attachmentId, doc._rev).pipe(
+                switchMap((result: any) => {
+                  console.log(`attachment removed ${id}`);
+                  console.log(result);
+                  // console.log(artifact);
+                  // return fromPromise(this.db.remove(id, result._rev));
+                  return fromPromise(this.db.put({ _id: id, _rev: result.rev, _deleted: true }));
+                }),
+                catchError((error: any) => {
+                  console.log('catchError');
+                  return fromPromise(this.db.remove(id, doc._rev));
+                })
+              );
+            } else {
+              console.log('else inner');
+              return fromPromise(this.db.remove(id, doc._rev));
+            }
+          }
+        } else {
+          console.log('else outer');
+          return fromPromise(this.db.remove(id, doc._rev));
+        }
+      }), catchError((error: any) => {
+        console.log('catchError');
+        console.log(error);
+        return null;
+      })
+    );
   }
 
+  deleteById2(id: string): Observable<any> {
+    console.log(`deleteById ${id}`);
+    return fromPromise(this.db.get(id)).pipe(
+      switchMap((doc: any) => {
+        console.log(`checking for attachments on ${id}`);
+        if (doc._attachments) {
+          console.log(`iterating through attachments ${id}`);
+          for (const attachmentId in doc._attachments) {
+            if (attachmentId) {
+              return this.removeAttachment(id, attachmentId, doc._rev).pipe(
+                switchMap((result: any) => {
+                  console.log(`attachment removed ${id}`);
+                  console.log(result);
+                  // console.log(artifact);
+                  // return fromPromise(this.db.remove(id, result._rev));
+                  return fromPromise(this.db.put({ _id: id, _rev: result.rev, _deleted: true }));
+                }),
+                catchError((error: any) => {
+                  console.log('catchError');
+                  return fromPromise(this.db.remove(id, doc._rev));
+                })
+              );
+            } else {
+              console.log('else inner');
+              return fromPromise(this.db.remove(id, doc._rev));
+            }
+          }
+        } else {
+          console.log('else outer');
+          return fromPromise(this.db.remove(id, doc._rev));
+        }
+      }), catchError((error: any) => {
+        console.log('catchError');
+        console.log(error);
+        return null;
+      })
+    );
+  }
+
+  // TODO: probably _id: artifact.id is not needed
+  // delete(artifact: Artifact): Observable<any> {
+  //   for (const fileName in artifact._attachments) {
+  //     if (fileName) {
+  //       return this.removeAttachment(artifact.id, fileName, artifact._rev).pipe(
+  //         switchMap((result: any) => {
+  //           console.log(result);
+  //           console.log(artifact);
+  //           return fromPromise(this.db.remove({ ...artifact, _id: artifact.id, _rev: result._rev }));
+  //         }),
+  //         catchError((error: any) => {
+  //           return fromPromise(this.db.remove({ ...artifact, _id: artifact.id }));
+  //         })
+  //       );
+  //     }
+  //   }
+  // }
+
+  // TODO: update shouldn't fetch the doc first but directly update
   update(id: string, changes: Partial<Artifact>): Observable<Artifact> {
     return fromPromise(this.db.get(id)).pipe(
       switchMap((doc: any) => {
@@ -112,6 +208,10 @@ export class ArtifactService {
 
   getAttachment(docId: string, attachmentId): Observable<Blob> {
     return fromPromise(this.db.getAttachment(docId, attachmentId));
+  }
+
+  removeAttachment(docId: string, attachmentId, rev: string): Observable<IPouchDBRemoveResult> {
+    return fromPromise(this.db.removeAttachment(docId, attachmentId, rev));
   }
 
   // getChanges(): Observable<any> {

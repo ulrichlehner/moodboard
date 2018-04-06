@@ -22,7 +22,7 @@ export class SpaceListComponent implements OnInit {
   }
 
   addSpace() {
-    let id: string = new Date().getUTCMilliseconds().toString();
+    const id: string = new Date().getUTCMilliseconds().toString();
     const space: Space = {
       id: id,
       name: `Space @${id}`,

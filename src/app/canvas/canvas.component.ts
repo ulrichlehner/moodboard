@@ -109,22 +109,10 @@ export class CanvasComponent implements OnInit, OnDestroy {
     this.artifacts$ = this.store.select(selectAllArtifacts);
     this.store.dispatch(new ArtifactActions.Load());
 
-    this.artifactSubscription = this.artifacts$.pipe(skip(1)).subscribe((artifacts: Artifact[]) => {
+    this.artifactSubscription = this.artifacts$.subscribe((artifacts: Artifact[]) => {
       // skip(1) as this is called initially
       // see https://stackoverflow.com/questions/42698785/ngrx-subscription-to-store-called-once-its-created
-
-      // console.log('Adding artifacts to canvas...');
-      artifacts.forEach((artifact: Artifact) => {
-        // console.log(artifact);
-        const object = this.fabricCanvas.getObjects().filter(obj => obj.id === artifact.id);
-        if (object.length === 0) {
-          this.addArtifactToCanvas(artifact);
-        }
-        // else {
-        //   console.log('update needed');
-        //   object._rev = artifact._rev;
-        // }
-      });
+      this.syncCanvas(artifacts);
     });
   }
 
@@ -141,7 +129,9 @@ export class CanvasComponent implements OnInit, OnDestroy {
     const canvasDomHeight = document.getElementById('canvas-wrapper').clientHeight;
 
     if (this.fabricCanvas == null) {
-      this.fabricCanvas = new fabric.Canvas('canvas');
+      this.fabricCanvas = new fabric.Canvas('canvas', {
+        noScaleCache: true
+      });
 
       // extend fabricjs with show/hide functionality
       // see https://groups.google.com/d/msg/fabricjs/cbdFgTH7UXc/jj6iVoNYmVUJ
@@ -385,6 +375,49 @@ export class CanvasComponent implements OnInit, OnDestroy {
       object.selection = selection;
     });
   }
+
+  syncCanvas(artifacts: Artifact[]) {
+    // console.log('Adding artifacts to canvas...');
+    if (artifacts.length < this.fabricCanvas.getObjects().length) {
+      // Artifact was deleted
+      // const deletedObjects = [];
+      console.log('delete from canvas');
+      if (artifacts.length === 0) {
+        this.fabricCanvas.forEachObject((canvasObject: any) => {
+          this.fabricCanvas.remove(canvasObject);
+        });
+      } else {
+        this.fabricCanvas.forEachObject((canvasObject: any) => {
+          const tmpObjects = artifacts.filter(artifact => canvasObject ? artifact.id === canvasObject.id : true);
+          if (tmpObjects.length === 0) {
+            console.log(`out-of-sync: ${canvasObject.id}`);
+            // deletedObjects.push(obj);
+            this.fabricCanvas.remove(canvasObject);
+            this.fabricCanvas.discardActiveObject();
+          }
+
+        });
+      }
+      // if (deletedObjects.length > 0) {
+      //   deletedObjects.forEach(object => {
+      //     console.log(`${object.name} was deleted`);
+      //   });
+      // }
+
+    } else {
+      artifacts.forEach((artifact: Artifact) => {
+        // console.log(artifact);
+        const object = this.fabricCanvas.getObjects().filter(obj => obj.id === artifact.id);
+        if (object.length === 0) {
+          this.addArtifactToCanvas(artifact);
+        }
+        // else {
+        //   console.log(`update needed (${artifact._rev})`);
+        //   object._rev = artifact._rev;
+        // }
+      });
+    }
+  }
   //#endregion
 
   //#region Data manipulation
@@ -423,8 +456,14 @@ export class CanvasComponent implements OnInit, OnDestroy {
     // }
   }
 
-  deleteMedia() {
+  deleteArtifact() {
     console.log('todo');
+    if (this.fabricCanvas.getActiveObjects()) {
+      this.fabricCanvas.getActiveObjects().forEach((obj: any) => {
+        console.log(`Deleting ${obj.name}`);
+        this.store.dispatch(new ArtifactActions.Delete(obj.id));
+      });
+    }
   }
 
   addArtifactToCanvas(artifact: Artifact, next?: Function) {
@@ -448,8 +487,8 @@ export class CanvasComponent implements OnInit, OnDestroy {
               name: artifact.name,
               centeredRotation: true,
               // PouchDB fields
-              _id: artifact.id,
-              _rev: artifact._rev
+              // _id: artifact.id,
+              // _rev: artifact._rev
             }).scale(artifact.transform.scale).setShadow(this.artifactShadow);
             // this.fabricCanvas.centerObject(img);
             this.fabricCanvas.add(img);
@@ -501,17 +540,17 @@ export class CanvasComponent implements OnInit, OnDestroy {
         this.setSelection(false);
         break;
       case 88: // 'x'
-        this.deleteMedia();
+        this.deleteArtifact();
         break;
       case 8: // BACKSPACE
         if (this.fabricCanvas.isDrawingMode) {
           // this.undoDrawing();
         } else {
-          this.deleteMedia();
+          this.deleteArtifact();
         }
         break;
       case 46: // DELETE
-        this.deleteMedia();
+        this.deleteArtifact();
         break;
       case 38: // UP ARROW
         this.sendObject('forward');
@@ -641,18 +680,65 @@ export class CanvasComponent implements OnInit, OnDestroy {
 
   //#region Canvas events
   objectModified(event) {
-    // console.log(event);
-    this.store.dispatch(new ArtifactActions.Update(event.target.id, {
-      _id: event.target._id,
-      _rev: event.target._rev,
-      transform: {
-        scale: event.target.scaleX,
-        angle: event.target.angle,
-        x: event.target.left,
-        y: event.target.top,
-        order: 0
+    console.log(event);
+    // if (event.target.id) {
+    //   this.store.dispatch(new ArtifactActions.Update(event.target.id, {
+    //     _id: event.target.id,
+    //     // _rev: event.target._rev,
+    //     transform: {
+    //       scale: event.target.scaleX,
+    //       angle: event.target.angle,
+    //       x: event.target.left,
+    //       y: event.target.top,
+    //       order: 0
+    //     }
+    //   }));
+    // } else if (event.target._objects && event.target._objects.length > 0) {
+    //   event.target._objects.forEach(object => {
+    //     this.store.dispatch(new ArtifactActions.Update(object.id, {
+    //       _id: object.id,
+    //       // _rev: object._rev,
+    //       transform: {
+    //         scale: object.scaleX,
+    //         angle: object.angle,
+    //         x: object.left,
+    //         y: object.top,
+    //         order: 0
+    //       }
+    //     }));
+    //   });
+    // }
+
+    const media = event.target;
+    let arr = [];
+    let isGroup = false;
+    if (media._objects) {
+      arr = media._objects;
+      isGroup = true;
+    } else {
+      arr.push(media);
+    }
+
+    // save data
+    for (let i = 0; i < arr.length; i++) {
+      const id = arr[i].id;
+      const object = this.fabricCanvas.toJSON().objects[this.fabricCanvas.getObjects().indexOf(arr[i])];
+      console.log(id);
+      console.log(object);
+      if (object) {
+        this.store.dispatch(new ArtifactActions.Update(id, {
+          _id: id,
+          // _rev: object._rev,
+          transform: {
+            scale: object.scaleX,
+            angle: object.angle,
+            x: arr.length > 1 ? object.left : media.oCoords.tl.x,
+            y: arr.length > 1 ? object.top : media.oCoords.tl.y,
+            order: this.fabricCanvas.getObjects().indexOf(arr[i])
+          }
+        }));
       }
-    }));
+    }
   }
   //#endregion
 
