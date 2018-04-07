@@ -780,8 +780,10 @@ export class CanvasComponent implements OnInit, OnDestroy {
         return '.png';
       case 'image/jpeg':
         return '.jpeg';
+      case 'image/webp':
+        return '.webp';
       default:
-        return 'null';
+        return '';
     }
   }
   //#endregion
