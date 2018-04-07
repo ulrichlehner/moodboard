@@ -30,15 +30,15 @@ export class CanvasComponent implements OnInit, OnDestroy {
 
   private readonly imageMimeType = 'image/webp';
   private readonly imageQuality = 0.6;
-  private readonly imageMaxWidth = 1600;
+  private readonly imageMaxSide = 1600;
 
   // scaleFactor = 1.07;
   // freeDrawingPadding = 10;
   private readonly artifactShadow = {
-    color: 'rgba(0, 0, 0, 0.2)',
-    blur: 10,
+    color: 'rgba(0, 0, 0, 0.4)',
+    blur: 15,
     offsetX: 0,
-    offsetY: 0
+    offsetY: 5
   };
   // private readonly zoomStep = 0.10;
   //#endregion
@@ -663,8 +663,15 @@ export class CanvasComponent implements OnInit, OnDestroy {
           // Resize image
           const canvas: HTMLCanvasElement = document.createElement('canvas');
           const ctx = canvas.getContext('2d');
-          canvas.width = this.imageMaxWidth;
-          canvas.height = canvas.width * (imgEl.height / imgEl.width);
+
+          if (imgEl.width > imgEl.height) {
+            canvas.width = this.imageMaxSide;
+            canvas.height = canvas.width * (imgEl.height / imgEl.width);
+          } else {
+            canvas.height = this.imageMaxSide;
+            canvas.width = canvas.height * (imgEl.width / imgEl.height);
+          }
+
           ctx.drawImage(imgEl, 0, 0, canvas.width, canvas.height);
 
           // console.log('img loaded');
@@ -693,6 +700,8 @@ export class CanvasComponent implements OnInit, OnDestroy {
             this.addArtifactToCanvas(artifact, () => {
               this.store.dispatch(new ArtifactActions.Create(artifact));
             });
+
+            canvas.remove();
           }, this.imageMimeType, this.imageQuality);
         };
       }
