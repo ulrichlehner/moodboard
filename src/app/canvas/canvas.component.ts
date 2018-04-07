@@ -28,6 +28,10 @@ export class CanvasComponent implements OnInit, OnDestroy {
   // spacebar: 32, pageup: 33, pagedown: 34, end: 35, home: 36
   private static readonly keys = { 37: 1, 38: 1, 39: 1, 40: 1 };
 
+  private readonly imageMimeType = 'image/webp';
+  private readonly imageQuality = 0.6;
+  private readonly imageMaxWidth = 1600;
+
   // scaleFactor = 1.07;
   // freeDrawingPadding = 10;
   private readonly artifactShadow = {
@@ -478,6 +482,11 @@ export class CanvasComponent implements OnInit, OnDestroy {
           imgObj.src = URL.createObjectURL(artifact._attachments[key].data);
           imgObj.onload = () => {
             const img = new fabric.Image(imgObj);
+            // img.filters.push(new fabric.Image.filters.Resize({
+            //   scaleX: 0.05,
+            //   scaleY: 0.05
+            // }));
+            // img.applyFilters();
             img.set({
               id: artifact.id,
               angle: artifact.transform.angle,
@@ -647,38 +656,49 @@ export class CanvasComponent implements OnInit, OnDestroy {
     if (event.target.files.length) {
       for (let i = 0; i < event.target.files.length; i++) {
         const file: File = event.target.files[i];
-        // console.log(file);
-        // console.log('img loaded');
-        const id: string = UUID.generate();
-        const artifact: Artifact = {
-          id: id,
-          name: `Artifact @${id}`,
-          transform: {
-            order: 0,
-            x: 10,
-            y: 10,
-            angle: 0,
-            scale: 0.1
-          },
-          createDate: new Date(),
-          updateDate: new Date(),
-          _attachments: {}
-        };
-        // console.log(artifact);
-        artifact._attachments[`${id}${this.getExtensionFromType(file.type)}`] = {
-          content_type: file.type,
-          data: file
-        };
+        console.log(file);
+        const imgEl: HTMLImageElement = new Image();
+        imgEl.src = URL.createObjectURL(file);
+        imgEl.onload = () => {
+          // Resize image
+          const canvas: HTMLCanvasElement = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          canvas.width = this.imageMaxWidth;
+          canvas.height = canvas.width * (imgEl.height / imgEl.width);
+          ctx.drawImage(imgEl, 0, 0, canvas.width, canvas.height);
 
-        this.addArtifactToCanvas(artifact, () => {
-          this.store.dispatch(new ArtifactActions.Create(artifact));
-        });
+          // console.log('img loaded');
+          const id: string = UUID.generate();
+          const artifact: Artifact = {
+            id: id,
+            name: `Artifact @${id}`,
+            transform: {
+              order: 0,
+              x: 10,
+              y: 10,
+              angle: 0,
+              scale: 0.1
+            },
+            createDate: new Date(),
+            updateDate: new Date(),
+            _attachments: {}
+          };
+          canvas.toBlob((result: Blob) => {
+            // console.log(artifact);
+            artifact._attachments[`${id}${this.getExtensionFromType(file.type)}`] = {
+              content_type: this.imageMimeType,
+              data: result
+            };
+
+            this.addArtifactToCanvas(artifact, () => {
+              this.store.dispatch(new ArtifactActions.Create(artifact));
+            });
+          }, this.imageMimeType, this.imageQuality);
+        };
       }
     }
   }
-  //#endregion
 
-  //#region Canvas events
   objectModified(event) {
     console.log(event);
     // if (event.target.id) {
