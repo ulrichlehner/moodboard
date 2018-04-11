@@ -1,4 +1,4 @@
-import { map, switchMap, flatMap, catchError, mergeMap, concatMap, concatAll, mergeAll, combineAll, reduce } from 'rxjs/operators';
+import { map, switchMap, flatMap, catchError, mergeMap, concatMap, concatAll, mergeAll, combineAll, reduce, filter } from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 import { Artifact } from './models/artifact';
 // import { ARTIFACTS } from './mock-artifacts';
@@ -67,6 +67,16 @@ export class ArtifactService {
   }
 
   deleteById(id: string): Observable<any> {
+    return fromPromise(this.db.get(id).then(doc => {
+      return this.db.remove(id, doc._rev);
+    }).then(response => response)).pipe(
+      switchMap((response: any) => {
+        return of(response);
+      })
+    );
+  }
+
+  deleteById3(id: string): Observable<any> {
     // console.log(`deleteById ${id}`);
     return fromPromise(this.db.get(id)).pipe(
       concat(),
@@ -165,11 +175,17 @@ export class ArtifactService {
 
   // TODO: update shouldn't fetch the doc first but directly update
   update(id: string, changes: Partial<Artifact>): Observable<Artifact> {
-    return fromPromise(this.db.get(id)).pipe(
-      switchMap((doc: any) => {
-        // console.log(doc);
-        // console.log({ ...doc, ...changes });
-        return this.db.put({ ...doc, ...changes, _rev: doc._rev });
+    // console.log(`trying to update ${id}`);
+    return fromPromise(this.db.get(id).then(doc => {
+      return this.db.put({ ...doc, ...changes, _rev: doc._rev });
+    }).then(response => response)).pipe(
+      // catchError(error => of(`Error: ${error}`)),
+      switchMap((response: any) => {
+        // console.log(response);
+        // console.log(`updating ${id}`);
+        // console.log({ ...response, ...changes });
+        // return this.db.put({ ...doc, ...changes, _rev: doc._rev });
+        return of(response);
       })
     );
   }

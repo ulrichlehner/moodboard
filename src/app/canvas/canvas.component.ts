@@ -709,7 +709,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
   }
 
   objectModified(event) {
-    console.log(event);
+    // console.log(event);
     // if (event.target.id) {
     //   this.store.dispatch(new ArtifactActions.Update(event.target.id, {
     //     _id: event.target.id,
@@ -752,8 +752,8 @@ export class CanvasComponent implements OnInit, OnDestroy {
     for (let i = 0; i < arr.length; i++) {
       const id = arr[i].id;
       const object = this.fabricCanvas.toJSON().objects[this.fabricCanvas.getObjects().indexOf(arr[i])];
-      console.log(id);
-      console.log(object);
+      // console.log(id);
+      // console.log(object);
       if (object) {
         this.store.dispatch(new ArtifactActions.Update(id, {
           _id: id,
