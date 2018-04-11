@@ -4,8 +4,19 @@
     <label class="custom-file-label" for="upload">Choose file</label>
   </div>
 </div>
-<div id="canvas-wrapper" class="canvas-wrapper" (mousewheel)="mouseWheel($event)" (mousedown)="mouseDown($event)" (mousemove)="mouseMove($event)"
-  (mouseup)="mouseUp($event)">
+<progress max="100" [value]="saveProgress" *ngIf="saveProgress > 0"></progress>
+<div
+  id="canvas-wrapper"
+  class="canvas-wrapper"
+  (mousewheel)="mouseWheel($event)"
+  (mousedown)="mouseDown($event)"
+  (mousemove)="mouseMove($event)"
+  (mouseup)="mouseUp($event)"
+  (dragover)="dragOver()"
+  (dragleave)="dragEnd()"
+  (dragend)="dragEnd()"
+  (drop)="drop($event)"
+  [class.dragover]="isDragOver">
   <canvas id="canvas" class="canvas"></canvas>
 </div>
 <!-- <div class="media-dropzone"></div> -->

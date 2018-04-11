@@ -18,29 +18,31 @@ declare const fabric: any;
   changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-canvas',
   templateUrl: './canvas.component.html',
-  styleUrls: ['./canvas.component.css']
+  styleUrls: ['./canvas.component.scss']
 })
 export class CanvasComponent implements OnInit, OnDestroy {
 
   //#region Config
 
-  // left: 37, up: 38, right: 39, down: 40,
-  // spacebar: 32, pageup: 33, pagedown: 34, end: 35, home: 36
+  // left: 37, up: 38, right: 39, down: 40, spacebar: 32, pageup: 33, pagedown: 34, end: 35, home: 36
   private static readonly keys = { 37: 1, 38: 1, 39: 1, 40: 1 };
 
-  private readonly imageMimeType = 'image/webp';
-  private readonly imageQuality = 0.6;
+  private readonly attachmentImageMimeType = 'image/webp';
+  private readonly attachmentImageQuality = 0.6;
   private readonly imageMaxSide = 1600;
 
-  // scaleFactor = 1.07;
-  // freeDrawingPadding = 10;
+  private readonly acceptedMimeTypes = {
+    'image/png': true,
+    'image/jpeg': true,
+    'image/gif': true
+  };
+
   private readonly artifactShadow = {
     color: 'rgba(0, 0, 0, 0.4)',
-    blur: 15,
+    blur: 30,
     offsetX: 0,
     offsetY: 5
   };
-  // private readonly zoomStep = 0.10;
   //#endregion
 
   //#region Member variables
@@ -50,10 +52,12 @@ export class CanvasComponent implements OnInit, OnDestroy {
 
   lastX;
   lastY;
-  dragStart;
+  dragStartPosition;
+  saveProgress = 0;
 
-  spacePressed = false;
-  selectionEnabled = true;
+  isSpacePressed = false;
+  isSelectionEnabled = true;
+  isDragOver = false;
 
   // splashScreen = $('.splash-screen');
   drawnPathObjects = new Array();
@@ -368,7 +372,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
   }
 
   setSelection(selection) {
-    this.selectionEnabled = selection;
+    this.isSelectionEnabled = selection;
     this.fabricCanvas.selection = selection;
     const objects: Array<any> = this.fabricCanvas.getObjects();
     objects.forEach(object => {
@@ -496,6 +500,64 @@ export class CanvasComponent implements OnInit, OnDestroy {
       }
     }
   }
+
+  saveFiles(fileList: FileList) {
+    if (fileList.length) {
+      for (let i = 0; i < fileList.length; i++) {
+        const file: File = fileList[i];
+        if (this.acceptedMimeTypes[file.type]) {
+          const imgEl: HTMLImageElement = new Image();
+          imgEl.src = URL.createObjectURL(file);
+          imgEl.onload = () => {
+            // Resize image
+            const canvas: HTMLCanvasElement = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+
+            if (imgEl.width > imgEl.height) {
+              canvas.width = this.imageMaxSide;
+              canvas.height = canvas.width * (imgEl.height / imgEl.width);
+            } else {
+              canvas.height = this.imageMaxSide;
+              canvas.width = canvas.height * (imgEl.width / imgEl.height);
+            }
+
+            ctx.drawImage(imgEl, 0, 0, canvas.width, canvas.height);
+
+            const id: string = UUID.generate();
+            const artifact: Artifact = {
+              id: id,
+              name: `Artifact @${id}`,
+              transform: {
+                order: 0,
+                x: 10,
+                y: 10,
+                angle: 0,
+                scale: 0.1
+              },
+              createDate: new Date(),
+              updateDate: new Date(),
+              _attachments: {}
+            };
+            canvas.toBlob((result: Blob) => {
+              artifact._attachments[`${id}${this.getExtensionFromType(file.type)}`] = {
+                content_type: this.attachmentImageMimeType,
+                data: result
+              };
+
+              this.addArtifactToCanvas(artifact, () => {
+                this.store.dispatch(new ArtifactActions.Create(artifact));
+              });
+
+              canvas.remove();
+            }, this.attachmentImageMimeType, this.attachmentImageQuality);
+          };
+        } else {
+          console.warn(`File type ${file.type} is not supported`);
+        }
+      }
+    }
+  }
+
   //#endregion
 
   //#region User input events
@@ -509,8 +571,8 @@ export class CanvasComponent implements OnInit, OnDestroy {
     switch (event.keyCode) {
       case 32:
         // SPACE
-        this.spacePressed = false;
-        this.dragStart = null;
+        this.isSpacePressed = false;
+        this.dragStartPosition = null;
         this.setSelection(true);
         break;
     }
@@ -525,7 +587,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
 
     switch (event.keyCode) {
       case 32: // SPACE
-        this.spacePressed = true;
+        this.isSpacePressed = true;
         this.setSelection(false);
         break;
       case 88: // 'x'
@@ -577,7 +639,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
   mouseWheel(event: any) {
     // event.preventDefault();
 
-    if (this.spacePressed) {
+    if (this.isSpacePressed) {
       // this.fabricCanvas.discardActiveObject();
       const delta = event.wheelDelta ? event.wheelDelta / 40 : event.detail ? -event.detail : 0;
       const originX = event.offsetX || (event.pageX - this.domCanvas.offsetLeft);
@@ -593,11 +655,11 @@ export class CanvasComponent implements OnInit, OnDestroy {
   }
 
   mouseDown(event) {
-    if (this.spacePressed) {
+    if (this.isSpacePressed) {
       document.body.style.msUserSelect = document.body.style.webkitUserSelect = document.body.style.userSelect = 'none';
       this.lastX = event.offsetX || (event.pageX - this.domCanvas.offsetLeft);
       this.lastY = event.offsetY || (event.pageY - this.domCanvas.offsetTop);
-      this.dragStart = {
+      this.dragStartPosition = {
         x: this.lastX,
         y: this.lastY
       };
@@ -605,11 +667,11 @@ export class CanvasComponent implements OnInit, OnDestroy {
   }
 
   mouseMove(event) {
-    if (this.dragStart) {
+    if (this.dragStartPosition) {
       this.lastX = event.offsetX || (event.pageX - this.domCanvas.offsetLeft);
       this.lastY = event.offsetY || (event.pageY - this.domCanvas.offsetTop);
-      this.translate(this.lastX - this.dragStart.x, this.lastY - this.dragStart.y);
-      this.dragStart = {
+      this.translate(this.lastX - this.dragStartPosition.x, this.lastY - this.dragStartPosition.y);
+      this.dragStartPosition = {
         x: this.lastX,
         y: this.lastY
       };
@@ -617,66 +679,15 @@ export class CanvasComponent implements OnInit, OnDestroy {
   }
 
   mouseUp(event) {
-    if (this.dragStart) {
+    if (this.dragStartPosition) {
       // save current state
       this.updateAllMedia();
-      this.dragStart = null;
+      this.dragStartPosition = null;
     }
   }
 
   uploadFile(event) {
-    // PouchDB -> https://pouchdb.com/guides/attachments.html
-
-    if (event.target.files.length) {
-      for (let i = 0; i < event.target.files.length; i++) {
-        const file: File = event.target.files[i];
-        const imgEl: HTMLImageElement = new Image();
-        imgEl.src = URL.createObjectURL(file);
-        imgEl.onload = () => {
-          // Resize image
-          const canvas: HTMLCanvasElement = document.createElement('canvas');
-          const ctx = canvas.getContext('2d');
-
-          if (imgEl.width > imgEl.height) {
-            canvas.width = this.imageMaxSide;
-            canvas.height = canvas.width * (imgEl.height / imgEl.width);
-          } else {
-            canvas.height = this.imageMaxSide;
-            canvas.width = canvas.height * (imgEl.width / imgEl.height);
-          }
-
-          ctx.drawImage(imgEl, 0, 0, canvas.width, canvas.height);
-
-          const id: string = UUID.generate();
-          const artifact: Artifact = {
-            id: id,
-            name: `Artifact @${id}`,
-            transform: {
-              order: 0,
-              x: 10,
-              y: 10,
-              angle: 0,
-              scale: 0.1
-            },
-            createDate: new Date(),
-            updateDate: new Date(),
-            _attachments: {}
-          };
-          canvas.toBlob((result: Blob) => {
-            artifact._attachments[`${id}${this.getExtensionFromType(file.type)}`] = {
-              content_type: this.imageMimeType,
-              data: result
-            };
-
-            this.addArtifactToCanvas(artifact, () => {
-              this.store.dispatch(new ArtifactActions.Create(artifact));
-            });
-
-            canvas.remove();
-          }, this.imageMimeType, this.imageQuality);
-        };
-      }
-    }
+    this.saveFiles(event.target.files);
   }
 
   objectModified(event) {
@@ -737,6 +748,24 @@ export class CanvasComponent implements OnInit, OnDestroy {
         }));
       }
     }
+  }
+
+  dragOver() {
+    // console.log('dragover');
+    this.isDragOver = true;
+  }
+
+  dragEnd() {
+    // console.log('dragend');
+    this.isDragOver = false;
+  }
+
+  drop(event: DragEvent) {
+    // console.log('drop');
+    event.preventDefault();
+    event.stopPropagation();
+    this.saveFiles(event.dataTransfer.files);
+    this.isDragOver = false;
   }
   //#endregion
 
