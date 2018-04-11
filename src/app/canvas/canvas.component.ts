@@ -166,8 +166,6 @@ export class CanvasComponent implements OnInit, OnDestroy {
       // });
 
       this.fabricCanvas.on('object:modified', (event) => {
-        // console.log('object:modified');
-        // console.log(event);
         this.objectModified(event);
       });
 
@@ -381,11 +379,9 @@ export class CanvasComponent implements OnInit, OnDestroy {
   }
 
   syncCanvas(artifacts: Artifact[]) {
-    // console.log('Adding artifacts to canvas...');
     if (artifacts.length < this.fabricCanvas.getObjects().length) {
       // Artifact was deleted
       // const deletedObjects = [];
-      console.log('delete from canvas');
       if (artifacts.length === 0) {
         this.fabricCanvas.forEachObject((canvasObject: any) => {
           this.fabricCanvas.remove(canvasObject);
@@ -394,7 +390,6 @@ export class CanvasComponent implements OnInit, OnDestroy {
         this.fabricCanvas.forEachObject((canvasObject: any) => {
           const tmpObjects = artifacts.filter(artifact => canvasObject ? artifact.id === canvasObject.id : true);
           if (tmpObjects.length === 0) {
-            console.log(`out-of-sync: ${canvasObject.id}`);
             // deletedObjects.push(obj);
             this.fabricCanvas.remove(canvasObject);
             this.fabricCanvas.discardActiveObject();
@@ -461,32 +456,19 @@ export class CanvasComponent implements OnInit, OnDestroy {
   }
 
   deleteArtifact() {
-    console.log('todo');
     if (this.fabricCanvas.getActiveObjects()) {
-      this.fabricCanvas.getActiveObjects().forEach((obj: any) => {
-        console.log(`Deleting ${obj.name}`);
-        this.store.dispatch(new ArtifactActions.Delete(obj.id));
-      });
+      this.fabricCanvas.getActiveObjects().forEach((obj: any) => this.store.dispatch(new ArtifactActions.Delete(obj.id)));
     }
   }
 
   addArtifactToCanvas(artifact: Artifact, next?: Function) {
-    console.log(`Adding ${artifact.name} to canvas`);
-    // console.log(artifact);
     if (artifact._attachments) {
       for (const key in artifact._attachments) {
         if (artifact._attachments[key]) {
-          // console.log(artifact._attachments[key]);
-
           let imgObj = new Image();
           imgObj.src = URL.createObjectURL(artifact._attachments[key].data);
           imgObj.onload = () => {
             const img = new fabric.Image(imgObj);
-            // img.filters.push(new fabric.Image.filters.Resize({
-            //   scaleX: 0.05,
-            //   scaleY: 0.05
-            // }));
-            // img.applyFilters();
             img.set({
               id: artifact.id,
               angle: artifact.transform.angle,
@@ -524,7 +506,6 @@ export class CanvasComponent implements OnInit, OnDestroy {
 
   @HostListener('window:keyup', ['$event'])
   onKeyUp(event) {
-    // console.log('keyup');
     switch (event.keyCode) {
       case 32:
         // SPACE
@@ -537,7 +518,6 @@ export class CanvasComponent implements OnInit, OnDestroy {
 
   @HostListener('window:keydown', ['$event'])
   onKeyDown(event) {
-    // console.log('keydown');
     // prevent browser shortcuts to interfer with app
     if (event.keyCode === 38 || event.keyCode === 40 || event.keyCode === 33 || event.keyCode === 34 || event.keyCode === 8) {
       event.preventDefault();
@@ -595,7 +575,6 @@ export class CanvasComponent implements OnInit, OnDestroy {
 
   // @HostListener('window:scroll', ['$event'])
   mouseWheel(event: any) {
-    // console.log('mousewheel');
     // event.preventDefault();
 
     if (this.spacePressed) {
@@ -614,8 +593,6 @@ export class CanvasComponent implements OnInit, OnDestroy {
   }
 
   mouseDown(event) {
-    // console.log('mouse down');
-    // console.log(event);
     if (this.spacePressed) {
       document.body.style.msUserSelect = document.body.style.webkitUserSelect = document.body.style.userSelect = 'none';
       this.lastX = event.offsetX || (event.pageX - this.domCanvas.offsetLeft);
@@ -628,7 +605,6 @@ export class CanvasComponent implements OnInit, OnDestroy {
   }
 
   mouseMove(event) {
-    // console.log('mouse move');
     if (this.dragStart) {
       this.lastX = event.offsetX || (event.pageX - this.domCanvas.offsetLeft);
       this.lastY = event.offsetY || (event.pageY - this.domCanvas.offsetTop);
@@ -641,7 +617,6 @@ export class CanvasComponent implements OnInit, OnDestroy {
   }
 
   mouseUp(event) {
-    // console.log('mouse up');
     if (this.dragStart) {
       // save current state
       this.updateAllMedia();
@@ -652,11 +627,9 @@ export class CanvasComponent implements OnInit, OnDestroy {
   uploadFile(event) {
     // PouchDB -> https://pouchdb.com/guides/attachments.html
 
-    // console.log(event.target.result);
     if (event.target.files.length) {
       for (let i = 0; i < event.target.files.length; i++) {
         const file: File = event.target.files[i];
-        console.log(file);
         const imgEl: HTMLImageElement = new Image();
         imgEl.src = URL.createObjectURL(file);
         imgEl.onload = () => {
@@ -674,7 +647,6 @@ export class CanvasComponent implements OnInit, OnDestroy {
 
           ctx.drawImage(imgEl, 0, 0, canvas.width, canvas.height);
 
-          // console.log('img loaded');
           const id: string = UUID.generate();
           const artifact: Artifact = {
             id: id,
@@ -691,7 +663,6 @@ export class CanvasComponent implements OnInit, OnDestroy {
             _attachments: {}
           };
           canvas.toBlob((result: Blob) => {
-            // console.log(artifact);
             artifact._attachments[`${id}${this.getExtensionFromType(file.type)}`] = {
               content_type: this.imageMimeType,
               data: result
@@ -752,8 +723,6 @@ export class CanvasComponent implements OnInit, OnDestroy {
     for (let i = 0; i < arr.length; i++) {
       const id = arr[i].id;
       const object = this.fabricCanvas.toJSON().objects[this.fabricCanvas.getObjects().indexOf(arr[i])];
-      // console.log(id);
-      // console.log(object);
       if (object) {
         this.store.dispatch(new ArtifactActions.Update(id, {
           _id: id,
