@@ -154,7 +154,6 @@ export class CanvasComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     CanvasComponent.enableScroll();
     this.artifactSubscription.unsubscribe();
-    this.fabricCanvas.dispose();
   }
   //#endregion
 
