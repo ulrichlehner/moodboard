@@ -33,6 +33,17 @@ export class SpaceEffects {
     })
   );
 
+  @Effect() update$: Observable<Action> = this.actions$.pipe(
+    ofType(spaceActions.UPDATE),
+    switchMap((action: spaceActions.Update) => {
+      return this.dataService.updateSpace(action.id, action.changes).pipe(
+        map((result: any) => {
+          return new spaceActions.UpdateSuccess(action.id, {});
+        })
+      );
+    })
+  );
+
   constructor(
     private actions$: Actions,
     private dataService: DataService

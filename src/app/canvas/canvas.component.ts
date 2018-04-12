@@ -1,14 +1,19 @@
-import { skip, debounceTime } from 'rxjs/operators';
+import { selectActiveSpace } from './../store/reducers/space.reducer';
+import { Space } from './../models/space';
+import { skip, debounceTime, take } from 'rxjs/operators';
 import { Observable } from 'rxjs/Observable';
 import { selectAllArtifacts, selectActiveArtifact, ArtifactState } from '../store/reducers/artifact.reducer';
 import { Store } from '@ngrx/store';
 import { Artifact } from './../models/artifact';
 import { Component, OnInit, OnDestroy, HostListener, ChangeDetectionStrategy } from '@angular/core';
 import 'fabric';
-import * as ArtifactActions from '../store/actions/artifact.actions';
+import * as artifactActions from '../store/actions/artifact.actions';
+import * as spaceActions from '../store/actions/space.actions';
 import * as UUID from 'uuidjs';
 import { Subscription } from 'rxjs/Subscription';
 import { fromEvent } from 'rxjs/observable/fromEvent';
+import { selectAllSpaces } from '../store/reducers/space.reducer';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
 declare const fabric: any;
 
@@ -48,7 +53,13 @@ export class CanvasComponent implements OnInit, OnDestroy {
   //#endregion
 
   //#region Member variables
+  spaces$: Observable<Space[]>;
+  activeSpace$: Observable<Space>;
   artifacts$: Observable<Artifact[]>;
+
+  artifactSubscription: Subscription;
+  spaceSubscription: Subscription;
+
   fabricCanvas = null;
   domCanvas;
 
@@ -65,8 +76,6 @@ export class CanvasComponent implements OnInit, OnDestroy {
   // splashScreen = $('.splash-screen');
   drawnPathObjects = new Array();
   activeSession;
-
-  artifactSubscription: Subscription;
 
   //#endregion
 
@@ -118,20 +127,34 @@ export class CanvasComponent implements OnInit, OnDestroy {
     this.initCanvas();
 
     // this.createDemoObjects();
+    this.spaces$ = this.store.select(selectAllSpaces);
+    this.activeSpace$ = this.store.select(selectActiveSpace);
+    this.activeSpace$.subscribe();
     this.artifacts$ = this.store.select(selectAllArtifacts);
-    this.store.dispatch(new ArtifactActions.Load());
+
+    this.store.dispatch(new spaceActions.Load());
+    this.store.dispatch(new artifactActions.Load());
+
+    // this.activeSpace$.pipe(take(1)).subscribe(space => {
+    //   this.canvasViewportTransform = space.viewportTransform;
+    //   console.log(this.canvasViewportTransform);
+    // });
 
     this.artifactSubscription = this.artifacts$.subscribe((artifacts: Artifact[]) => {
-      // skip(1) as this is called initially
-      // see https://stackoverflow.com/questions/42698785/ngrx-subscription-to-store-called-once-its-created
       this.syncCanvas(artifacts);
+    });
+
+    // skip(1) as this is called initially
+    // see https://stackoverflow.com/questions/42698785/ngrx-subscription-to-store-called-once-its-created
+    this.spaceSubscription = this.activeSpace$.pipe(skip(1)).subscribe((space: Space) => {
+      this.fabricCanvas.setViewportTransform(space.viewportTransform);
     });
   }
 
   ngOnDestroy() {
     CanvasComponent.enableScroll();
     this.artifactSubscription.unsubscribe();
-    // this.fabricCanvas.dispose();
+    this.fabricCanvas.dispose();
   }
   //#endregion
 
@@ -210,27 +233,11 @@ export class CanvasComponent implements OnInit, OnDestroy {
     this.fabricCanvas.setHeight(canvasDomHeight);
 
     this.lastX = this.domCanvas.width / 2,
-      this.lastY = this.domCanvas.height / 2;
+    this.lastY = this.domCanvas.height / 2;
 
     // window.addEventListener('beforeunload', this.postSessionCanvas);
 
     // console.log('canvas initialized (w: ' + canvasDomWidth + 'px, h: ' + canvasDomHeight + 'px)');
-  }
-
-  createDemoObjects() {
-    const circle = new fabric.Circle({
-      radius: 50, fill: 'green', left: 80, top: 80
-    });
-
-    const triangle = new fabric.Triangle({
-      width: 50, height: 50, fill: 'blue', left: 50, top: 50
-    });
-
-    const rect = new fabric.Rect({
-      width: 50, height: 50, fill: 'red', left: 20, top: 20
-    });
-
-    this.fabricCanvas.add(circle, triangle, rect);
   }
   //#endregion
 
@@ -480,7 +487,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
 
   deleteArtifact() {
     if (this.fabricCanvas.getActiveObjects()) {
-      this.fabricCanvas.getActiveObjects().forEach((obj: any) => this.store.dispatch(new ArtifactActions.Delete(obj.id)));
+      this.fabricCanvas.getActiveObjects().forEach((obj: any) => this.store.dispatch(new artifactActions.Delete(obj.id)));
     }
   }
 
@@ -564,7 +571,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
               };
 
               this.addArtifactToCanvas(artifact, () => {
-                this.store.dispatch(new ArtifactActions.Create(artifact));
+                this.store.dispatch(new artifactActions.Create(artifact));
               });
 
               canvas.remove();
@@ -759,7 +766,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
       const id = arr[i].id;
       const object = this.fabricCanvas.toJSON().objects[this.fabricCanvas.getObjects().indexOf(arr[i])];
       if (object) {
-        this.store.dispatch(new ArtifactActions.Update(id, {
+        this.store.dispatch(new artifactActions.Update(id, {
           // _id: id,
           // _rev: object._rev,
           transform: {
@@ -780,7 +787,11 @@ export class CanvasComponent implements OnInit, OnDestroy {
       !this.canvasViewportTransform.every((e, i) => e === this.fabricCanvas.viewportTransform[i])
     ) {
       this.canvasViewportTransform = this.fabricCanvas.viewportTransform.slice();
-      console.log(this.canvasViewportTransform);
+      this.activeSpace$.pipe(take(1)).subscribe(space => {
+        // console.log(this.canvasViewportTransform);
+        // console.log(space.id);
+        this.store.dispatch(new spaceActions.Update(space.id, { viewportTransform: this.canvasViewportTransform }));
+      });
     }
   }
 

@@ -31,7 +31,11 @@ export function spaceReducer(state: SpaceState = initialState, action: spaceActi
       return { ...state };
 
     case spaceActions.LOAD_SUCCESS:
-      return spaceAdapter.addAll(action.spaces, state);
+      const loadSuccessState: SpaceState = spaceAdapter.addAll(action.spaces, state);
+      if (loadSuccessState.ids.length > 0) {
+        loadSuccessState.activeSpaceId = loadSuccessState.ids[0].toString();
+      }
+      return loadSuccessState;
 
     case spaceActions.CREATE:
       return spaceAdapter.addOne(action.space, state);
@@ -43,11 +47,11 @@ export function spaceReducer(state: SpaceState = initialState, action: spaceActi
       }, state);
 
     case spaceActions.DELETE:
-      const newState: SpaceState = spaceAdapter.removeOne(action.id, state);
+      const deleteState: SpaceState = spaceAdapter.removeOne(action.id, state);
       if (state.activeSpaceId === action.id) {
-        newState.activeSpaceId = null;
+        deleteState.activeSpaceId = null;
       }
-      return newState;
+      return deleteState;
 
     case spaceActions.SELECT:
       return { ...state, activeSpaceId: action.id };
