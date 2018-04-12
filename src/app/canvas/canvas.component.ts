@@ -382,6 +382,20 @@ export class CanvasComponent implements OnInit, OnDestroy {
     });
   }
 
+  // http://fabricjs.com/manage-selection
+  selectAllCanvasObjects() {
+    this.fabricCanvas.discardActiveObject();
+    this.fabricCanvas.setActiveObject(new fabric.ActiveSelection(this.fabricCanvas.getObjects(), {
+      canvas: this.fabricCanvas,
+    }));
+    this.fabricCanvas.requestRenderAll();
+  }
+
+  unselectAllCanvasObjects() {
+    this.fabricCanvas.discardActiveObject();
+    this.fabricCanvas.requestRenderAll();
+  }
+
   syncCanvas(artifacts: Artifact[]) {
     if (artifacts.length < this.fabricCanvas.getObjects().length) {
       // Artifact was deleted
@@ -581,57 +595,62 @@ export class CanvasComponent implements OnInit, OnDestroy {
   @HostListener('window:keydown', ['$event'])
   onKeyDown(event) {
     // prevent browser shortcuts to interfer with app
-    if (event.keyCode === 38 || event.keyCode === 40 || event.keyCode === 33 || event.keyCode === 34 || event.keyCode === 8) {
-      event.preventDefault();
-    }
+    event.preventDefault();
 
-    switch (event.keyCode) {
-      case 32: // SPACE
-        this.isSpacePressed = true;
-        this.setSelection(false);
-        break;
-      case 88: // 'x'
-        this.deleteArtifact();
-        break;
-      case 8: // BACKSPACE
-        if (this.fabricCanvas.isDrawingMode) {
-          // this.undoDrawing();
-        } else {
+    // Key-combos
+    if (event.key === 'a' && (event.ctrlKey || event.metaKey)) {
+      this.selectAllCanvasObjects();
+    } else if (event.key === 'd' && (event.ctrlKey || event.metaKey)) {
+      this.unselectAllCanvasObjects();
+    } else {
+      switch (event.keyCode) {
+        case 32: // SPACE
+          this.isSpacePressed = true;
+          this.setSelection(false);
+          break;
+        case 88: // 'x'
           this.deleteArtifact();
-        }
-        break;
-      case 46: // DELETE
-        this.deleteArtifact();
-        break;
-      case 38: // UP ARROW
-        this.sendObject('forward');
-        break;
-      case 40: // DOWN ARROW
-        this.sendObject('backward');
-        break;
-      case 33: // PAGE UP
-        this.sendObject('front');
-        break;
-      case 34: // PAGE DOWN
-        this.sendObject('back');
-        break;
-      case 13: // ENTER
-        if (this.fabricCanvas.isDrawingMode) {
-          // disableDrawing();
-          // saveDrawing();
-        }
-        break;
-      case 27: // ESCAPE
-        if (this.fabricCanvas.isDrawingMode) {
-          // cancelDrawing();
-          // disableDrawing();
-        }
-        break;
-      case 68: // 'D'
-        if (!this.fabricCanvas.isDrawingMode) {
-          // enableDrawing();
-        }
-        break;
+          break;
+        case 8: // BACKSPACE
+          if (this.fabricCanvas.isDrawingMode) {
+            // this.undoDrawing();
+          } else {
+            this.deleteArtifact();
+          }
+          break;
+        case 46: // DELETE
+          this.deleteArtifact();
+          break;
+        case 38: // UP ARROW
+          this.sendObject('forward');
+          break;
+        case 40: // DOWN ARROW
+          this.sendObject('backward');
+          break;
+        case 33: // PAGE UP
+          this.sendObject('front');
+          break;
+        case 34: // PAGE DOWN
+          this.sendObject('back');
+          break;
+        case 13: // ENTER
+          if (this.fabricCanvas.isDrawingMode) {
+            // disableDrawing();
+            // saveDrawing();
+          }
+          break;
+        case 27: // ESCAPE
+          if (this.fabricCanvas.isDrawingMode) {
+            // cancelDrawing();
+            // disableDrawing();
+          }
+          break;
+        case 68: // 'D'
+          if (!this.fabricCanvas.isDrawingMode) {
+            // enableDrawing();
+          }
+          break;
+      }
     }
   }
 
