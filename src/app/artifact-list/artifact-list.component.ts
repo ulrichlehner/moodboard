@@ -1,8 +1,8 @@
 import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 
-import { ArtifactService } from '../artifact.service';
+import { DataService } from '../data.service';
 import { Artifact } from '../models/artifact';
-import * as ArtifactActions from '../store/actions/artifact.actions';
+import * as artifactActions from '../store/actions/artifact.actions';
 import { selectAllArtifacts, selectActiveArtifact, ArtifactState } from '../store/reducers/artifact.reducer';
 
 import { Store } from '@ngrx/store';
@@ -25,7 +25,7 @@ export class ArtifactListComponent implements OnInit {
 
   activeArtifact$: Observable<Artifact>;
 
-  constructor(private store: Store<ArtifactState>, private artifactService: ArtifactService) { }
+  constructor(private store: Store<ArtifactState>, private dataService: DataService) { }
 
   ngOnInit() {
     // this.getArtifacts();
@@ -33,12 +33,12 @@ export class ArtifactListComponent implements OnInit {
     this.activeArtifact$ = this.store.select(selectActiveArtifact);
 
     // Dispatch LOAD_ARTIFACTS https://www.youtube.com/watch?v=xkUOQeGqIGI (2:24)
-    this.store.dispatch(new ArtifactActions.Load());
+    this.store.dispatch(new artifactActions.Load());
   }
 
   selectArtifact(artifact: Artifact) {
     // this.activeArtifact = artifact;
-    this.store.dispatch(new ArtifactActions.Select(artifact.id));
+    this.store.dispatch(new artifactActions.Select(artifact.id));
     console.log(`Artifact selected: ${artifact.name}`);
   }
 
@@ -61,7 +61,7 @@ export class ArtifactListComponent implements OnInit {
       createDate: new Date(),
       updateDate: new Date()
     };
-    this.store.dispatch(new ArtifactActions.Create(artifact));
+    this.store.dispatch(new artifactActions.Create(artifact));
     console.log(`Artifact added: ${artifact.name}`);
   }
 

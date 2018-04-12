@@ -6,8 +6,8 @@ export interface Artifact {
   updateDate: Date;
 
   // PouchDB fields
-  _id?: string;
-  _rev?: string;
+  // _id?: string;
+  // _rev?: string;
   _attachments?: {
     [index: string]: Attachment;
   };

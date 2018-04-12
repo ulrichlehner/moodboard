@@ -1,3 +1,4 @@
+import { SpaceEffects } from './store/effects/space.effects';
 import { ArtifactEffects } from './store/effects/artifact.effects';
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
@@ -6,7 +7,7 @@ import { FormsModule } from '@angular/forms';
 import { AppComponent } from './app.component';
 import { ArtifactListComponent } from './artifact-list/artifact-list.component';
 import { ArtifactDetailComponent } from './artifact-detail/artifact-detail.component';
-import { ArtifactService } from './artifact.service';
+import { DataService } from './data.service';
 import { MessagesComponent } from './messages/messages.component';
 import { MessageService } from './message.service';
 import { AppRoutingModule } from './/app-routing.module';
@@ -34,14 +35,14 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
     FormsModule,
     AppRoutingModule,
     StoreModule.forRoot(reducers),
-    EffectsModule.forRoot([ArtifactEffects]),
+    EffectsModule.forRoot([SpaceEffects, ArtifactEffects]),
     StoreDevtoolsModule.instrument({
       maxAge: 25,
       logOnly: environment.production
     })
   ],
   providers: [
-    ArtifactService,
+    DataService,
     MessageService
   ],
   bootstrap: [AppComponent]

@@ -1,10 +1,10 @@
 import { createSelector, createFeatureSelector, ActionReducerMap } from '@ngrx/store';
 import { createEntityAdapter, EntityState, EntityAdapter } from '@ngrx/entity';
 import { Space } from '../../models/space';
-import * as spaceActions from '../actions/space.actions'
+import * as spaceActions from '../actions/space.actions';
 
 export interface SpaceState extends EntityState<Space> {
-  activeSpaceId: string | null
+  activeSpaceId: string | null;
 }
 
 export const spaceAdapter: EntityAdapter<Space> = createEntityAdapter<Space>();
@@ -25,8 +25,14 @@ export const selectActiveSpace = createSelector(
   selectEntities, selectActiveSpaceId, (space, id) => space[id]
 );
 
-export function spaceReducer(state: SpaceState = initialState, action: spaceActions.SpaceActions) {
+export function spaceReducer(state: SpaceState = initialState, action: spaceActions.All) {
   switch (action.type) {
+    case spaceActions.LOAD:
+      return { ...state };
+
+    case spaceActions.LOAD_SUCCESS:
+      return spaceAdapter.addAll(action.spaces, state);
+
     case spaceActions.CREATE:
       return spaceAdapter.addOne(action.space, state);
 
@@ -37,14 +43,14 @@ export function spaceReducer(state: SpaceState = initialState, action: spaceActi
       }, state);
 
     case spaceActions.DELETE:
-      let newState: SpaceState = spaceAdapter.removeOne(action.id, state);;
+      const newState: SpaceState = spaceAdapter.removeOne(action.id, state);
       if (state.activeSpaceId === action.id) {
         newState.activeSpaceId = null;
       }
       return newState;
 
     case spaceActions.SELECT:
-      return { ...state, activeSpaceId: action.id }
+      return { ...state, activeSpaceId: action.id };
 
     default:
       return state;

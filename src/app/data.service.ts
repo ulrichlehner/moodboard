@@ -8,6 +8,7 @@ import { MessageService } from './message.service';
 import PouchDB from 'pouchdb';
 import { fromPromise } from 'rxjs/observable/fromPromise';
 import { concat } from 'rxjs/operators/concat';
+import { Space } from './models/space';
 
 // see https://www.bennadel.com/blog/3194-experimenting-with-simple-crud-operations-using-pouchdb-in-angular-2-1-1.htm
 
@@ -51,33 +52,56 @@ export interface IPouchDBGetFriendResult extends IPouchDBGetResult {
 }
 
 @Injectable()
-export class ArtifactService {
+export class DataService {
 
   private db;
 
   constructor(private messageService: MessageService) {
-    this.db = new PouchDB('artifact');
+    this.db = new PouchDB('inspirespac');
   }
 
-  create(artifact: Artifact): Observable<Artifact> {
-    return fromPromise(this.db.put({ ...artifact, _id: artifact.id }));
+  createSpace(space: Space): Observable<Space> {
+    return fromPromise(this.db.put({ ...space, _id: `space:${space.id}` }));
   }
 
-  deleteById(id: string): Observable<any> {
-    return fromPromise(this.db.get(id).then(doc => this.db.remove(id, doc._rev)));
+  deleteSpaceById(id: string): Observable<any> {
+    return fromPromise(this.db.get(`space:${id}`).then(doc => this.db.remove(id, doc._rev)));
   }
 
-  update(id: string, changes: Partial<Artifact>): Observable<Artifact> {
-    return fromPromise(this.db.get(id).then(doc => this.db.put({ ...doc, ...changes, _rev: doc._rev })));
+  updateSpace(id: string, changes: Partial<Space>): Observable<Space> {
+    return fromPromise(this.db.get(`space:${id}`).then(doc => this.db.put({ ...doc, ...changes, _rev: doc._rev })));
   }
 
-  get(id: string): Observable<Artifact> {
-    return fromPromise(this.db.get(id));
+  getAllSpaces(): Observable<Space[]> {
+    return fromPromise(this.db.allDocs({ include_docs: true, startkey: 'space', endkey: 'space\ufff0' })).pipe(
+      map((docs: IPouchDBAllDocsResult) => {
+        return docs.rows.map(row => row.doc);
+      }));
   }
 
-  getAll(): Observable<Artifact[]> {
+  getSpace(id: string): Observable<Space> {
+    return fromPromise(this.db.get(`space:${id}`));
+  }
+
+  createArtifact(artifact: Artifact): Observable<Artifact> {
+    return fromPromise(this.db.put({ ...artifact, _id: `artifact:${artifact.id}` }));
+  }
+
+  deleteArtifactById(id: string): Observable<any> {
+    return fromPromise(this.db.get(`artifact:${id}`).then(doc => this.db.remove(`artifact:${id}`, doc._rev)));
+  }
+
+  updateArtifact(id: string, changes: Partial<Artifact>): Observable<Artifact> {
+    return fromPromise(this.db.get(`artifact:${id}`).then(doc => this.db.put({ ...doc, ...changes, _rev: doc._rev })));
+  }
+
+  getArtifact(id: string): Observable<Artifact> {
+    return fromPromise(this.db.get(`artifact:${id}`));
+  }
+
+  getAllArtifacts(): Observable<Artifact[]> {
     // see https://codereview.stackexchange.com/questions/152897/switchmap-with-array-of-observables
-    return fromPromise(this.db.allDocs({ include_docs: true })).pipe(
+    return fromPromise(this.db.allDocs({ include_docs: true, startkey: 'artifact', endkey: 'artifact\ufff0' })).pipe(
       map((docs: IPouchDBAllDocsResult) => {
         return docs.rows.map(row => row.doc);
       }),
@@ -85,7 +109,7 @@ export class ArtifactService {
       concatMap((artifact: any) => {
         for (const fileName in artifact._attachments) {
           if (fileName) {
-            return this.getAttachment(artifact.id, fileName).pipe(map(attachment => {
+            return this.getAttachment(`artifact:${artifact.id}`, fileName).pipe(map(attachment => {
               artifact._attachments[fileName] = {
                 content_type: attachment.type,
                 data: new File([attachment], fileName)

@@ -1,6 +1,6 @@
 import { Action } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
-import { ArtifactService } from './../../artifact.service';
+import { DataService } from './../../data.service';
 import { Artifact } from './../../models/artifact';
 import { Injectable } from '@angular/core';
 import { Effect, Actions, ofType } from '@ngrx/effects';
@@ -14,7 +14,7 @@ export class ArtifactEffects {
   @Effect() load$: Observable<Action> = this.actions$.pipe(
     ofType(artifactActions.LOAD),
     switchMap(() => {
-      return this.db.getAll().pipe(
+      return this.dataService.getAllArtifacts().pipe(
         map(artifacts => {
           return new artifactActions.LoadSuccess(artifacts);
         }) // ,
@@ -26,10 +26,10 @@ export class ArtifactEffects {
   @Effect() create$: Observable<Action> = this.actions$.pipe(
     ofType(artifactActions.CREATE),
     switchMap((action: artifactActions.Create) => {
-      return this.db.create(action.artifact).pipe(
+      return this.dataService.createArtifact(action.artifact).pipe(
         map((result: any) => {
           // console.log(action.artifact);
-          return new artifactActions.CreateSuccess({ ...action.artifact, _rev: result.rev });
+          return new artifactActions.CreateSuccess({ ...action.artifact /*, _rev: result.rev*/ });
         })
       );
       // return this.db.create(ac)
@@ -40,9 +40,9 @@ export class ArtifactEffects {
   @Effect() update$: Observable<Action> = this.actions$.pipe(
     ofType(artifactActions.UPDATE),
     switchMap((action: artifactActions.Update) => {
-      return this.db.update(action.id, action.changes).pipe(
+      return this.dataService.updateArtifact(action.id, action.changes).pipe(
         map((result: any) => {
-          return new artifactActions.UpdateSuccess(action.id, { _rev: result.rev });
+          return new artifactActions.UpdateSuccess(action.id, {/* _rev: result.rev */});
         })
       );
     })
@@ -51,7 +51,7 @@ export class ArtifactEffects {
   @Effect() delete$: Observable<Action> = this.actions$.pipe(
     ofType(artifactActions.DELETE),
     switchMap((action: artifactActions.Delete) => {
-      return this.db.deleteById(action.id).pipe(
+      return this.dataService.deleteArtifactById(action.id).pipe(
         map((result: any) => {
           // return new artifactActions.DeleteSuccess({ ...action.artifact, _rev: result.rev });
           return new artifactActions.DeleteSuccess();
@@ -117,6 +117,6 @@ export class ArtifactEffects {
 
   constructor(
     private actions$: Actions,
-    private db: ArtifactService
+    private dataService: DataService
   ) { }
 }

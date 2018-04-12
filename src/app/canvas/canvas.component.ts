@@ -1,4 +1,4 @@
-import { skip } from 'rxjs/operators';
+import { skip, debounceTime } from 'rxjs/operators';
 import { Observable } from 'rxjs/Observable';
 import { selectAllArtifacts, selectActiveArtifact, ArtifactState } from '../store/reducers/artifact.reducer';
 import { Store } from '@ngrx/store';
@@ -29,7 +29,9 @@ export class CanvasComponent implements OnInit, OnDestroy {
 
   private readonly attachmentImageMimeType = 'image/webp';
   private readonly attachmentImageQuality = 0.6;
-  private readonly imageMaxSide = 1600;
+  private readonly attachmentImageMaxSide = 1600;
+
+  private readonly canvasMinZoom = 0.05;
 
   private readonly acceptedMimeTypes = {
     'image/png': true,
@@ -54,6 +56,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
   lastY;
   dragStartPosition;
   saveProgress = 0;
+  canvasViewportTransform = [];
 
   isSpacePressed = false;
   isSelectionEnabled = true;
@@ -113,6 +116,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
   ngOnInit() {
     CanvasComponent.disableScroll();
     this.initCanvas();
+
     // this.createDemoObjects();
     this.artifacts$ = this.store.select(selectAllArtifacts);
     this.store.dispatch(new ArtifactActions.Load());
@@ -181,22 +185,20 @@ export class CanvasComponent implements OnInit, OnDestroy {
 
       // fromEvent(this.fabricCanvas, 'object:modified').subscribe(this.objectModified);
 
-      this.fabricCanvas.on('path:created', function (event) {
-        if (this.fabricCanvas.isDrawingMode) {
-          // console.log("free-drawing path created");
+      // this.fabricCanvas.on('path:created', function (event) {
+      //   if (this.fabricCanvas.isDrawingMode) {
+      //     // console.log("free-drawing path created");
 
-          // save path in array to merge when drawing finished
-          this.drawnPathObjects.push(event.path);
+      //     // save path in array to merge when drawing finished
+      //     this.drawnPathObjects.push(event.path);
 
-          this.fabricCanvas.renderAll();
-        }
-      });
+      //     this.fabricCanvas.renderAll();
+      //   }
+      // });
 
-      this.fabricCanvas.on('after:render', function () {
-        // draw bounding box for free-drawn objects
-        // if (this.fabricCanvas.isDrawingMode) {
-        //   drawFreeDrawingBoundingBox();
-        // }
+      // Debounce time to prevent fireing too often
+      fromEvent(this.fabricCanvas, 'after:render').pipe(debounceTime(250)).subscribe(() => {
+        this.afterRender();
       });
     }
 
@@ -269,10 +271,13 @@ export class CanvasComponent implements OnInit, OnDestroy {
 
   translate(x, y) {
     this.fabricCanvas.relativePan({ x: x, y: y });
+    // console.log(this.fabricCanvas.viewportTransform);
   }
 
   zoom(originX, originY, delta) {
-    this.fabricCanvas.zoomToPoint({ x: originX, y: originY }, this.fabricCanvas.getZoom() + delta / 20);
+    const zoom = this.fabricCanvas.getZoom() + delta / 20;
+    this.fabricCanvas.zoomToPoint({ x: originX, y: originY }, zoom < this.canvasMinZoom ? this.canvasMinZoom : zoom);
+    // console.log(this.fabricCanvas.viewportTransform);
   }
 
   // scale(scale) {
@@ -528,10 +533,10 @@ export class CanvasComponent implements OnInit, OnDestroy {
             const ctx = canvas.getContext('2d');
 
             if (imgEl.width > imgEl.height) {
-              canvas.width = this.imageMaxSide;
+              canvas.width = this.attachmentImageMaxSide;
               canvas.height = canvas.width * (imgEl.height / imgEl.width);
             } else {
-              canvas.height = this.imageMaxSide;
+              canvas.height = this.attachmentImageMaxSide;
               canvas.width = canvas.height * (imgEl.width / imgEl.height);
             }
 
@@ -553,8 +558,8 @@ export class CanvasComponent implements OnInit, OnDestroy {
               _attachments: {}
             };
             canvas.toBlob((result: Blob) => {
-              artifact._attachments[`${id}${this.getExtensionFromType(file.type)}`] = {
-                content_type: this.attachmentImageMimeType,
+              artifact._attachments[`${id}${this.getExtensionFromType(result.type)}`] = {
+                content_type: result.type,
                 data: result
               };
 
@@ -755,7 +760,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
       const object = this.fabricCanvas.toJSON().objects[this.fabricCanvas.getObjects().indexOf(arr[i])];
       if (object) {
         this.store.dispatch(new ArtifactActions.Update(id, {
-          _id: id,
+          // _id: id,
           // _rev: object._rev,
           transform: {
             scale: object.scaleX,
@@ -766,6 +771,16 @@ export class CanvasComponent implements OnInit, OnDestroy {
           }
         }));
       }
+    }
+  }
+
+  afterRender() {
+    if (
+      this.canvasViewportTransform.length !== this.fabricCanvas.viewportTransform.length ||
+      !this.canvasViewportTransform.every((e, i) => e === this.fabricCanvas.viewportTransform[i])
+    ) {
+      this.canvasViewportTransform = this.fabricCanvas.viewportTransform.slice();
+      console.log(this.canvasViewportTransform);
     }
   }
 
@@ -802,6 +817,10 @@ export class CanvasComponent implements OnInit, OnDestroy {
       default:
         return '';
     }
+  }
+
+  clamp(num: number, min: number, max: number): number {
+    return num <= min ? min : num >= max ? max : num;
   }
   //#endregion
 }
