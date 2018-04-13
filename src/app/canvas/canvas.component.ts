@@ -6,18 +6,17 @@ import { selectAllArtifacts, selectActiveArtifact, ArtifactState } from '../stor
 import { Store } from '@ngrx/store';
 import { Artifact } from './../models/artifact';
 import { Component, OnInit, OnDestroy, HostListener, ChangeDetectionStrategy } from '@angular/core';
-import 'fabric';
-import * as artifactActions from '../store/actions/artifact.actions';
-import * as spaceActions from '../store/actions/space.actions';
-import * as UUID from 'uuidjs';
 import { Subscription } from 'rxjs/Subscription';
 import { fromEvent } from 'rxjs/observable/fromEvent';
 import { selectAllSpaces } from '../store/reducers/space.reducer';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
-declare const fabric: any;
+import * as artifactActions from '../store/actions/artifact.actions';
+import * as spaceActions from '../store/actions/space.actions';
+import * as UUID from 'uuidjs';
 
-// Fabric w/ Angular -> https://stackoverflow.com/questions/45941730/using-fabric-js-with-angular-4
+import 'fabric';
+declare const fabric: any;
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -27,9 +26,9 @@ declare const fabric: any;
 })
 export class CanvasComponent implements OnInit, OnDestroy {
 
-  //#region Config
+  //#region hey
 
-  // left: 37, up: 38, right: 39, down: 40, spacebar: 32, pageup: 33, pagedown: 34, end: 35, home: 36
+  /* left: 37, up: 38, right: 39, down: 40, spacebar: 32, pageup: 33, pagedown: 34, end: 35, home: 36 */
   private static readonly keys = { 37: 1, 38: 1, 39: 1, 40: 1 };
 
   private readonly attachmentImageMimeType = 'image/webp';
@@ -51,16 +50,9 @@ export class CanvasComponent implements OnInit, OnDestroy {
     offsetY: 5
   };
 
-  // enum OrderTarget {
-  //   Front,
-  //   Forward,
-  //   Backward,
-  //   Back,
-  // };
-
   //#endregion
 
-  //#region Member variables
+  //#region  Member variables
   spaces$: Observable<Space[]>;
   activeSpace$: Observable<Space>;
   artifacts$: Observable<Artifact[]>;
@@ -81,7 +73,6 @@ export class CanvasComponent implements OnInit, OnDestroy {
   isSelectionEnabled = true;
   isDragOver = false;
 
-  // splashScreen = $('.splash-screen');
   drawnPathObjects = new Array();
   activeSession;
 
@@ -134,18 +125,12 @@ export class CanvasComponent implements OnInit, OnDestroy {
     CanvasComponent.disableScroll();
     this.initCanvas();
 
-    // this.createDemoObjects();
     this.spaces$ = this.store.select(selectAllSpaces);
     this.activeSpace$ = this.store.select(selectActiveSpace);
     this.artifacts$ = this.store.select(selectAllArtifacts);
 
     this.store.dispatch(new spaceActions.Load());
     this.store.dispatch(new artifactActions.Load());
-
-    // this.activeSpace$.pipe(take(1)).subscribe(space => {
-    //   this.canvasViewportTransform = space.viewportTransform;
-    //   console.log(this.canvasViewportTransform);
-    // });
 
     this.artifactSubscription = this.artifacts$.subscribe((artifacts: Artifact[]) => {
       this.syncCanvas(artifacts);
@@ -176,56 +161,9 @@ export class CanvasComponent implements OnInit, OnDestroy {
         noScaleCache: true
       });
 
-      // extend fabricjs with show/hide functionality
-      // see https://groups.google.com/d/msg/fabricjs/cbdFgTH7UXc/jj6iVoNYmVUJ
-      fabric.Object.prototype.hide = function () {
-        this.set({
-          opacity: 0,
-          selectable: false
-        });
-      };
-
-      fabric.Object.prototype.show = function () {
-        this.set({
-          opacity: 1,
-          selectable: true
-        });
-      };
-
-      // this.fabricCanvas.on('selection:cleared', function (event) {
-      //   // $('#btn-delete-media').addClass('hide');
-      // });
-
-      // this.fabricCanvas.on('selection:created', function (event) {
-      //   // $('#btn-delete-media').removeClass('hide');
-      // });
-
-      // this.fabricCanvas.on('object:selected', function (event) {
-      //   // $('#btn-delete-media').removeClass('hide');
-      // });
-
       this.fabricCanvas.on('object:modified', (event) => {
         this.objectModified(event.target);
       });
-
-      // this.fabricCanvas.on('object:added', function (event) {
-      // });
-
-      // this.fabricCanvas.on('object:removed', function (event) {
-      // });
-
-      // fromEvent(this.fabricCanvas, 'object:modified').subscribe(this.objectModified);
-
-      // this.fabricCanvas.on('path:created', function (event) {
-      //   if (this.fabricCanvas.isDrawingMode) {
-      //     // console.log("free-drawing path created");
-
-      //     // save path in array to merge when drawing finished
-      //     this.drawnPathObjects.push(event.path);
-
-      //     this.fabricCanvas.renderAll();
-      //   }
-      // });
 
       // Debounce time to prevent fireing too often
       fromEvent(this.fabricCanvas, 'after:render').pipe(debounceTime(250)).subscribe(() => {
@@ -242,111 +180,20 @@ export class CanvasComponent implements OnInit, OnDestroy {
 
     this.lastX = this.domCanvas.width / 2;
     this.lastY = this.domCanvas.height / 2;
-
-    // window.addEventListener('beforeunload', this.postSessionCanvas);
-
-    // console.log('canvas initialized (w: ' + canvasDomWidth + 'px, h: ' + canvasDomHeight + 'px)');
   }
   //#endregion
 
   //#region Canvas manipulation
-  calculateBounds(objects?) {
-    objects = objects || this.fabricCanvas.getObjects();
-
-    const xCoords = [];
-    const yCoords = [];
-
-    objects.forEach(object => {
-      const c = object.oCoords;
-      xCoords.push(c.tl.x);
-      xCoords.push(c.tr.x);
-      xCoords.push(c.br.x);
-      xCoords.push(c.bl.x);
-      yCoords.push(c.tl.y);
-      yCoords.push(c.tr.y);
-      yCoords.push(c.br.y);
-      yCoords.push(c.bl.y);
-    });
-
-    const minX = fabric.util.array.min(xCoords);
-    const maxX = fabric.util.array.max(xCoords);
-    const width = Math.abs(minX - maxX);
-
-    const minY = fabric.util.array.min(yCoords);
-    const maxY = fabric.util.array.max(yCoords);
-    const height = Math.abs(minY - maxY);
-
-    return {
-      left: minX,
-      top: minY,
-      width: width,
-      height: height
-    };
-  }
-
   translate(x, y) {
     this.fabricCanvas.relativePan({ x: x, y: y });
-    // console.log(this.fabricCanvas.viewportTransform);
   }
 
   zoom(originX, originY, delta) {
     const zoom = this.fabricCanvas.getZoom() + delta / 20;
     this.fabricCanvas.zoomToPoint({ x: originX, y: originY }, zoom < this.canvasMinZoom ? this.canvasMinZoom : zoom);
-    // console.log(this.fabricCanvas.viewportTransform);
   }
 
-  // scale(scale) {
-  //   const vcx = this.fabricCanvas.getWidth() / 2;
-  //   const vcy = this.fabricCanvas.getHeight() / 2;
-
-  //   this.translate(-vcx, -vcy);
-  //   const objects: Array<any> = this.fabricCanvas.getObjects();
-  //   objects.forEach(object => {
-  //     const scaleX = object.scaleX;
-  //     const scaleY = object.scaleY;
-  //     const left = object.left;
-  //     const top = object.top;
-
-  //     const tempScaleX = scaleX * scale;
-  //     const tempScaleY = scaleY * scale;
-  //     const tempLeft = left * scale;
-  //     const tempTop = top * scale;
-
-  //     object.scaleX = tempScaleX;
-  //     object.scaleY = tempScaleY;
-  //     object.left = tempLeft;
-  //     object.top = tempTop;
-
-  //     object.setCoords();
-  //   });
-  //   this.translate(vcx, vcy);
-  //   this.fabricCanvas.renderAll();
-  // }
-
   resetView() {
-    // this.fabricCanvas.discardActiveObject();
-    // const bound = this.calculateBounds();
-
-    // const vw = this.fabricCanvas.getWidth();
-    // const vh = this.fabricCanvas.getHeight();
-    // const vr = vw / vh;
-
-    // const bw = bound.width;
-    // const bh = bound.height;
-    // const bx = bound.left;
-    // const by = bound.top;
-    // const br = bw / bh;
-
-    // // Translate to center
-    // const dx = vw / 2 - bx - bw / 2;
-    // const dy = vh / 2 - by - bh / 2;
-    // this.translate(dx, dy);
-
-    // // Scale to fit bounds
-    // const s = vr < br ? vw / bw : vh / bh;
-    // this.scale(s * 0.95);
-
-    // this.updateAllMedia();
   }
 
   sendObject(where) {
@@ -377,26 +224,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
         console.log('save all');
         this.objectModified(this.fabricCanvas.getObjects());
       }
-
     }
-    // else if (this.fabricCanvas.getActiveObject()) {
-    //   const obj = this.fabricCanvas.getActiveObject();
-    //   switch (where) {
-    //     case 'backward':
-    //       this.fabricCanvas.sendBackwards(obj);
-    //       break;
-    //     case 'back':
-    //       this.fabricCanvas.sendToBack(obj);
-    //       break;
-    //     case 'forward':
-    //       this.fabricCanvas.bringForward(obj);
-    //       break;
-    //     case 'front':
-    //       this.fabricCanvas.bringToFront(obj);
-    //       break;
-    //   }
-    //   this.updateAllMedia();
-    // }
   }
 
   setSelection(selection) {
@@ -426,8 +254,6 @@ export class CanvasComponent implements OnInit, OnDestroy {
 
   syncCanvas(artifacts: Artifact[]) {
     if (artifacts.length < this.fabricCanvas.getObjects().length) {
-      // Artifact was deleted
-      // const deletedObjects = [];
       if (artifacts.length === 0) {
         this.fabricCanvas.forEachObject((canvasObject: any) => {
           this.fabricCanvas.remove(canvasObject);
@@ -435,31 +261,21 @@ export class CanvasComponent implements OnInit, OnDestroy {
       } else {
         this.fabricCanvas.forEachObject((canvasObject: any) => {
           const tmpObjects = artifacts.filter(artifact => canvasObject ? artifact.id === canvasObject.id : true);
+
           if (tmpObjects.length === 0) {
-            // deletedObjects.push(obj);
             this.fabricCanvas.remove(canvasObject);
             this.fabricCanvas.discardActiveObject();
           }
 
         });
       }
-      // if (deletedObjects.length > 0) {
-      //   deletedObjects.forEach(object => {
-      //     console.log(`${object.name} was deleted`);
-      //   });
-      // }
-
     } else {
       artifacts.forEach((artifact: Artifact) => {
-        // console.log(artifact);
         const object = this.fabricCanvas.getObjects().filter(obj => obj.id === artifact.id);
+
         if (object.length === 0) {
           this.addArtifactToCanvas(artifact);
         }
-        // else {
-        //   console.log(`update needed (${artifact._rev})`);
-        //   object._rev = artifact._rev;
-        // }
       });
     }
   }
@@ -489,9 +305,6 @@ export class CanvasComponent implements OnInit, OnDestroy {
               lockUniScaling: true,
               name: artifact.name,
               centeredRotation: true,
-              // PouchDB fields
-              // _id: artifact.id,
-              // _rev: artifact._rev
             }).scale(artifact.transform.scale).setShadow(this.artifactShadow);
             // this.fabricCanvas.centerObject(img);
             this.fabricCanvas.insertAt(img, artifact.transform.order);
@@ -650,17 +463,12 @@ export class CanvasComponent implements OnInit, OnDestroy {
 
   // @HostListener('window:scroll', ['$event'])
   mouseWheel(event: any) {
-    // event.preventDefault();
-
     if (this.isSpacePressed) {
-      // this.fabricCanvas.discardActiveObject();
       const delta = event.wheelDelta ? event.wheelDelta / 40 : event.detail ? -event.detail : 0;
       const originX = event.offsetX || (event.pageX - this.domCanvas.offsetLeft);
       const originY = event.offsetY || (event.pageY - this.domCanvas.offsetTop);
 
       this.zoom(originX, originY, delta);
-
-      // return event.preventDefault() && false;
     }
   }
 
@@ -734,25 +542,21 @@ export class CanvasComponent implements OnInit, OnDestroy {
     ) {
       this.lastCanvasViewportTransform = this.fabricCanvas.viewportTransform.slice();
       this.activeSpace$.pipe(take(1)).subscribe(space => {
-        // console.log(this.lastCanvasViewportTransform);
-        // console.log(space);
         this.store.dispatch(new spaceActions.Update(space.id, { viewportTransform: this.lastCanvasViewportTransform }));
       });
     }
   }
 
   dragOver() {
-    // console.log('dragover');
     this.isDragOver = true;
   }
 
   dragEnd() {
-    // console.log('dragend');
     this.isDragOver = false;
   }
 
+  // See also https://stackoverflow.com/questions/45941730/using-fabric-js-with-angular-4
   drop(event: DragEvent) {
-    // console.log('drop');
     event.preventDefault();
     event.stopPropagation();
     this.saveFiles(event.dataTransfer.files);
