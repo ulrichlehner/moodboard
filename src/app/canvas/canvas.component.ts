@@ -26,7 +26,7 @@ declare const fabric: any;
 })
 export class CanvasComponent implements OnInit, OnDestroy {
 
-  //#region hey
+  //#region Config
 
   /* left: 37, up: 38, right: 39, down: 40, spacebar: 32, pageup: 33, pagedown: 34, end: 35, home: 36 */
   private static readonly keys = { 37: 1, 38: 1, 39: 1, 40: 1 };
@@ -52,7 +52,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
 
   //#endregion
 
-  //#region  Member variables
+  //#region Member variables
   spaces$: Observable<Space[]>;
   activeSpace$: Observable<Space>;
   artifacts$: Observable<Artifact[]>;
@@ -118,7 +118,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
   }
   //#endregion
 
-  //#region Lifecylce events
+  //#region Component lifecylce event handlers
   constructor(private store: Store<ArtifactState>) { }
 
   ngOnInit() {
@@ -221,20 +221,19 @@ export class CanvasComponent implements OnInit, OnDestroy {
       });
 
       if (sendingPerformed) {
-        console.log('save all');
         this.objectModified(this.fabricCanvas.getObjects());
       }
     }
   }
 
-  setSelection(selection) {
-    this.isSelectionEnabled = selection;
-    this.fabricCanvas.selection = selection;
+  setCanvasObjectsSelectable(isSelectable: boolean) {
+    this.isSelectionEnabled = isSelectable;
+    this.fabricCanvas.selection = isSelectable;
     const objects: Array<any> = this.fabricCanvas.getObjects();
     objects.forEach(object => {
-      object.hasControls = selection;
-      object.hasBorders = selection;
-      object.selection = selection;
+      object.hasControls = isSelectable;
+      object.hasBorders = isSelectable;
+      object.selection = isSelectable;
     });
   }
 
@@ -381,7 +380,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
 
   //#endregion
 
-  //#region User input events
+  //#region Event handlers
   @HostListener('window:resize', ['$event'])
   onResize(event) {
     this.initCanvas();
@@ -394,7 +393,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
         // SPACE
         this.isSpacePressed = false;
         this.dragStartPosition = null;
-        this.setSelection(true);
+        this.setCanvasObjectsSelectable(true);
         break;
     }
   }
@@ -413,7 +412,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
       switch (event.keyCode) {
         case 32: // SPACE
           this.isSpacePressed = true;
-          this.setSelection(false);
+          this.setCanvasObjectsSelectable(false);
           break;
         case 88: // 'x'
           this.deleteArtifact();
@@ -542,7 +541,11 @@ export class CanvasComponent implements OnInit, OnDestroy {
     ) {
       this.lastCanvasViewportTransform = this.fabricCanvas.viewportTransform.slice();
       this.activeSpace$.pipe(take(1)).subscribe(space => {
-        this.store.dispatch(new spaceActions.Update(space.id, { viewportTransform: this.lastCanvasViewportTransform }));
+        if (space) {
+          this.store.dispatch(new spaceActions.Update(space.id, { viewportTransform: this.lastCanvasViewportTransform }));
+        } else {
+          console.warn('No space found');
+        }
       });
     }
   }
@@ -579,10 +582,5 @@ export class CanvasComponent implements OnInit, OnDestroy {
         return '';
     }
   }
-
-  clamp(num: number, min: number, max: number): number {
-    return num <= min ? min : num >= max ? max : num;
-  }
   //#endregion
 }
-
