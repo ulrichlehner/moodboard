@@ -1,4 +1,10 @@
-import { ChangeDetectionStrategy, Component, HostListener, OnDestroy, OnInit } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  HostListener,
+  OnDestroy,
+  OnInit
+} from '@angular/core';
 import { Store } from '@ngrx/store';
 import 'fabric';
 import { Observable } from 'rxjs/Observable';
@@ -8,7 +14,10 @@ import { debounceTime, skip, take } from 'rxjs/operators';
 import * as UUID from 'uuidjs';
 import * as artifactActions from '../store/actions/artifact.actions';
 import * as spaceActions from '../store/actions/space.actions';
-import { ArtifactState, selectAllArtifacts } from '../store/reducers/artifact.reducer';
+import {
+  ArtifactState,
+  selectAllArtifacts
+} from '../store/reducers/artifact.reducer';
 import { selectAllSpaces } from '../store/reducers/space.reducer';
 import { Artifact } from './../models/artifact';
 import { Space } from './../models/space';
@@ -23,7 +32,6 @@ declare const fabric: any;
   styleUrls: ['./canvas.component.scss']
 })
 export class CanvasComponent implements OnInit, OnDestroy {
-
   //#region Config
 
   /* left: 37, up: 38, right: 39, down: 40, spacebar: 32, pageup: 33, pagedown: 34, end: 35, home: 36 */
@@ -95,18 +103,28 @@ export class CanvasComponent implements OnInit, OnDestroy {
   }
 
   static disableScroll() {
-    if (window.addEventListener) { // older FF
-      window.addEventListener('DOMMouseScroll', CanvasComponent.preventDefault, false);
+    if (window.addEventListener) {
+      // older FF
+      window.addEventListener(
+        'DOMMouseScroll',
+        CanvasComponent.preventDefault,
+        false
+      );
     }
     window.onwheel = CanvasComponent.preventDefault; // modern standard
-    window.onmousewheel = document.onmousewheel = CanvasComponent.preventDefault; // older browsers, IE
+    window.onmousewheel = document.onmousewheel =
+      CanvasComponent.preventDefault; // older browsers, IE
     window.ontouchmove = CanvasComponent.preventDefault; // mobile
     document.onkeydown = CanvasComponent.preventDefaultForScrollKeys;
   }
 
   static enableScroll() {
     if (window.removeEventListener) {
-      window.removeEventListener('DOMMouseScroll', CanvasComponent.preventDefault, false);
+      window.removeEventListener(
+        'DOMMouseScroll',
+        CanvasComponent.preventDefault,
+        false
+      );
     }
     window.onmousewheel = document.onmousewheel = null;
     window.onwheel = null;
@@ -116,7 +134,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
   //#endregion
 
   //#region Component lifecylce event handlers
-  constructor(private store: Store<ArtifactState>) { }
+  constructor(private store: Store<ArtifactState>) {}
 
   ngOnInit() {
     CanvasComponent.disableScroll();
@@ -129,16 +147,20 @@ export class CanvasComponent implements OnInit, OnDestroy {
     this.store.dispatch(new spaceActions.Load());
     this.store.dispatch(new artifactActions.Load());
 
-    this.artifactSubscription = this.artifacts$.subscribe((artifacts: Artifact[]) => {
-      this.syncCanvas(artifacts);
-    });
+    this.artifactSubscription = this.artifacts$.subscribe(
+      (artifacts: Artifact[]) => {
+        this.syncCanvas(artifacts);
+      }
+    );
 
     // skip(1) as this is called initially
     // see https://stackoverflow.com/questions/42698785/ngrx-subscription-to-store-called-once-its-created
-    this.spaceSubscription = this.activeSpace$.pipe(skip(1)).subscribe((space: Space) => {
-      this.lastCanvasViewportTransform = space.viewportTransform;
-      this.fabricCanvas.setViewportTransform(space.viewportTransform);
-    });
+    this.spaceSubscription = this.activeSpace$
+      .pipe(skip(1))
+      .subscribe((space: Space) => {
+        this.lastCanvasViewportTransform = space.viewportTransform;
+        this.fabricCanvas.setViewportTransform(space.viewportTransform);
+      });
   }
 
   ngOnDestroy() {
@@ -150,22 +172,26 @@ export class CanvasComponent implements OnInit, OnDestroy {
 
   //#region Canvas initializing
   initCanvas() {
-    const canvasDomWidth = document.getElementById('canvas-wrapper').clientWidth;
-    const canvasDomHeight = document.getElementById('canvas-wrapper').clientHeight;
+    const canvasDomWidth = document.getElementById('canvas-wrapper')
+      .clientWidth;
+    const canvasDomHeight = document.getElementById('canvas-wrapper')
+      .clientHeight;
 
     if (this.fabricCanvas == null) {
       this.fabricCanvas = new fabric.Canvas('canvas', {
         noScaleCache: true
       });
 
-      this.fabricCanvas.on('object:modified', (event) => {
+      this.fabricCanvas.on('object:modified', event => {
         this.objectModified(event.target);
       });
 
       // Debounce time to prevent fireing too often
-      fromEvent(this.fabricCanvas, 'after:render').pipe(debounceTime(250)).subscribe(() => {
-        this.afterRender();
-      });
+      fromEvent(this.fabricCanvas, 'after:render')
+        .pipe(debounceTime(250))
+        .subscribe(() => {
+          this.afterRender();
+        });
     }
 
     // take index [1] since fabric.js produces an extra canvas (buffer technique?)
@@ -187,11 +213,13 @@ export class CanvasComponent implements OnInit, OnDestroy {
 
   zoom(originX, originY, delta) {
     const zoom = this.fabricCanvas.getZoom() + delta / 20;
-    this.fabricCanvas.zoomToPoint({ x: originX, y: originY }, zoom < this.canvasMinZoom ? this.canvasMinZoom : zoom);
+    this.fabricCanvas.zoomToPoint(
+      { x: originX, y: originY },
+      zoom < this.canvasMinZoom ? this.canvasMinZoom : zoom
+    );
   }
 
-  resetView() {
-  }
+  resetView() {}
 
   sendObject(where) {
     if (this.fabricCanvas.getActiveObjects()) {
@@ -230,9 +258,11 @@ export class CanvasComponent implements OnInit, OnDestroy {
   // http://fabricjs.com/manage-selection
   selectAllCanvasObjects() {
     this.fabricCanvas.discardActiveObject();
-    this.fabricCanvas.setActiveObject(new fabric.ActiveSelection(this.fabricCanvas.getObjects(), {
-      canvas: this.fabricCanvas,
-    }));
+    this.fabricCanvas.setActiveObject(
+      new fabric.ActiveSelection(this.fabricCanvas.getObjects(), {
+        canvas: this.fabricCanvas
+      })
+    );
     this.fabricCanvas.requestRenderAll();
   }
 
@@ -249,18 +279,21 @@ export class CanvasComponent implements OnInit, OnDestroy {
         });
       } else {
         this.fabricCanvas.forEachObject((canvasObject: any) => {
-          const tmpObjects = artifacts.filter(artifact => canvasObject ? artifact.id === canvasObject.id : true);
+          const tmpObjects = artifacts.filter(
+            artifact => (canvasObject ? artifact.id === canvasObject.id : true)
+          );
 
           if (tmpObjects.length === 0) {
             this.fabricCanvas.remove(canvasObject);
             this.fabricCanvas.discardActiveObject();
           }
-
         });
       }
     } else {
       artifacts.forEach((artifact: Artifact) => {
-        const object = this.fabricCanvas.getObjects().filter(obj => obj.id === artifact.id);
+        const object = this.fabricCanvas
+          .getObjects()
+          .filter(obj => obj.id === artifact.id);
 
         if (object.length === 0) {
           this.addArtifactToCanvas(artifact);
@@ -274,7 +307,11 @@ export class CanvasComponent implements OnInit, OnDestroy {
 
   deleteArtifact() {
     if (this.fabricCanvas.getActiveObjects()) {
-      this.fabricCanvas.getActiveObjects().forEach((obj: any) => this.store.dispatch(new artifactActions.Delete(obj.id)));
+      this.fabricCanvas
+        .getActiveObjects()
+        .forEach((obj: any) =>
+          this.store.dispatch(new artifactActions.Delete(obj.id))
+        );
     }
   }
 
@@ -286,15 +323,18 @@ export class CanvasComponent implements OnInit, OnDestroy {
           imgObj.src = URL.createObjectURL(artifact._attachments[key].data);
           imgObj.onload = () => {
             const img = new fabric.Image(imgObj);
-            img.set({
-              id: artifact.id,
-              angle: artifact.transform.angle,
-              left: artifact.transform.x,
-              top: artifact.transform.y,
-              lockUniScaling: true,
-              name: artifact.name,
-              centeredRotation: true,
-            }).scale(artifact.transform.scale).setShadow(this.artifactShadow);
+            img
+              .set({
+                id: artifact.id,
+                angle: artifact.transform.angle,
+                left: artifact.transform.x,
+                top: artifact.transform.y,
+                lockUniScaling: true,
+                name: artifact.name,
+                centeredRotation: true
+              })
+              .scale(artifact.transform.scale)
+              .setShadow(this.artifactShadow);
             // this.fabricCanvas.centerObject(img);
             this.fabricCanvas.insertAt(img, artifact.transform.order);
 
@@ -348,18 +388,24 @@ export class CanvasComponent implements OnInit, OnDestroy {
               updateDate: new Date(),
               _attachments: {}
             };
-            canvas.toBlob((result: Blob) => {
-              artifact._attachments[`${id}${this.getExtensionFromType(result.type)}`] = {
-                content_type: result.type,
-                data: result
-              };
+            canvas.toBlob(
+              (result: Blob) => {
+                artifact._attachments[
+                  `${id}${this.getExtensionFromType(result.type)}`
+                ] = {
+                  content_type: result.type,
+                  data: result
+                };
 
-              this.addArtifactToCanvas(artifact, () => {
-                this.store.dispatch(new artifactActions.Create(artifact));
-              });
+                this.addArtifactToCanvas(artifact, () => {
+                  this.store.dispatch(new artifactActions.Create(artifact));
+                });
 
-              canvas.remove();
-            }, this.attachmentImageMimeType, this.attachmentImageQuality);
+                canvas.remove();
+              },
+              this.attachmentImageMimeType,
+              this.attachmentImageQuality
+            );
           };
         } else {
           console.warn(`File type ${file.type} is not supported`);
@@ -453,9 +499,11 @@ export class CanvasComponent implements OnInit, OnDestroy {
   // @HostListener('window:scroll', ['$event'])
   mouseWheel(event: any) {
     if (this.isSpacePressed) {
-      const delta = event.wheelDelta ? event.wheelDelta / 40 : event.detail ? -event.detail : 0;
-      const originX = event.offsetX || (event.pageX - this.domCanvas.offsetLeft);
-      const originY = event.offsetY || (event.pageY - this.domCanvas.offsetTop);
+      const delta = event.wheelDelta
+        ? event.wheelDelta / 40
+        : event.detail ? -event.detail : 0;
+      const originX = event.offsetX || event.pageX - this.domCanvas.offsetLeft;
+      const originY = event.offsetY || event.pageY - this.domCanvas.offsetTop;
 
       this.zoom(originX, originY, delta);
     }
@@ -463,9 +511,10 @@ export class CanvasComponent implements OnInit, OnDestroy {
 
   mouseDown(event) {
     if (this.isSpacePressed) {
-      document.body.style.msUserSelect = document.body.style.webkitUserSelect = document.body.style.userSelect = 'none';
-      this.lastX = event.offsetX || (event.pageX - this.domCanvas.offsetLeft);
-      this.lastY = event.offsetY || (event.pageY - this.domCanvas.offsetTop);
+      document.body.style.msUserSelect = document.body.style.webkitUserSelect = document.body.style.userSelect =
+        'none';
+      this.lastX = event.offsetX || event.pageX - this.domCanvas.offsetLeft;
+      this.lastY = event.offsetY || event.pageY - this.domCanvas.offsetTop;
       this.dragStartPosition = {
         x: this.lastX,
         y: this.lastY
@@ -475,9 +524,12 @@ export class CanvasComponent implements OnInit, OnDestroy {
 
   mouseMove(event) {
     if (this.dragStartPosition) {
-      this.lastX = event.offsetX || (event.pageX - this.domCanvas.offsetLeft);
-      this.lastY = event.offsetY || (event.pageY - this.domCanvas.offsetTop);
-      this.translate(this.lastX - this.dragStartPosition.x, this.lastY - this.dragStartPosition.y);
+      this.lastX = event.offsetX || event.pageX - this.domCanvas.offsetLeft;
+      this.lastY = event.offsetY || event.pageY - this.domCanvas.offsetTop;
+      this.translate(
+        this.lastX - this.dragStartPosition.x,
+        this.lastY - this.dragStartPosition.y
+      );
       this.dragStartPosition = {
         x: this.lastX,
         y: this.lastY
@@ -495,7 +547,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
     this.saveFiles(event.target.files);
   }
 
-  objectModified(selection: any |  Array<any>) {
+  objectModified(selection: any | Array<any>) {
     let objects = [];
     if (selection._objects) {
       objects = selection._objects;
@@ -509,30 +561,40 @@ export class CanvasComponent implements OnInit, OnDestroy {
     const currentObjects = this.fabricCanvas.toJSON().objects; // needed for correct coordinates
     for (let i = 0; i < objects.length; i++) {
       const id = objects[i].id;
-      const object = currentObjects[this.fabricCanvas.getObjects().indexOf(objects[i])];
+      const object =
+        currentObjects[this.fabricCanvas.getObjects().indexOf(objects[i])];
       if (object) {
-        this.store.dispatch(new artifactActions.Update(id, {
-          transform: {
-            scale: object.scaleX,
-            angle: object.angle,
-            x: object.left,
-            y: object.top,
-            order: this.fabricCanvas.getObjects().indexOf(objects[i])
-          }
-        }));
+        this.store.dispatch(
+          new artifactActions.Update(id, {
+            transform: {
+              scale: object.scaleX,
+              angle: object.angle,
+              x: object.left,
+              y: object.top,
+              order: this.fabricCanvas.getObjects().indexOf(objects[i])
+            }
+          })
+        );
       }
     }
   }
 
   afterRender() {
     if (
-      this.lastCanvasViewportTransform.length !== this.fabricCanvas.viewportTransform.length ||
-      !this.lastCanvasViewportTransform.every((e, i) => e === this.fabricCanvas.viewportTransform[i])
+      this.lastCanvasViewportTransform.length !==
+        this.fabricCanvas.viewportTransform.length ||
+      !this.lastCanvasViewportTransform.every(
+        (e, i) => e === this.fabricCanvas.viewportTransform[i]
+      )
     ) {
       this.lastCanvasViewportTransform = this.fabricCanvas.viewportTransform.slice();
       this.activeSpace$.pipe(take(1)).subscribe(space => {
         if (space) {
-          this.store.dispatch(new spaceActions.Update(space.id, { viewportTransform: this.lastCanvasViewportTransform }));
+          this.store.dispatch(
+            new spaceActions.Update(space.id, {
+              viewportTransform: this.lastCanvasViewportTransform
+            })
+          );
         } else {
           console.warn('No space found');
         }
