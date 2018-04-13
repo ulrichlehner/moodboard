@@ -1,13 +1,11 @@
-import { map, switchMap, flatMap, catchError, mergeMap, concatMap, concatAll, mergeAll, combineAll, reduce, filter } from 'rxjs/operators';
 import { Injectable } from '@angular/core';
-import { Artifact } from './models/artifact';
-// import { ARTIFACTS } from './mock-artifacts';
-import { Observable } from 'rxjs/Observable';
-import { of } from 'rxjs/observable/of';
-import { MessageService } from './message.service';
 import PouchDB from 'pouchdb';
+import { Observable } from 'rxjs/Observable';
 import { fromPromise } from 'rxjs/observable/fromPromise';
-import { concat } from 'rxjs/operators/concat';
+import { of } from 'rxjs/observable/of';
+import { catchError, concatAll, concatMap, map, reduce } from 'rxjs/operators';
+import { MessageService } from './message.service';
+import { Artifact } from './models/artifact';
 import { Space } from './models/space';
 
 // see https://www.bennadel.com/blog/3194-experimenting-with-simple-crud-operations-using-pouchdb-in-angular-2-1-1.htm

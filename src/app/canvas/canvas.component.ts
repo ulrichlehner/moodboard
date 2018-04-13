@@ -1,21 +1,19 @@
-import { selectActiveSpace } from './../store/reducers/space.reducer';
-import { Space } from './../models/space';
-import { skip, debounceTime, take } from 'rxjs/operators';
-import { Observable } from 'rxjs/Observable';
-import { selectAllArtifacts, selectActiveArtifact, ArtifactState } from '../store/reducers/artifact.reducer';
+import { ChangeDetectionStrategy, Component, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Artifact } from './../models/artifact';
-import { Component, OnInit, OnDestroy, HostListener, ChangeDetectionStrategy } from '@angular/core';
+import 'fabric';
+import { Observable } from 'rxjs/Observable';
 import { Subscription } from 'rxjs/Subscription';
 import { fromEvent } from 'rxjs/observable/fromEvent';
-import { selectAllSpaces } from '../store/reducers/space.reducer';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-
+import { debounceTime, skip, take } from 'rxjs/operators';
+import * as UUID from 'uuidjs';
 import * as artifactActions from '../store/actions/artifact.actions';
 import * as spaceActions from '../store/actions/space.actions';
-import * as UUID from 'uuidjs';
+import { ArtifactState, selectAllArtifacts } from '../store/reducers/artifact.reducer';
+import { selectAllSpaces } from '../store/reducers/space.reducer';
+import { Artifact } from './../models/artifact';
+import { Space } from './../models/space';
+import { selectActiveSpace } from './../store/reducers/space.reducer';
 
-import 'fabric';
 declare const fabric: any;
 
 @Component({
