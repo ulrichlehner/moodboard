@@ -68,7 +68,6 @@ export class CanvasComponent implements OnInit, OnDestroy {
   lastCanvasViewportTransform = [];
 
   isSpacePressed = false;
-  isSelectionEnabled = true;
   isDragOver = false;
 
   drawnPathObjects = new Array();
@@ -225,14 +224,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
   }
 
   setCanvasObjectsSelectable(isSelectable: boolean) {
-    this.isSelectionEnabled = isSelectable;
     this.fabricCanvas.selection = isSelectable;
-    const objects: Array<any> = this.fabricCanvas.getObjects();
-    objects.forEach(object => {
-      object.hasControls = isSelectable;
-      object.hasBorders = isSelectable;
-      object.selection = isSelectable;
-    });
   }
 
   // http://fabricjs.com/manage-selection
