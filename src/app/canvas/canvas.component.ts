@@ -50,6 +50,14 @@ export class CanvasComponent implements OnInit, OnDestroy {
     offsetX: 0,
     offsetY: 5
   };
+
+  // enum OrderTarget {
+  //   Front,
+  //   Forward,
+  //   Backward,
+  //   Back,
+  // };
+
   //#endregion
 
   //#region Member variables
@@ -196,7 +204,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
       // });
 
       this.fabricCanvas.on('object:modified', (event) => {
-        this.objectModified(event);
+        this.objectModified(event.target);
       });
 
       // this.fabricCanvas.on('object:added', function (event) {
@@ -232,7 +240,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
     this.fabricCanvas.setHeight(canvasDomHeight);
 
     this.lastX = this.domCanvas.width / 2,
-    this.lastY = this.domCanvas.height / 2;
+      this.lastY = this.domCanvas.height / 2;
 
     // window.addEventListener('beforeunload', this.postSessionCanvas);
 
@@ -342,25 +350,33 @@ export class CanvasComponent implements OnInit, OnDestroy {
 
   sendObject(where) {
     if (this.fabricCanvas.getActiveObjects()) {
+      let sendingPerformed = false;
       this.fabricCanvas.getActiveObjects().forEach((obj: any) => {
         switch (where) {
           case 'backward':
             this.fabricCanvas.sendBackwards(obj);
+            sendingPerformed = true;
             break;
           case 'back':
             this.fabricCanvas.sendToBack(obj);
+            sendingPerformed = true;
             break;
           case 'forward':
             this.fabricCanvas.bringForward(obj);
+            sendingPerformed = true;
             break;
           case 'front':
             this.fabricCanvas.bringToFront(obj);
+            sendingPerformed = true;
             break;
         }
       });
-      // this.fabricCanvas.discardActiveGroup().renderAll();
-      // this.fabricCanvas.discardActiveObject();
-      this.updateAllMedia();
+
+      if (sendingPerformed) {
+        console.log('save all');
+        this.objectModified(this.fabricCanvas.getObjects());
+      }
+
     }
     // else if (this.fabricCanvas.getActiveObject()) {
     //   const obj = this.fabricCanvas.getActiveObject();
@@ -449,40 +465,6 @@ export class CanvasComponent implements OnInit, OnDestroy {
   //#endregion
 
   //#region Data manipulation
-  updateAllMedia() {
-    // update all media
-    // var objects = fabricCanvas.getObjects();
-    // for (i in objects) {
-    //   updateMedia(objects[i]);
-    // }
-  }
-
-  updateMedia(media) {
-    // var arr = [];
-    // var isGroup = false;
-    // if (media._objects) {
-    //   arr = media._objects;
-    //   isGroup = true;
-    // } else {
-    //   arr.push(media);
-    // }
-
-    // // save data
-    // for (var i = 0; i < arr.length; i++) {
-    //   var name = arr[i].name;
-    //   var obj = fabricCanvas.toJSON().objects[fabricCanvas.getObjects().indexOf(arr[i])];
-    //   if (obj != null) {
-    //     socket.emit('update media', {
-    //       name: name,
-    //       scale: obj.scaleX,
-    //       angle: obj.angle,
-    //       x: arr.length > 1 ? obj.left : media.oCoords.tl.x,
-    //       y: arr.length > 1 ? obj.top : media.oCoords.tl.y,
-    //       order: fabricCanvas.getObjects().indexOf(arr[i])
-    //     });
-    //   }
-    // }
-  }
 
   deleteArtifact() {
     if (this.fabricCanvas.getActiveObjects()) {
@@ -511,7 +493,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
               // _rev: artifact._rev
             }).scale(artifact.transform.scale).setShadow(this.artifactShadow);
             // this.fabricCanvas.centerObject(img);
-            this.fabricCanvas.add(img);
+            this.fabricCanvas.insertAt(img, artifact.transform.order);
 
             // Release image object
             imgObj.remove();
@@ -677,9 +659,6 @@ export class CanvasComponent implements OnInit, OnDestroy {
 
       this.zoom(originX, originY, delta);
 
-      // save current state
-      this.updateAllMedia();
-
       // return event.preventDefault() && false;
     }
   }
@@ -710,8 +689,6 @@ export class CanvasComponent implements OnInit, OnDestroy {
 
   mouseUp(event) {
     if (this.dragStartPosition) {
-      // save current state
-      this.updateAllMedia();
       this.dragStartPosition = null;
     }
   }
@@ -720,8 +697,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
     this.saveFiles(event.target.files);
   }
 
-  objectModified(event) {
-    // console.log(event);
+  objectModified(selection: any | Array<any>) {
     // if (event.target.id) {
     //   this.store.dispatch(new ArtifactActions.Update(event.target.id, {
     //     _id: event.target.id,
@@ -750,30 +726,30 @@ export class CanvasComponent implements OnInit, OnDestroy {
     //   });
     // }
 
-    const media = event.target;
-    let arr = [];
-    let isGroup = false;
-    if (media._objects) {
-      arr = media._objects;
-      isGroup = true;
+    // const obj = event.target;
+    let objects = [];
+    if (selection._objects) {
+      objects = selection._objects;
+    } else if (selection.id) {
+      objects.push(selection);
     } else {
-      arr.push(media);
+      objects = selection;
     }
 
     // save data
-    for (let i = 0; i < arr.length; i++) {
-      const id = arr[i].id;
-      const object = this.fabricCanvas.toJSON().objects[this.fabricCanvas.getObjects().indexOf(arr[i])];
+    const currentObjects = this.fabricCanvas.toJSON().objects;
+    for (let i = 0; i < objects.length; i++) {
+      const id = objects[i].id;
+      const object = currentObjects[this.fabricCanvas.getObjects().indexOf(objects[i])]; // TODO: check why this is needed
       if (object) {
+        console.log(object);
         this.store.dispatch(new artifactActions.Update(id, {
-          // _id: id,
-          // _rev: object._rev,
           transform: {
             scale: object.scaleX,
             angle: object.angle,
-            x: arr.length > 1 ? object.left : media.oCoords.tl.x,
-            y: arr.length > 1 ? object.top : media.oCoords.tl.y,
-            order: this.fabricCanvas.getObjects().indexOf(arr[i])
+            x: objects.length > 1 ? object.left : selection.oCoords.tl.x,
+            y: objects.length > 1 ? object.top : selection.oCoords.tl.y,
+            order: this.fabricCanvas.getObjects().indexOf(objects[i])
           }
         }));
       }
