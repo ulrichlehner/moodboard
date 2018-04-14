@@ -41,6 +41,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
   private readonly attachmentImageQuality = 0.6;
   private readonly attachmentImageMaxSide = 1600;
 
+  private readonly canvasBackgroundImage = '/assets/img/background-pattern/background-pattern-14.png';
   private readonly canvasMinZoom = 0.05;
 
   private readonly acceptedMimeTypes = {
@@ -49,6 +50,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
     'image/gif': true
   };
 
+  private readonly artifactInitialSize = 200;
   private readonly artifactShadow = {
     color: 'rgba(0, 0, 0, 0.4)',
     blur: 30,
@@ -189,7 +191,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
 
       this.fabricCanvas.setBackgroundColor(
         {
-          source: '/assets/img/background-pattern/background-pattern-14.png',
+          source: this.canvasBackgroundImage,
           repeat: 'repeat'
         },
         this.fabricCanvas.renderAll.bind(this.fabricCanvas)
@@ -376,7 +378,10 @@ export class CanvasComponent implements OnInit, OnDestroy {
                   (startOffsetY + artifactCnt++) * distance +
                   distance,
                 angle: 0,
-                scale: 0.1 / this.fabricCanvas.getZoom()
+                scale:
+                  this.artifactInitialSize /
+                  this.attachmentImageMaxSide /
+                  this.fabricCanvas.getZoom()
               },
               createDate: date,
               updateDate: date,
