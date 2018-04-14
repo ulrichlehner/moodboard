@@ -310,7 +310,6 @@ export class CanvasComponent implements OnInit, OnDestroy {
               })
               .scale(artifact.transform.scale)
               .setShadow(this.artifactShadow);
-            // this.fabricCanvas.centerObject(img);
             this.fabricCanvas.insertAt(img, artifact.transform.order);
 
             // Release image object
@@ -357,15 +356,19 @@ export class CanvasComponent implements OnInit, OnDestroy {
             const bounds = this.fabricCanvas.calcViewportBoundaries();
             const id: string = UUID.generate();
             const date = new Date();
+            const distance = 10 / this.fabricCanvas.getZoom();
             const artifact: Artifact = {
               id: id,
               name: `Artifact @${id}`,
               transform: {
                 order: this.artifacts.length + artifactCnt,
-                x: bounds.tl.x + 10,
-                y: bounds.tl.y + (startOffsetY + artifactCnt++) * 10 + 10,
+                x: bounds.tl.x + distance,
+                y:
+                  bounds.tl.y +
+                  (startOffsetY + artifactCnt++) * distance +
+                  distance,
                 angle: 0,
-                scale: 0.1
+                scale: 0.1 / this.fabricCanvas.getZoom()
               },
               createDate: date,
               updateDate: date,
