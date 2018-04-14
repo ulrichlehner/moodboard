@@ -183,14 +183,14 @@ export class CanvasComponent implements OnInit, OnDestroy {
       });
 
       this.fabricCanvas.on('object:modified', event => {
-        this.objectModified(event.target);
+        this.updateArtifact(event.target);
       });
 
       // Debounce time to prevent fireing too often
       fromEvent(this.fabricCanvas, 'after:render')
         .pipe(debounceTime(250))
         .subscribe(() => {
-          this.afterRender();
+          this.updateCanvasViewportTransform();
         });
     }
 
@@ -220,36 +220,6 @@ export class CanvasComponent implements OnInit, OnDestroy {
   }
 
   resetView() {}
-
-  sendObject(where) {
-    if (this.fabricCanvas.getActiveObjects()) {
-      let sendingPerformed = false;
-      this.fabricCanvas.getActiveObjects().forEach((obj: any) => {
-        switch (where) {
-          case 'backward':
-            this.fabricCanvas.sendBackwards(obj);
-            sendingPerformed = true;
-            break;
-          case 'back':
-            this.fabricCanvas.sendToBack(obj);
-            sendingPerformed = true;
-            break;
-          case 'forward':
-            this.fabricCanvas.bringForward(obj);
-            sendingPerformed = true;
-            break;
-          case 'front':
-            this.fabricCanvas.bringToFront(obj);
-            sendingPerformed = true;
-            break;
-        }
-      });
-
-      if (sendingPerformed) {
-        this.objectModified(this.fabricCanvas.getObjects());
-      }
-    }
-  }
 
   setCanvasObjectsSelectable(isSelectable: boolean) {
     this.fabricCanvas.selection = isSelectable;
@@ -414,6 +384,90 @@ export class CanvasComponent implements OnInit, OnDestroy {
     }
   }
 
+  sendObject(where) {
+    if (this.fabricCanvas.getActiveObjects()) {
+      let sendingPerformed = false;
+      this.fabricCanvas.getActiveObjects().forEach((obj: any) => {
+        switch (where) {
+          case 'backward':
+            this.fabricCanvas.sendBackwards(obj);
+            sendingPerformed = true;
+            break;
+          case 'back':
+            this.fabricCanvas.sendToBack(obj);
+            sendingPerformed = true;
+            break;
+          case 'forward':
+            this.fabricCanvas.bringForward(obj);
+            sendingPerformed = true;
+            break;
+          case 'front':
+            this.fabricCanvas.bringToFront(obj);
+            sendingPerformed = true;
+            break;
+        }
+      });
+
+      if (sendingPerformed) {
+        this.updateArtifact(this.fabricCanvas.getObjects());
+      }
+    }
+  }
+
+  updateArtifact(selection: any | Array<any>) {
+    let objects = [];
+    if (selection._objects) {
+      objects = selection._objects;
+    } else if (selection.id) {
+      objects.push(selection);
+    } else {
+      objects = selection;
+    }
+
+    // save data
+    const currentObjects = this.fabricCanvas.toJSON().objects; // needed for correct coordinates
+    for (let i = 0; i < objects.length; i++) {
+      const id = objects[i].id;
+      const object =
+        currentObjects[this.fabricCanvas.getObjects().indexOf(objects[i])];
+      if (object) {
+        this.store.dispatch(
+          new artifactActions.Update(id, {
+            transform: {
+              scale: object.scaleX,
+              angle: object.angle,
+              x: object.left,
+              y: object.top,
+              order: this.fabricCanvas.getObjects().indexOf(objects[i])
+            }
+          })
+        );
+      }
+    }
+  }
+
+  updateCanvasViewportTransform() {
+    if (
+      this.lastCanvasViewportTransform.length !==
+        this.fabricCanvas.viewportTransform.length ||
+      !this.lastCanvasViewportTransform.every(
+        (e, i) => e === this.fabricCanvas.viewportTransform[i]
+      )
+    ) {
+      this.lastCanvasViewportTransform = this.fabricCanvas.viewportTransform.slice();
+      this.activeSpace$.pipe(take(1)).subscribe(space => {
+        if (space) {
+          this.store.dispatch(
+            new spaceActions.Update(space.id, {
+              viewportTransform: this.lastCanvasViewportTransform
+            })
+          );
+        } else {
+          console.warn('No space found');
+        }
+      });
+    }
+  }
   //#endregion
 
   //#region Event handlers
@@ -545,61 +599,6 @@ export class CanvasComponent implements OnInit, OnDestroy {
 
   uploadFile(event) {
     this.saveFiles(event.target.files);
-  }
-
-  objectModified(selection: any | Array<any>) {
-    let objects = [];
-    if (selection._objects) {
-      objects = selection._objects;
-    } else if (selection.id) {
-      objects.push(selection);
-    } else {
-      objects = selection;
-    }
-
-    // save data
-    const currentObjects = this.fabricCanvas.toJSON().objects; // needed for correct coordinates
-    for (let i = 0; i < objects.length; i++) {
-      const id = objects[i].id;
-      const object =
-        currentObjects[this.fabricCanvas.getObjects().indexOf(objects[i])];
-      if (object) {
-        this.store.dispatch(
-          new artifactActions.Update(id, {
-            transform: {
-              scale: object.scaleX,
-              angle: object.angle,
-              x: object.left,
-              y: object.top,
-              order: this.fabricCanvas.getObjects().indexOf(objects[i])
-            }
-          })
-        );
-      }
-    }
-  }
-
-  afterRender() {
-    if (
-      this.lastCanvasViewportTransform.length !==
-        this.fabricCanvas.viewportTransform.length ||
-      !this.lastCanvasViewportTransform.every(
-        (e, i) => e === this.fabricCanvas.viewportTransform[i]
-      )
-    ) {
-      this.lastCanvasViewportTransform = this.fabricCanvas.viewportTransform.slice();
-      this.activeSpace$.pipe(take(1)).subscribe(space => {
-        if (space) {
-          this.store.dispatch(
-            new spaceActions.Update(space.id, {
-              viewportTransform: this.lastCanvasViewportTransform
-            })
-          );
-        } else {
-          console.warn('No space found');
-        }
-      });
-    }
   }
 
   dragOver() {
