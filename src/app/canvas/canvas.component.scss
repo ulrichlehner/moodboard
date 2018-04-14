@@ -24,13 +24,13 @@ progress {
 }
 
 .canvas-wrapper {
-  background: url($backgroundImageUrl) repeat top left;
+  // background: url($backgroundImageUrl) repeat top left;
   position: absolute;
   top: 0;
   bottom: 0;
   left: 0;
   right: 0;
-  background-color: $canvasBackgroundColor;
+  // background-color: $canvasBackgroundColor;
   overflow: hidden;
   width: auto;
   z-index: 1;

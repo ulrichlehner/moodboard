@@ -182,10 +182,18 @@ export class CanvasComponent implements OnInit, OnDestroy {
     const canvasDomHeight = document.getElementById('canvas-wrapper')
       .clientHeight;
 
-    if (this.fabricCanvas == null) {
+    if (!this.fabricCanvas) {
       this.fabricCanvas = new fabric.Canvas('canvas', {
         noScaleCache: true
       });
+
+      this.fabricCanvas.setBackgroundColor(
+        {
+          source: '/assets/img/background-pattern/background-pattern-14.png',
+          repeat: 'repeat'
+        },
+        this.fabricCanvas.renderAll.bind(this.fabricCanvas)
+      );
 
       this.fabricCanvas.on('object:modified', event => {
         this.updateArtifact(event.target);

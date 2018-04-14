@@ -2,8 +2,6 @@
 
 // Import Bootstrap? -> https://stackoverflow.com/questions/45660802/how-to-use-bootstrap-4-with-sass-in-angular
 
-
-
 // @import "./../lib/open-sans-fontface/open-sans";
 // @import "./../lib/font-awesome/less/font-awesome";
 // @import "./../lib/bootstrap/less/bootstrap";
@@ -16,19 +14,18 @@
 // @import "modules/canvas";
 // @import "modules/splash-screen";
 
-
 /*****************************
 * Variables
 *****************************/
 
-$backgroundImageUrl: "/assets/img/background-pattern/background-pattern-14.png";
+// $backgroundImageUrl: "/assets/img/background-pattern/background-pattern-14.png";
 $canvasShadow: inset rgba(0, 0, 0, 0.1) 0px 0px 15px;
-$canvasBackgroundColor: rgba(255, 255, 255, 0.7);
+// $canvasBackgroundColor: rgba(255, 255, 255, 0.7);
 $splashScreenGradientStartColor: rgba(0, 0, 0, 0);
 $splashScreenGradientEndColor: rgba(0, 0, 0, 0.05);
 
-$btn-color: rgba(0,0,0,0.2);
-$btn-color-hover: rgba(0,0,0,0.6);
+$btn-color: rgba(0, 0, 0, 0.2);
+$btn-color-hover: rgba(0, 0, 0, 0.6);
 
 /*****************************
 * Global
@@ -40,7 +37,7 @@ body {
 }
 
 code {
-  background-color: rgba(0,0,0,0.1);
+  background-color: rgba(0, 0, 0, 0.1);
   color: #000;
   margin-left: 4px;
   margin-right: 4px;
@@ -75,7 +72,6 @@ code {
   right: 0;
   top: 0;
   padding: 10px 10px 10px 5px;
-
 }
 
 .bottom-toolbar {
@@ -110,7 +106,7 @@ code {
 //   i {
 //     margin-left: 6px;
 //   }
-// } 
+// }
 
 .btn-main-menu {
   line-height: 35px;
