@@ -51,7 +51,6 @@ export interface IPouchDBGetFriendResult extends IPouchDBGetResult {
 
 @Injectable()
 export class DataService {
-
   private db;
 
   constructor(private messageService: MessageService) {
@@ -63,18 +62,31 @@ export class DataService {
   }
 
   deleteSpaceById(id: string): Observable<any> {
-    return fromPromise(this.db.get(`space:${id}`).then(doc => this.db.remove(id, doc._rev)));
+    return fromPromise(
+      this.db.get(`space:${id}`).then(doc => this.db.remove(id, doc._rev))
+    );
   }
 
   updateSpace(id: string, changes: Partial<Space>): Observable<Space> {
-    return fromPromise(this.db.get(`space:${id}`).then(doc => this.db.put({ ...doc, ...changes, _rev: doc._rev })));
+    return fromPromise(
+      this.db
+        .get(`space:${id}`)
+        .then(doc => this.db.put({ ...doc, ...changes, _rev: doc._rev }))
+    );
   }
 
   getAllSpaces(): Observable<Space[]> {
-    return fromPromise(this.db.allDocs({ include_docs: true, startkey: 'space', endkey: 'space\ufff0' })).pipe(
+    return fromPromise(
+      this.db.allDocs({
+        include_docs: true,
+        startkey: 'space',
+        endkey: 'space\ufff0'
+      })
+    ).pipe(
       map((docs: IPouchDBAllDocsResult) => {
         return docs.rows.map(row => row.doc);
-      }));
+      })
+    );
   }
 
   getSpace(id: string): Observable<Space> {
@@ -82,15 +94,25 @@ export class DataService {
   }
 
   createArtifact(artifact: Artifact): Observable<Artifact> {
-    return fromPromise(this.db.put({ ...artifact, _id: `artifact:${artifact.id}` }));
+    return fromPromise(
+      this.db.put({ ...artifact, _id: `artifact:${artifact.id}` })
+    );
   }
 
   deleteArtifactById(id: string): Observable<any> {
-    return fromPromise(this.db.get(`artifact:${id}`).then(doc => this.db.remove(`artifact:${id}`, doc._rev)));
+    return fromPromise(
+      this.db
+        .get(`artifact:${id}`)
+        .then(doc => this.db.remove(`artifact:${id}`, doc._rev))
+    );
   }
 
   updateArtifact(id: string, changes: Partial<Artifact>): Observable<Artifact> {
-    return fromPromise(this.db.get(`artifact:${id}`).then(doc => this.db.put({ ...doc, ...changes, _rev: doc._rev })));
+    return fromPromise(
+      this.db
+        .get(`artifact:${id}`)
+        .then(doc => this.db.put({ ...doc, ...changes, _rev: doc._rev }))
+    );
   }
 
   getArtifact(id: string): Observable<Artifact> {
@@ -99,7 +121,13 @@ export class DataService {
 
   getAllArtifacts(): Observable<Artifact[]> {
     // see https://codereview.stackexchange.com/questions/152897/switchmap-with-array-of-observables
-    return fromPromise(this.db.allDocs({ include_docs: true, startkey: 'artifact', endkey: 'artifact\ufff0' })).pipe(
+    return fromPromise(
+      this.db.allDocs({
+        include_docs: true,
+        startkey: 'artifact',
+        endkey: 'artifact\ufff0'
+      })
+    ).pipe(
       map((docs: IPouchDBAllDocsResult) => {
         return docs.rows.map(row => row.doc);
       }),
@@ -107,28 +135,31 @@ export class DataService {
       concatMap((artifact: any) => {
         for (const fileName in artifact._attachments) {
           if (fileName) {
-            return this.getAttachment(`artifact:${artifact.id}`, fileName).pipe(map(attachment => {
-              artifact._attachments[fileName] = {
-                content_type: attachment.type,
-                data: new File([attachment], fileName)
-              };
-              return artifact;
-            }), catchError((err: any) => {
-              return of(artifact);
-            }));
+            return this.getAttachment(`artifact:${artifact.id}`, fileName).pipe(
+              map(attachment => {
+                artifact._attachments[fileName] = {
+                  content_type: attachment.type,
+                  data: new File([attachment], fileName)
+                };
+                return artifact;
+              }),
+              catchError((err: any) => {
+                return of(artifact);
+              })
+            );
           }
         }
       }),
       reduce((acc: Artifact[], value: Artifact) => {
         acc.push(value);
         return acc;
-      }, []));
+      }, [])
+    );
   }
 
   getAttachment(docId: string, attachmentId): Observable<Blob> {
     return fromPromise(this.db.getAttachment(docId, attachmentId));
   }
-
 
   // deleteById3(id: string): Observable<any> {
   //   // console.log(`deleteById ${id}`);
@@ -275,5 +306,4 @@ export class DataService {
   //         return acc;
   //       }, []));
   // }
-
 }
