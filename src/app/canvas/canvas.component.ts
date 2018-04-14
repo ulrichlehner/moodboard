@@ -343,14 +343,15 @@ export class CanvasComponent implements OnInit, OnDestroy {
 
             ctx.drawImage(imgEl, 0, 0, canvas.width, canvas.height);
 
+            const bounds = this.fabricCanvas.calcViewportBoundaries();
             const id: string = UUID.generate();
             const artifact: Artifact = {
               id: id,
               name: `Artifact @${id}`,
               transform: {
                 order: 0,
-                x: 10,
-                y: 10,
+                x: bounds.tl.x + 10,
+                y: bounds.tl.y + 10,
                 angle: 0,
                 scale: 0.1
               },
