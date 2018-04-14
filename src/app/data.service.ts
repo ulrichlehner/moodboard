@@ -69,9 +69,9 @@ export class DataService {
 
   updateSpace(id: string, changes: Partial<Space>): Observable<Space> {
     return fromPromise(
-      this.db
-        .get(`space:${id}`)
-        .then(doc => this.db.put({ ...doc, ...changes, _rev: doc._rev }))
+      this.db.get(`space:${id}`).then(doc => {
+        this.db.put({ ...doc, ...changes, _rev: doc._rev });
+      })
     );
   }
 

@@ -9,8 +9,8 @@ import * as spaceActions from '../actions/space.actions';
 
 @Injectable()
 export class SpaceEffects {
-
-  @Effect() load$: Observable<Action> = this.actions$.pipe(
+  @Effect()
+  load$: Observable<Action> = this.actions$.pipe(
     ofType(spaceActions.LOAD),
     switchMap(() => {
       return this.dataService.getAllSpaces().pipe(
@@ -22,7 +22,8 @@ export class SpaceEffects {
     })
   );
 
-  @Effect() create$: Observable<Action> = this.actions$.pipe(
+  @Effect()
+  create$: Observable<Action> = this.actions$.pipe(
     ofType(spaceActions.CREATE),
     switchMap((action: spaceActions.Create) => {
       return this.dataService.createSpace(action.space).pipe(
@@ -33,7 +34,8 @@ export class SpaceEffects {
     })
   );
 
-  @Effect() update$: Observable<Action> = this.actions$.pipe(
+  @Effect()
+  update$: Observable<Action> = this.actions$.pipe(
     ofType(spaceActions.UPDATE),
     switchMap((action: spaceActions.Update) => {
       return this.dataService.updateSpace(action.id, action.changes).pipe(
@@ -44,8 +46,5 @@ export class SpaceEffects {
     })
   );
 
-  constructor(
-    private actions$: Actions,
-    private dataService: DataService
-  ) { }
+  constructor(private actions$: Actions, private dataService: DataService) {}
 }

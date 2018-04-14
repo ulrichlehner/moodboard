@@ -17,31 +17,31 @@ export const SELECT = '[Space] Select';
 export class Create implements Action {
   readonly type = CREATE;
 
-  constructor(public space: Space) { }
+  constructor(public space: Space) {}
 }
 
 export class Update implements Action {
   readonly type = UPDATE;
 
-  constructor(public id: string, public changes: Partial<Space>) { }
+  constructor(public id: string, public changes: Partial<Space>) {}
 }
 
 export class Delete implements Action {
   readonly type = DELETE;
 
-  constructor(public id: string) { }
+  constructor(public id: string) {}
 }
 
 export class CreateSuccess implements Action {
   readonly type = CREATE_SUCCESS;
 
-  constructor(public space: Space) { }
+  constructor(public space: Space) {}
 }
 
 export class UpdateSuccess implements Action {
   readonly type = UPDATE_SUCCESS;
 
-  constructor(public id: string, public changes: Partial<Space>) { }
+  constructor(public id: string, public changes: Partial<Space>) {}
 }
 
 export class DeleteSuccess implements Action {
@@ -59,13 +59,23 @@ export class Load implements Action {
 export class LoadSuccess implements Action {
   readonly type = LOAD_SUCCESS;
 
-  constructor(public spaces: Space[]) { }
+  constructor(public spaces: Space[]) {}
 }
 
 export class Select implements Action {
   readonly type = SELECT;
 
-  constructor(public readonly id: string) { }
+  constructor(public readonly id: string) {}
 }
 
-export type All = Create | CreateSuccess | Update | UpdateSuccess | Delete | DeleteSuccess | DeleteFail | Load | LoadSuccess | Select;
+export type All =
+  | Create
+  | CreateSuccess
+  | Update
+  | UpdateSuccess
+  | Delete
+  | DeleteSuccess
+  | DeleteFail
+  | Load
+  | LoadSuccess
+  | Select;

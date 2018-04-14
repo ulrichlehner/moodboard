@@ -63,6 +63,9 @@ export class CanvasComponent implements OnInit, OnDestroy {
   activeSpace$: Observable<Space>;
   artifacts$: Observable<Artifact[]>;
 
+  artifacts: Artifact[];
+  activeSpace: Space;
+
   artifactSubscription: Subscription;
   spaceSubscription: Subscription;
 
@@ -149,6 +152,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
 
     this.artifactSubscription = this.artifacts$.subscribe(
       (artifacts: Artifact[]) => {
+        this.artifacts = artifacts;
         this.syncCanvas(artifacts);
       }
     );
@@ -158,6 +162,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
     this.spaceSubscription = this.activeSpace$
       .pipe(skip(1))
       .subscribe((space: Space) => {
+        this.activeSpace = space;
         this.lastCanvasViewportTransform = space.viewportTransform;
         this.fabricCanvas.setViewportTransform(space.viewportTransform);
       });
@@ -323,6 +328,12 @@ export class CanvasComponent implements OnInit, OnDestroy {
 
   saveFiles(fileList: FileList) {
     if (fileList.length) {
+      let artifactCnt = 0;
+      const startOffsetY = this.artifacts.filter(
+        (a: Artifact) =>
+          a.updateDate > this.activeSpace.updateDate &&
+          a.updateDate === a.createDate
+      ).length;
       for (let i = 0; i < fileList.length; i++) {
         const file: File = fileList[i];
         if (this.acceptedMimeTypes[file.type]) {
@@ -345,18 +356,19 @@ export class CanvasComponent implements OnInit, OnDestroy {
 
             const bounds = this.fabricCanvas.calcViewportBoundaries();
             const id: string = UUID.generate();
+            const date = new Date();
             const artifact: Artifact = {
               id: id,
               name: `Artifact @${id}`,
               transform: {
-                order: 0,
+                order: this.artifacts.length + artifactCnt,
                 x: bounds.tl.x + 10,
-                y: bounds.tl.y + 10,
+                y: bounds.tl.y + (startOffsetY + artifactCnt++) * 10 + 10,
                 angle: 0,
                 scale: 0.1
               },
-              createDate: new Date(),
-              updateDate: new Date(),
+              createDate: date,
+              updateDate: date,
               _attachments: {}
             };
             canvas.toBlob(
@@ -451,8 +463,9 @@ export class CanvasComponent implements OnInit, OnDestroy {
     if (
       this.lastCanvasViewportTransform.length !==
         this.fabricCanvas.viewportTransform.length ||
-      !this.lastCanvasViewportTransform.every(
-        (e, i) => e === this.fabricCanvas.viewportTransform[i]
+      !this.isArrayEqual(
+        this.lastCanvasViewportTransform,
+        this.fabricCanvas.viewportTransform
       )
     ) {
       this.lastCanvasViewportTransform = this.fabricCanvas.viewportTransform.slice();
@@ -460,7 +473,8 @@ export class CanvasComponent implements OnInit, OnDestroy {
         if (space) {
           this.store.dispatch(
             new spaceActions.Update(space.id, {
-              viewportTransform: this.lastCanvasViewportTransform
+              viewportTransform: this.lastCanvasViewportTransform,
+              updateDate: new Date()
             })
           );
         } else {
@@ -633,6 +647,10 @@ export class CanvasComponent implements OnInit, OnDestroy {
       default:
         return '';
     }
+  }
+
+  isArrayEqual(a: Array<any>, b: Array<any>): boolean {
+    return a.every((e, i) => e === b[i]);
   }
   //#endregion
 }

@@ -17,31 +17,31 @@ export const SELECT = '[Artifact] Select';
 export class Create implements Action {
   readonly type = CREATE;
 
-  constructor(public artifact: Artifact) { }
+  constructor(public artifact: Artifact) {}
 }
 
 export class Update implements Action {
   readonly type = UPDATE;
 
-  constructor(public id: string, public changes: Partial<Artifact>) { }
+  constructor(public id: string, public changes: Partial<Artifact>) {}
 }
 
 export class Delete implements Action {
   readonly type = DELETE;
 
-  constructor(public id: string) { }
+  constructor(public id: string) {}
 }
 
 export class CreateSuccess implements Action {
   readonly type = CREATE_SUCCESS;
 
-  constructor(public artifact: Artifact) { }
+  constructor(public artifact: Artifact) {}
 }
 
 export class UpdateSuccess implements Action {
   readonly type = UPDATE_SUCCESS;
 
-  constructor(public id: string, public changes: Partial<Artifact>) { }
+  constructor(public id: string, public changes: Partial<Artifact>) {}
 }
 
 export class DeleteSuccess implements Action {
@@ -63,13 +63,23 @@ export class Load implements Action {
 export class LoadSuccess implements Action {
   readonly type = LOAD_SUCCESS;
 
-  constructor(public artifacts: Artifact[]) { }
+  constructor(public artifacts: Artifact[]) {}
 }
 
 export class Select implements Action {
   readonly type = SELECT;
 
-  constructor(public readonly id: string) { }
+  constructor(public readonly id: string) {}
 }
 
-export type All = Create | CreateSuccess | Update | UpdateSuccess | Delete | DeleteSuccess | DeleteFail | Load | LoadSuccess | Select;
+export type All =
+  | Create
+  | CreateSuccess
+  | Update
+  | UpdateSuccess
+  | Delete
+  | DeleteSuccess
+  | DeleteFail
+  | Load
+  | LoadSuccess
+  | Select;
