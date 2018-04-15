@@ -8,6 +8,7 @@ import { MessageService } from './message.service';
 import { Artifact } from './models/artifact';
 import { Space } from './models/space';
 
+//#region PouchDB interfaces
 // see https://www.bennadel.com/blog/3194-experimenting-with-simple-crud-operations-using-pouchdb-in-angular-2-1-1.htm
 
 // CAUTION: There is currently no up-to-date "Definitely Typed" set of interfaces for
@@ -48,15 +49,17 @@ export interface IPouchDBRow {
 export interface IPouchDBGetFriendResult extends IPouchDBGetResult {
   name: string;
 }
+//#endregion
 
 @Injectable()
 export class DataService {
   private db;
 
   constructor(private messageService: MessageService) {
-    this.db = new PouchDB('inspirespac');
+    this.db = new PouchDB('inspirespace');
   }
 
+  //#region Space
   createSpace(space: Space): Observable<Space> {
     return fromPromise(this.db.put({ ...space, _id: `space:${space.id}` }));
   }
@@ -92,7 +95,9 @@ export class DataService {
   getSpace(id: string): Observable<Space> {
     return fromPromise(this.db.get(`space:${id}`));
   }
+  //#endregion
 
+  //#region Artifact
   createArtifact(artifact: Artifact): Observable<Artifact> {
     return fromPromise(
       this.db.put({ ...artifact, _id: `artifact:${artifact.id}` })
@@ -156,154 +161,11 @@ export class DataService {
       }, [])
     );
   }
+  //#endregion
 
+  //#region Generic
   getAttachment(docId: string, attachmentId): Observable<Blob> {
     return fromPromise(this.db.getAttachment(docId, attachmentId));
   }
-
-  // deleteById3(id: string): Observable<any> {
-  //   // console.log(`deleteById ${id}`);
-  //   return fromPromise(this.db.get(id)).pipe(
-  //     concat(),
-  //     concatMap((doc: any) => {
-  //       console.log(`checking for attachments on ${id}`);
-  //       if (doc._attachments) {
-  //         console.log(`iterating through attachments ${id}`);
-  //         for (const attachmentId in doc._attachments) {
-  //           if (attachmentId) {
-  //             return this.removeAttachment(id, attachmentId, doc._rev).pipe(
-  //               switchMap((result: any) => {
-  //                 console.log(`attachment removed ${id}`);
-  //                 console.log(result);
-  //                 // console.log(artifact);
-  //                 // return fromPromise(this.db.remove(id, result._rev));
-  //                 return fromPromise(this.db.put({ _id: id, _rev: result.rev, _deleted: true }));
-  //               }),
-  //               catchError((error: any) => {
-  //                 console.log('catchError');
-  //                 return fromPromise(this.db.remove(id, doc._rev));
-  //               })
-  //             );
-  //           } else {
-  //             console.log('else inner');
-  //             return fromPromise(this.db.remove(id, doc._rev));
-  //           }
-  //         }
-  //       } else {
-  //         console.log('else outer');
-  //         return fromPromise(this.db.remove(id, doc._rev));
-  //       }
-  //     }), catchError((error: any) => {
-  //       console.log('catchError');
-  //       console.log(error);
-  //       return null;
-  //     })
-  //   );
-  // }
-
-  // deleteById2(id: string): Observable<any> {
-  //   console.log(`deleteById ${id}`);
-  //   return fromPromise(this.db.get(id)).pipe(
-  //     switchMap((doc: any) => {
-  //       console.log(`checking for attachments on ${id}`);
-  //       if (doc._attachments) {
-  //         console.log(`iterating through attachments ${id}`);
-  //         for (const attachmentId in doc._attachments) {
-  //           if (attachmentId) {
-  //             return this.removeAttachment(id, attachmentId, doc._rev).pipe(
-  //               switchMap((result: any) => {
-  //                 console.log(`attachment removed ${id}`);
-  //                 console.log(result);
-  //                 // console.log(artifact);
-  //                 // return fromPromise(this.db.remove(id, result._rev));
-  //                 return fromPromise(this.db.put({ _id: id, _rev: result.rev, _deleted: true }));
-  //               }),
-  //               catchError((error: any) => {
-  //                 console.log('catchError');
-  //                 return fromPromise(this.db.remove(id, doc._rev));
-  //               })
-  //             );
-  //           } else {
-  //             console.log('else inner');
-  //             return fromPromise(this.db.remove(id, doc._rev));
-  //           }
-  //         }
-  //       } else {
-  //         console.log('else outer');
-  //         return fromPromise(this.db.remove(id, doc._rev));
-  //       }
-  //     }), catchError((error: any) => {
-  //       console.log('catchError');
-  //       console.log(error);
-  //       return null;
-  //     })
-  //   );
-  // }
-
-  // TODO: probably _id: artifact.id is not needed
-  // delete(artifact: Artifact): Observable<any> {
-  //   for (const fileName in artifact._attachments) {
-  //     if (fileName) {
-  //       return this.removeAttachment(artifact.id, fileName, artifact._rev).pipe(
-  //         switchMap((result: any) => {
-  //           console.log(result);
-  //           console.log(artifact);
-  //           return fromPromise(this.db.remove({ ...artifact, _id: artifact.id, _rev: result._rev }));
-  //         }),
-  //         catchError((error: any) => {
-  //           return fromPromise(this.db.remove({ ...artifact, _id: artifact.id }));
-  //         })
-  //       );
-  //     }
-  //   }
-  // }
-
-  // removeAttachment(docId: string, attachmentId, rev: string): Observable<IPouchDBRemoveResult> {
-  //   return fromPromise(this.db.removeAttachment(docId, attachmentId, rev));
-  // }
-
-  // getChanges(): Observable<any> {
-  //   return Observable.create(observer => {
-  //     this.db.changes({ live: true, since: 'now', include_docs: true }).on('change', change => {
-  //       console.log('change.doc');
-  //       console.log(change.doc);
-  //       console.log('----------');
-  //       observer.next(change.doc);
-  //     });
-  //   });
-  // }
-
-  // getArtifacts(): Observable<Artifact[]> {
-  //   // Todo: send the message _after_ fetching the heroes
-  //   this.messageService.add('ArtifactService: fetched artifacts');
-  //   return of(ARTIFACTS);
-  // }
-
-  // getAll(): Observable<Artifact[]> {
-  //   return fromPromise(this.db.allDocs({ include_docs: true })).pipe(
-  //     map((docs: IPouchDBAllDocsResult) => {
-  //       console.log(docs);
-  //       return docs.rows.map(row => row.doc);
-  //     }),
-  //     concatAll(),
-  //     mergeMap((artifact: any) => this.db.getAttachment(artifact._id, 'test.jpeg'),
-  //       (artifact, attachment: any) => {
-  //         artifact._attachments['test.jpeg'] = {
-  //           content_type: attachment.type,
-  //           // data: attachment
-  //           data: new File([attachment], 'test.jpeg')
-  //         };
-  //         return artifact;
-  //       }), catchError((err: any) => {
-  //         // console.log(`no attachment`);
-  //         return [];
-  //       }),
-  //       reduce( (acc: Artifact[], value: Artifact) => {
-  //         // console.log('---');
-  //         // console.log(acc);
-  //         // console.log(value);
-  //         acc.push(value);
-  //         return acc;
-  //       }, []));
-  // }
+  //#endregion
 }
