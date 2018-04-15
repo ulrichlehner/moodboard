@@ -4,6 +4,7 @@ import { Observable } from 'rxjs/Observable';
 import { fromPromise } from 'rxjs/observable/fromPromise';
 import { of } from 'rxjs/observable/of';
 import { catchError, concatAll, concatMap, map, reduce } from 'rxjs/operators';
+import * as UUID from 'uuidjs';
 import { MessageService } from './message.service';
 import { Artifact } from './models/artifact';
 import { Space } from './models/space';
@@ -53,7 +54,18 @@ export interface IPouchDBGetFriendResult extends IPouchDBGetResult {
 
 @Injectable()
 export class DataService {
+  static SPACE_ID_PREFIX = 'space';
+  static ARTIFACT_ID_PREFIX = 'artifact';
+
   private db;
+
+  public static generateArtifactId(spaceId: string): string {
+    return `${this.ARTIFACT_ID_PREFIX}:${spaceId}:${UUID.generate()}`;
+  }
+
+  public static generateSpaceId(): string {
+    return `${this.SPACE_ID_PREFIX}:${UUID.generate()}`;
+  }
 
   constructor(private messageService: MessageService) {
     this.db = new PouchDB('inspirespace');
@@ -61,18 +73,18 @@ export class DataService {
 
   //#region Space
   createSpace(space: Space): Observable<Space> {
-    return fromPromise(this.db.put({ ...space, _id: `space:${space.id}` }));
+    return fromPromise(this.db.put({ ...space, _id: space.id }));
   }
 
-  deleteSpaceById(id: string): Observable<any> {
+  deleteSpace(spaceId: string): Observable<any> {
     return fromPromise(
-      this.db.get(`space:${id}`).then(doc => this.db.remove(id, doc._rev))
+      this.db.get(spaceId).then(doc => this.db.remove(spaceId, doc._rev))
     );
   }
 
-  updateSpace(id: string, changes: Partial<Space>): Observable<Space> {
+  updateSpace(spaceId: string, changes: Partial<Space>): Observable<Space> {
     return fromPromise(
-      this.db.get(`space:${id}`).then(doc => {
+      this.db.get(spaceId).then(doc => {
         this.db.put({ ...doc, ...changes, _rev: doc._rev });
       })
     );
@@ -82,8 +94,8 @@ export class DataService {
     return fromPromise(
       this.db.allDocs({
         include_docs: true,
-        startkey: 'space',
-        endkey: 'space\ufff0'
+        startkey: `${DataService.SPACE_ID_PREFIX}`,
+        endkey: `${DataService.SPACE_ID_PREFIX}\ufff0`
       })
     ).pipe(
       map((docs: IPouchDBAllDocsResult) => {
@@ -100,37 +112,41 @@ export class DataService {
   //#region Artifact
   createArtifact(artifact: Artifact): Observable<Artifact> {
     return fromPromise(
-      this.db.put({ ...artifact, _id: `artifact:${artifact.id}` })
+      this.db.put({
+        ...artifact,
+        _id: artifact.id
+      })
     );
   }
 
-  deleteArtifactById(id: string): Observable<any> {
+  deleteArtifact(artifactId: string): Observable<any> {
     return fromPromise(
-      this.db
-        .get(`artifact:${id}`)
-        .then(doc => this.db.remove(`artifact:${id}`, doc._rev))
+      this.db.get(artifactId).then(doc => this.db.remove(artifactId, doc._rev))
     );
   }
 
-  updateArtifact(id: string, changes: Partial<Artifact>): Observable<Artifact> {
+  updateArtifact(
+    artifactId: string,
+    changes: Partial<Artifact>
+  ): Observable<Artifact> {
     return fromPromise(
       this.db
-        .get(`artifact:${id}`)
+        .get(artifactId)
         .then(doc => this.db.put({ ...doc, ...changes, _rev: doc._rev }))
     );
   }
 
-  getArtifact(id: string): Observable<Artifact> {
-    return fromPromise(this.db.get(`artifact:${id}`));
+  getArtifact(artifactId: string): Observable<Artifact> {
+    return fromPromise(this.db.get(artifactId));
   }
 
-  getAllArtifacts(): Observable<Artifact[]> {
+  getAllArtifacts(spaceId: string): Observable<Artifact[]> {
     // see https://codereview.stackexchange.com/questions/152897/switchmap-with-array-of-observables
     return fromPromise(
       this.db.allDocs({
         include_docs: true,
-        startkey: 'artifact',
-        endkey: 'artifact\ufff0'
+        startkey: `${DataService.ARTIFACT_ID_PREFIX}:${spaceId}`,
+        endkey: `${DataService.ARTIFACT_ID_PREFIX}:${spaceId}\ufff0`
       })
     ).pipe(
       map((docs: IPouchDBAllDocsResult) => {
@@ -140,7 +156,7 @@ export class DataService {
       concatMap((artifact: any) => {
         for (const fileName in artifact._attachments) {
           if (fileName) {
-            return this.getAttachment(`artifact:${artifact.id}`, fileName).pipe(
+            return this.getAttachment(artifact.id, fileName).pipe(
               map(attachment => {
                 artifact._attachments[fileName] = {
                   content_type: attachment.type,

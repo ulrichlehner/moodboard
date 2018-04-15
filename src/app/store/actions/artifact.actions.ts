@@ -58,6 +58,8 @@ export class DeleteFail implements Action {
 
 export class Load implements Action {
   readonly type = LOAD;
+
+  constructor(public spaceId: string = '') {}
 }
 
 export class LoadSuccess implements Action {

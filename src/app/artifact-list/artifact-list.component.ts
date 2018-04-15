@@ -1,17 +1,14 @@
-import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
-
+import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import { Store } from '@ngrx/store';
+import { Observable } from 'rxjs/Observable';
 import { DataService } from '../data.service';
 import { Artifact } from '../models/artifact';
 import * as artifactActions from '../store/actions/artifact.actions';
 import {
-  selectAllArtifacts,
+  ArtifactState,
   selectActiveArtifact,
-  ArtifactState
+  selectAllArtifacts
 } from '../store/reducers/artifact.reducer';
-
-import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Observable';
-import * as UUID from 'uuidjs';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -1,10 +1,10 @@
-import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { SpaceState, selectAllSpaces } from '../store/reducers/space.reducer';
 import { Observable } from 'rxjs/Observable';
+import { DataService } from '../data.service';
 import { Space } from '../models/space';
 import * as spaceActions from '../store/actions/space.actions';
-import * as UUID from 'uuidjs';
+import { SpaceState, selectAllSpaces } from '../store/reducers/space.reducer';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -13,10 +13,9 @@ import * as UUID from 'uuidjs';
   styleUrls: ['./space-list.component.css']
 })
 export class SpaceListComponent implements OnInit {
-
   spaces$: Observable<Space[]>;
 
-  constructor(private store: Store<SpaceState>) { }
+  constructor(private store: Store<SpaceState>) {}
 
   ngOnInit() {
     this.spaces$ = this.store.select(selectAllSpaces);
@@ -24,7 +23,7 @@ export class SpaceListComponent implements OnInit {
   }
 
   addSpace() {
-    const id: string = UUID.generate();
+    const id: string = DataService.generateSpaceId();
     const space: Space = {
       id: id,
       viewportTransform: [1, 0, 0, 1, 0, 0],
@@ -33,7 +32,5 @@ export class SpaceListComponent implements OnInit {
       updateDate: new Date()
     };
     this.store.dispatch(new spaceActions.Create(space));
-    console.log(`Space added: ${space.name}`);
   }
-
 }

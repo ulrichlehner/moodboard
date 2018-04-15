@@ -11,7 +11,6 @@ import { Observable } from 'rxjs/Observable';
 import { Subscription } from 'rxjs/Subscription';
 import { fromEvent } from 'rxjs/observable/fromEvent';
 import { debounceTime, skip, take } from 'rxjs/operators';
-import * as UUID from 'uuidjs';
 import * as artifactActions from '../store/actions/artifact.actions';
 import * as spaceActions from '../store/actions/space.actions';
 import {
@@ -22,6 +21,7 @@ import { selectAllSpaces } from '../store/reducers/space.reducer';
 import { Artifact } from './../models/artifact';
 import { Space } from './../models/space';
 import { selectActiveSpace } from './../store/reducers/space.reducer';
+import { DataService } from '../data.service';
 
 declare const fabric: any;
 
@@ -74,9 +74,12 @@ export class CanvasComponent implements OnInit, OnDestroy {
   fabricCanvas = null;
   domCanvas;
 
-  lastX;
-  lastY;
-  dragStartPosition;
+  //#endregion
+
+  //#region State variables
+  lastX: number;
+  lastY: number;
+  dragStartPosition: { x: number; y: number };
   saveProgress = 0;
   lastCanvasViewportTransform = [];
 
@@ -84,8 +87,6 @@ export class CanvasComponent implements OnInit, OnDestroy {
   isDragOver = false;
 
   drawnPathObjects = new Array();
-  activeSession;
-
   //#endregion
 
   //#region Disable scrolling
@@ -149,8 +150,20 @@ export class CanvasComponent implements OnInit, OnDestroy {
     this.activeSpace$ = this.store.select(selectActiveSpace);
     this.artifacts$ = this.store.select(selectAllArtifacts);
 
+    // Load space
     this.store.dispatch(new spaceActions.Load());
-    this.store.dispatch(new artifactActions.Load());
+
+    // Load artifacts when active space is set
+    this.spaceSubscription = this.activeSpace$
+      // skip(1) as this is called initially
+      // see https://stackoverflow.com/questions/42698785/ngrx-subscription-to-store-called-once-its-created
+      .pipe(skip(1))
+      .subscribe((space: Space) => {
+        this.activeSpace = space;
+        this.lastCanvasViewportTransform = space.viewportTransform;
+        this.fabricCanvas.setViewportTransform(space.viewportTransform);
+        this.store.dispatch(new artifactActions.Load(space.id));
+      });
 
     this.artifactSubscription = this.artifacts$.subscribe(
       (artifacts: Artifact[]) => {
@@ -158,16 +171,6 @@ export class CanvasComponent implements OnInit, OnDestroy {
         this.syncCanvas(artifacts);
       }
     );
-
-    // skip(1) as this is called initially
-    // see https://stackoverflow.com/questions/42698785/ngrx-subscription-to-store-called-once-its-created
-    this.spaceSubscription = this.activeSpace$
-      .pipe(skip(1))
-      .subscribe((space: Space) => {
-        this.activeSpace = space;
-        this.lastCanvasViewportTransform = space.viewportTransform;
-        this.fabricCanvas.setViewportTransform(space.viewportTransform);
-      });
   }
 
   ngOnDestroy() {
@@ -364,12 +367,15 @@ export class CanvasComponent implements OnInit, OnDestroy {
             ctx.drawImage(imgEl, 0, 0, canvas.width, canvas.height);
 
             const bounds = this.fabricCanvas.calcViewportBoundaries();
-            const id: string = UUID.generate();
+            const id: string = DataService.generateArtifactId(
+              this.activeSpace.id
+            );
             const date = new Date();
             const distance = 10 / this.fabricCanvas.getZoom();
             const artifact: Artifact = {
               id: id,
               name: `Artifact @${id}`,
+              spaceId: this.activeSpace.id,
               transform: {
                 order: this.artifacts.length + artifactCnt,
                 x: bounds.tl.x + distance,

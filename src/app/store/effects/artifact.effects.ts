@@ -13,8 +13,8 @@ export class ArtifactEffects {
   @Effect()
   load$: Observable<Action> = this.actions$.pipe(
     ofType(artifactActions.LOAD),
-    switchMap(() => {
-      return this.dataService.getAllArtifacts().pipe(
+    switchMap((action: artifactActions.Load) => {
+      return this.dataService.getAllArtifacts(action.spaceId).pipe(
         map(artifacts => {
           return new artifactActions.LoadSuccess(artifacts);
         }) // ,
@@ -58,7 +58,7 @@ export class ArtifactEffects {
   delete$: Observable<Action> = this.actions$.pipe(
     ofType(artifactActions.DELETE),
     switchMap((action: artifactActions.Delete) => {
-      return this.dataService.deleteArtifactById(action.id).pipe(
+      return this.dataService.deleteArtifact(action.id).pipe(
         map(
           (result: any) => {
             // return new artifactActions.DeleteSuccess({ ...action.artifact, _rev: result.rev });

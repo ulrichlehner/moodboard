@@ -2,6 +2,7 @@ export interface Artifact {
   id: string;
   name: string;
   transform: Transform;
+  spaceId: string;
   createDate: Date;
   updateDate: Date;
 
