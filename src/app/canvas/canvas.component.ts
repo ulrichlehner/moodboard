@@ -165,6 +165,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
         this.store.dispatch(new artifactActions.Load(space.id));
       });
 
+    // Sync canvas when artifacts change
     this.artifactSubscription = this.artifacts$.subscribe(
       (artifacts: Artifact[]) => {
         this.artifacts = artifacts;
