@@ -12,7 +12,7 @@ export const LOAD_SUCCESS = '[Space] Load success';
 export const CREATE_FAIL = '[Space] Add fail';
 export const UPDATE_FAIL = '[Space] Update fail';
 export const DELETE_FAIL = '[Space] Delete fail';
-export const SELECT = '[Space] Select';
+export const ACTIVATE = '[Space] Activate';
 
 export class Create implements Action {
   readonly type = CREATE;
@@ -62,8 +62,8 @@ export class LoadSuccess implements Action {
   constructor(public spaces: Space[]) {}
 }
 
-export class Select implements Action {
-  readonly type = SELECT;
+export class Activate implements Action {
+  readonly type = ACTIVATE;
 
   constructor(public readonly id: string) {}
 }
@@ -78,4 +78,4 @@ export type All =
   | DeleteFail
   | Load
   | LoadSuccess
-  | Select;
+  | Activate;

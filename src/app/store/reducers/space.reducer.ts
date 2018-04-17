@@ -68,7 +68,7 @@ export function spaceReducer(
       }
       return deleteState;
 
-    case spaceActions.SELECT:
+    case spaceActions.ACTIVATE:
       return { ...state, activeSpaceId: action.id };
 
     default:

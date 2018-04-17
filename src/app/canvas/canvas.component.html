@@ -1,22 +1,13 @@
-<div class="w-50 position-fixed mt-2 mr-2" style="right: 0; z-index: 9999">
+<div class="w-25 position-fixed mt-2 mr-2" style="right: 0; z-index: 9999">
   <div class="custom-file">
     <input type="file" multiple class="custom-file-input" id="upload" (change)="uploadFile($event)">
     <label class="custom-file-label" for="upload">Choose file</label>
   </div>
 </div>
 <progress max="100" [value]="saveProgress" *ngIf="saveProgress > 0"></progress>
-<div
-  id="canvas-wrapper"
-  class="canvas-wrapper"
-  (mousewheel)="mouseWheel($event)"
-  (mousedown)="mouseDown($event)"
-  (mousemove)="mouseMove($event)"
-  (mouseup)="mouseUp($event)"
-  (dragover)="dragOver()"
-  (dragleave)="dragEnd()"
-  (dragend)="dragEnd()"
-  (drop)="drop($event)"
-  [class.dragover]="isDragOver">
+<app-space-list class="position-fixed mt-2 ml-2" appearance="light" style="left: 0; z-index: 9999"></app-space-list>
+<div id="canvas-wrapper" class="canvas-wrapper" (mousewheel)="mouseWheel($event)" (mousedown)="mouseDown($event)" (mousemove)="mouseMove($event)"
+  (mouseup)="mouseUp($event)" (dragover)="dragOver()" (dragleave)="dragEnd()" (dragend)="dragEnd()" (drop)="drop($event)" [class.dragover]="isDragOver">
   <canvas id="canvas" class="canvas"></canvas>
 </div>
 <!-- <div class="media-dropzone"></div> -->

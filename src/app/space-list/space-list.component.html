@@ -1,10 +1,15 @@
-<h2>Spaces</h2>
-<button (click)="addSpace()">Add Space</button>
-<ul>
-  <li *ngFor="let space of spaces$ | async" (click)="selectSpace(space)" [class.selected]="space === (activeSpace$ | async)">
-    <h3>{{ space.name }}</h3>
-  </li>
-</ul>
-<div *ngIf="activeSpace$ | async as s">
-  <strong>Selected: </strong>{{ s.name }}
+<div ngbDropdown *ngIf="activeSpace$ | async as activeSpace">
+  <button ngbDropdownToggle class="btn btn-sm" [class.btn-outline-primary]="appearance === Appearance.Dark" [class.btn-outline-light]="appearance === Appearance.Light"
+    type="button" id="dropdownSpaces" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+    {{ (activeSpace$ | async).name }}
+  </button>
+  <div ngbDropdownMenu aria-labelledby="dropdownSpaces">
+    <header class="dropdown-header">Your Spaces</header>
+    <button *ngFor="let space of spaces$ | async" class="dropdown-item" [class.active]="space.id === activeSpace.id" (click)="activateSpace(space)">{{ space.name }}</button>
+    <div class="dropdown-divider"></div>
+    <div class="px-4 py-0">
+      <button class="btn btn-link btn-sm pl-0 ml-0" (click)="addSpace()">Start new Space</button>
+      <!-- <small class="text-muted">Todo: DB Stats</small> -->
+    </div>
+  </div>
 </div>

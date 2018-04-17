@@ -45,7 +45,7 @@ export function artifactReducer(
 ) {
   switch (action.type) {
     case artifactActions.LOAD:
-      return { ...state };
+      return { ...initialState };
 
     case artifactActions.LOAD_SUCCESS:
       return artifactAdapter.addAll(action.artifacts, state);

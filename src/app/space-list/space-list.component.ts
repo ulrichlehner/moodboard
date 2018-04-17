@@ -1,10 +1,24 @@
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnInit,
+  Input
+} from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
 import { DataService } from '../data.service';
 import { Space } from '../models/space';
 import * as spaceActions from '../store/actions/space.actions';
-import { SpaceState, selectAllSpaces } from '../store/reducers/space.reducer';
+import {
+  SpaceState,
+  selectAllSpaces,
+  selectActiveSpace
+} from '../store/reducers/space.reducer';
+
+export enum Appearance {
+  Light = 'light',
+  Dark = 'dark'
+}
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -13,13 +27,24 @@ import { SpaceState, selectAllSpaces } from '../store/reducers/space.reducer';
   styleUrls: ['./space-list.component.css']
 })
 export class SpaceListComponent implements OnInit {
+  // Workaround to make enum accessible in template
+  // see https://stackoverflow.com/questions/37277527/how-to-use-enum-in-angular-2-templates#37277643
+  Appearance = Appearance;
+  @Input() appearance: Appearance = Appearance.Dark;
+
   spaces$: Observable<Space[]>;
+  activeSpace$: Observable<Space>;
 
   constructor(private store: Store<SpaceState>) {}
 
   ngOnInit() {
     this.spaces$ = this.store.select(selectAllSpaces);
+    this.activeSpace$ = this.store.select(selectActiveSpace);
     this.store.dispatch(new spaceActions.Load());
+  }
+
+  activateSpace(space: Space) {
+    this.store.dispatch(new spaceActions.Activate(space.id));
   }
 
   addSpace() {
@@ -33,4 +58,6 @@ export class SpaceListComponent implements OnInit {
     };
     this.store.dispatch(new spaceActions.Create(space));
   }
+
+  deleteSpace(space: Space) {}
 }

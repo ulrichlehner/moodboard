@@ -159,10 +159,13 @@ export class CanvasComponent implements OnInit, OnDestroy {
       // see https://stackoverflow.com/questions/42698785/ngrx-subscription-to-store-called-once-its-created
       .pipe(skip(1))
       .subscribe((space: Space) => {
+        if (!this.activeSpace || space.id !== this.activeSpace.id) {
+          this.removeAllCanvasObjects();
+          this.store.dispatch(new artifactActions.Load(space.id));
+        }
         this.activeSpace = space;
         this.lastCanvasViewportTransform = space.viewportTransform;
         this.fabricCanvas.setViewportTransform(space.viewportTransform);
-        this.store.dispatch(new artifactActions.Load(space.id));
       });
 
     // Sync canvas when artifacts change
@@ -260,12 +263,16 @@ export class CanvasComponent implements OnInit, OnDestroy {
     this.fabricCanvas.requestRenderAll();
   }
 
+  removeAllCanvasObjects() {
+    this.fabricCanvas.forEachObject((canvasObject: any) => {
+      this.fabricCanvas.remove(canvasObject);
+    });
+  }
+
   syncCanvas(artifacts: Artifact[]) {
     if (artifacts.length < this.fabricCanvas.getObjects().length) {
       if (artifacts.length === 0) {
-        this.fabricCanvas.forEachObject((canvasObject: any) => {
-          this.fabricCanvas.remove(canvasObject);
-        });
+        this.removeAllCanvasObjects();
       } else {
         this.fabricCanvas.forEachObject((canvasObject: any) => {
           const tmpObjects = artifacts.filter(
