@@ -56,6 +56,7 @@ export interface IPouchDBGetFriendResult extends IPouchDBGetResult {
 export class DataService {
   static SPACE_ID_PREFIX = 'space';
   static ARTIFACT_ID_PREFIX = 'artifact';
+  readonly DB_NAME = 'inspirespace';
 
   private db;
 
@@ -68,7 +69,7 @@ export class DataService {
   }
 
   constructor(private messageService: MessageService) {
-    this.db = new PouchDB('inspirespace');
+    this.db = new PouchDB(this.DB_NAME, { auto_compaction: true });
   }
 
   //#region Space
