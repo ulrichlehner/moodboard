@@ -1,11 +1,16 @@
-import { Component, OnInit, Input, ChangeDetectionStrategy } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  Input,
+  ChangeDetectionStrategy
+} from '@angular/core';
 
 import * as ArtifactActions from '../store/actions/artifact.actions';
 
 import { Artifact } from '../models/artifact';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
-import { selectActiveArtifact } from '../store/reducers/artifact.reducer';
+// import { selectActiveArtifact } from '../store/reducers/artifact.reducer';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -14,19 +19,17 @@ import { selectActiveArtifact } from '../store/reducers/artifact.reducer';
   styleUrls: ['./artifact-detail.component.css']
 })
 export class ArtifactDetailComponent implements OnInit {
+  @Input() artifact: Artifact;
+  // artifact$: Observable<Artifact>;
 
-  // @Input() artifact: Artifact;
-  artifact$: Observable<Artifact>;
-
-  constructor(private store: Store<any>) { }
+  constructor(private store: Store<any>) {}
 
   ngOnInit() {
-    this.artifact$ = this.store.select(selectActiveArtifact);
+    // this.artifact$ = this.store.select(selectActiveArtifact);
   }
 
   deleteArtifact(artifact: Artifact) {
     this.store.dispatch(new ArtifactActions.Delete(artifact.id));
     console.log(`Artifact deleted: ${artifact.name}`);
   }
-
 }

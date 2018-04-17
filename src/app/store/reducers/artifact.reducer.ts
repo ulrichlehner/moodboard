@@ -8,7 +8,7 @@ import { Artifact } from '../../models/artifact';
 import * as artifactActions from '../actions/artifact.actions';
 
 export interface ArtifactState extends EntityState<Artifact> {
-  activeArtifactId: string | null;
+  // activeArtifactId: string | null;
 }
 
 export const artifactAdapter: EntityAdapter<Artifact> = createEntityAdapter<
@@ -16,7 +16,7 @@ export const artifactAdapter: EntityAdapter<Artifact> = createEntityAdapter<
 >();
 
 export const initialState: ArtifactState = artifactAdapter.getInitialState({
-  activeArtifactId: null
+  // activeArtifactId: null
 });
 
 export const selectArtifactState = createFeatureSelector<ArtifactState>(
@@ -81,14 +81,7 @@ export function artifactReducer(
       );
 
     case artifactActions.DELETE:
-      const newState: ArtifactState = artifactAdapter.removeOne(
-        action.id,
-        state
-      );
-      if (state.activeArtifactId === action.id) {
-        newState.activeArtifactId = null;
-      }
-      return newState;
+      return artifactAdapter.removeOne(action.id, state);
 
     // case artifactActions.SELECT:
     //   return { ...state, activeArtifactId: action.id };
