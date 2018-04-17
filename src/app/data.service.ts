@@ -79,7 +79,25 @@ export class DataService {
 
   deleteSpace(spaceId: string): Observable<any> {
     return fromPromise(
-      this.db.get(spaceId).then(doc => this.db.remove(spaceId, doc._rev))
+      this.db
+        .allDocs({
+          startkey: `${DataService.ARTIFACT_ID_PREFIX}:${spaceId}`,
+          endkey: `${DataService.ARTIFACT_ID_PREFIX}:${spaceId}\ufff0`
+        })
+        .then(allDocs => {
+          return allDocs.rows.map(row => {
+            return { _id: row.id, _rev: row.value.rev, _deleted: true };
+          });
+        })
+        .then(deleteDocs => {
+          return this.db.bulkDocs(deleteDocs);
+        })
+        .then(() => {
+          return this.db.get(spaceId);
+        })
+        .then(doc => {
+          this.db.remove(spaceId, doc._rev);
+        })
     );
   }
 

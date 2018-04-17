@@ -1,8 +1,9 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  Input,
   OnInit,
-  Input
+  ViewChild
 } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
@@ -11,9 +12,10 @@ import { Space } from '../models/space';
 import * as spaceActions from '../store/actions/space.actions';
 import {
   SpaceState,
-  selectAllSpaces,
-  selectActiveSpace
+  selectActiveSpace,
+  selectAllSpaces
 } from '../store/reducers/space.reducer';
+import { NgbDropdown } from '@ng-bootstrap/ng-bootstrap';
 
 export enum Appearance {
   Light = 'light',
@@ -31,6 +33,7 @@ export class SpaceListComponent implements OnInit {
   // see https://stackoverflow.com/questions/37277527/how-to-use-enum-in-angular-2-templates#37277643
   Appearance = Appearance;
   @Input() appearance: Appearance = Appearance.Dark;
+  @ViewChild('dropdownSpaces') dropdownSpaces: NgbDropdown;
 
   spaces$: Observable<Space[]>;
   activeSpace$: Observable<Space>;
@@ -45,6 +48,7 @@ export class SpaceListComponent implements OnInit {
 
   activateSpace(space: Space) {
     this.store.dispatch(new spaceActions.Activate(space.id));
+    this.dropdownSpaces.close();
   }
 
   addSpace() {
@@ -59,5 +63,7 @@ export class SpaceListComponent implements OnInit {
     this.store.dispatch(new spaceActions.Create(space));
   }
 
-  deleteSpace(space: Space) {}
+  deleteSpace(space: Space) {
+    this.store.dispatch(new spaceActions.Delete(space.id));
+  }
 }

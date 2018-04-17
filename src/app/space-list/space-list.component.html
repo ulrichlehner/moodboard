@@ -1,10 +1,10 @@
-<div ngbDropdown *ngIf="activeSpace$ | async as activeSpace">
+<div ngbDropdown *ngIf="activeSpace$ | async as activeSpace" autoClose="false" #dropdownSpaces="ngbDropdown">
   <button ngbDropdownToggle class="btn btn-sm" [class.btn-outline-primary]="appearance === Appearance.Dark" [class.btn-outline-light]="appearance === Appearance.Light"
     type="button" id="dropdownSpaces" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
     {{ (activeSpace$ | async).name }}
   </button>
   <div ngbDropdownMenu aria-labelledby="dropdownSpaces">
-    <header class="dropdown-header">Your Spaces</header>
+    <header class="dropdown-header">Your Spaces ({{ (spaces$ | async).length }})</header>
     <button *ngFor="let space of spaces$ | async" class="dropdown-item" [class.active]="space.id === activeSpace.id" (click)="activateSpace(space)">{{ space.name }}</button>
     <div class="dropdown-divider"></div>
     <div class="px-4 py-0">
@@ -13,3 +13,4 @@
     </div>
   </div>
 </div>
+<button *ngIf="activeSpace$ | async as activeSpace" class="btn btn-link" (click)="deleteSpace(activeSpace)">Delete space</button>

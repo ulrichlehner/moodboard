@@ -1,10 +1,9 @@
-import { Action } from '@ngrx/store';
-import { switchMap, map } from 'rxjs/operators';
-import { Observable } from 'rxjs/Observable';
-import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Injectable } from '@angular/core';
+import { Actions, Effect, ofType } from '@ngrx/effects';
+import { Action } from '@ngrx/store';
+import { Observable } from 'rxjs/Observable';
+import { catchError, map, switchMap } from 'rxjs/operators';
 import { DataService } from '../../data.service';
-import { Space } from '../../models/space';
 import * as spaceActions from '../actions/space.actions';
 
 @Injectable()
@@ -41,6 +40,18 @@ export class SpaceEffects {
       return this.dataService.updateSpace(action.id, action.changes).pipe(
         map((result: any) => {
           return new spaceActions.UpdateSuccess(action.id, {});
+        })
+      );
+    })
+  );
+
+  @Effect()
+  delete$: Observable<Action> = this.actions$.pipe(
+    ofType(spaceActions.DELETE),
+    switchMap((action: spaceActions.Delete) => {
+      return this.dataService.deleteSpace(action.id).pipe(
+        map((result: any) => {
+          return new spaceActions.DeleteSuccess();
         })
       );
     })

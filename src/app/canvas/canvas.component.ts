@@ -159,13 +159,17 @@ export class CanvasComponent implements OnInit, OnDestroy {
       // see https://stackoverflow.com/questions/42698785/ngrx-subscription-to-store-called-once-its-created
       .pipe(skip(1))
       .subscribe((space: Space) => {
-        if (!this.activeSpace || space.id !== this.activeSpace.id) {
-          this.removeAllCanvasObjects();
-          this.store.dispatch(new artifactActions.Load(space.id));
+        if (space) {
+          if (!this.activeSpace || space.id !== this.activeSpace.id) {
+            this.removeAllCanvasObjects();
+            this.store.dispatch(new artifactActions.Load(space.id));
+          }
+          this.activeSpace = space;
+          this.lastCanvasViewportTransform = space.viewportTransform;
+          this.fabricCanvas.setViewportTransform(space.viewportTransform);
+        } else {
+          console.warn('No space found');
         }
-        this.activeSpace = space;
-        this.lastCanvasViewportTransform = space.viewportTransform;
-        this.fabricCanvas.setViewportTransform(space.viewportTransform);
       });
 
     // Sync canvas when artifacts change
@@ -499,6 +503,8 @@ export class CanvasComponent implements OnInit, OnDestroy {
       )
     ) {
       this.lastCanvasViewportTransform = this.fabricCanvas.viewportTransform.slice();
+
+      // TODO: check if needed
       this.activeSpace$.pipe(take(1)).subscribe(space => {
         if (space) {
           this.store.dispatch(
