@@ -6,7 +6,7 @@ import { Artifact } from '../models/artifact';
 import * as artifactActions from '../store/actions/artifact.actions';
 import {
   ArtifactState,
-  selectActiveArtifact,
+  // selectActiveArtifact,
   selectAllArtifacts
 } from '../store/reducers/artifact.reducer';
 
@@ -21,9 +21,9 @@ export class ArtifactListComponent implements OnInit {
 
   artifacts$: Observable<Artifact[]>;
 
-  // activeArtifact: Artifact;
+  activeArtifact: Artifact;
 
-  activeArtifact$: Observable<Artifact>;
+  // activeArtifact$: Observable<Artifact>;
 
   constructor(
     private store: Store<ArtifactState>,
@@ -33,15 +33,15 @@ export class ArtifactListComponent implements OnInit {
   ngOnInit() {
     // this.getArtifacts();
     this.artifacts$ = this.store.select(selectAllArtifacts);
-    this.activeArtifact$ = this.store.select(selectActiveArtifact);
+    // this.activeArtifact$ = this.store.select(selectActiveArtifact);
 
     // Dispatch LOAD_ARTIFACTS https://www.youtube.com/watch?v=xkUOQeGqIGI (2:24)
     this.store.dispatch(new artifactActions.Load());
   }
 
   selectArtifact(artifact: Artifact) {
-    // this.activeArtifact = artifact;
-    this.store.dispatch(new artifactActions.Select(artifact.id));
-    console.log(`Artifact selected: ${artifact.name}`);
+    this.activeArtifact = artifact;
+    // this.store.dispatch(new artifactActions.Select(artifact.id));
+    // console.log(`Artifact selected: ${artifact.name}`);
   }
 }

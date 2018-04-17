@@ -12,7 +12,7 @@ export const LOAD_SUCCESS = '[Artifact] Load success';
 export const CREATE_FAIL = '[Artifact] Add fail';
 export const UPDATE_FAIL = '[Artifact] Update fail';
 export const DELETE_FAIL = '[Artifact] Delete fail';
-export const SELECT = '[Artifact] Select';
+// export const SELECT = '[Artifact] Select';
 
 export class Create implements Action {
   readonly type = CREATE;
@@ -68,11 +68,11 @@ export class LoadSuccess implements Action {
   constructor(public artifacts: Artifact[]) {}
 }
 
-export class Select implements Action {
-  readonly type = SELECT;
+// export class Select implements Action {
+//   readonly type = SELECT;
 
-  constructor(public readonly id: string) {}
-}
+//   constructor(public readonly id: string) {}
+// }
 
 export type All =
   | Create
@@ -83,5 +83,5 @@ export type All =
   | DeleteSuccess
   | DeleteFail
   | Load
-  | LoadSuccess
-  | Select;
+  | LoadSuccess;
+// | Select;

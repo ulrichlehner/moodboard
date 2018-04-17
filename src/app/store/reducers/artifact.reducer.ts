@@ -28,16 +28,16 @@ export const {
   selectEntities
 } = artifactAdapter.getSelectors(selectArtifactState);
 
-export const selectActiveArtifactId = createSelector(
-  selectArtifactState,
-  state => state.activeArtifactId
-);
+// export const selectActiveArtifactId = createSelector(
+//   selectArtifactState,
+//   state => state.activeArtifactId
+// );
 
-export const selectActiveArtifact = createSelector(
-  selectEntities,
-  selectActiveArtifactId,
-  (artifact, id) => artifact[id]
-);
+// export const selectActiveArtifact = createSelector(
+//   selectEntities,
+//   selectActiveArtifactId,
+//   (artifact, id) => artifact[id]
+// );
 
 export function artifactReducer(
   state: ArtifactState = initialState,
@@ -90,8 +90,8 @@ export function artifactReducer(
       }
       return newState;
 
-    case artifactActions.SELECT:
-      return { ...state, activeArtifactId: action.id };
+    // case artifactActions.SELECT:
+    //   return { ...state, activeArtifactId: action.id };
 
     default:
       return state;
