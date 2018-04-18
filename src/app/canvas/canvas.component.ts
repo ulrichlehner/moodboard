@@ -40,6 +40,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
   private readonly attachmentImageMimeType = 'image/webp';
   private readonly attachmentImageQuality = 0.6;
   private readonly attachmentImageMaxSide = 1600;
+  private readonly attachmentImageInitialPositionOffsetY = 85;
 
   private readonly canvasBackgroundImage = '/assets/img/background-pattern/background-pattern-14.png';
   private readonly canvasMinZoom = 0.05;
@@ -394,6 +395,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
                 y:
                   bounds.tl.y +
                   (startOffsetY + artifactCnt++) * distance +
+                  this.attachmentImageInitialPositionOffsetY +
                   distance,
                 angle: 0,
                 scale:
