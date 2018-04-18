@@ -13,4 +13,4 @@
     </div>
   </div>
 </div>
-<button *ngIf="activeSpace$ | async as activeSpace" class="btn btn-link" (click)="deleteSpace(activeSpace)">Delete space</button>
+<button *ngIf="activeSpace$ | async as activeSpace" class="btn btn-link" (click)="deleteSpace(activeSpace)" [disabled]="(spaces$ | async).length <= 1">Delete space</button>
