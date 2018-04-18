@@ -67,7 +67,9 @@ export function spaceReducer(
         // Select latest space
         deleteState.activeSpaceId =
           state.ids.length > 0
-            ? state.ids[state.ids.length - 1].toString()
+            ? state.ids[
+                state.ids.length > 1 ? state.ids.length - 2 : 0
+              ].toString()
             : null;
       }
       return deleteState;
