@@ -68,7 +68,11 @@ export function spaceReducer(
         deleteState.activeSpaceId =
           state.ids.length > 0
             ? state.ids[
-                state.ids.length > 1 ? state.ids.length - 2 : 0
+                state.ids.length > 1
+                  ? action.id === state.ids[state.ids.length - 1]
+                    ? state.ids.length - 2
+                    : state.ids.length - 1
+                  : 0
               ].toString()
             : null;
       }
