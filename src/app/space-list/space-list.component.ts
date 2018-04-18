@@ -5,6 +5,7 @@ import {
   OnInit,
   ViewChild
 } from '@angular/core';
+import { NgbDropdown, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
 import { DataService } from '../data.service';
@@ -15,7 +16,6 @@ import {
   selectActiveSpace,
   selectAllSpaces
 } from '../store/reducers/space.reducer';
-import { NgbDropdown } from '@ng-bootstrap/ng-bootstrap';
 
 export enum Appearance {
   Light = 'light',
@@ -26,7 +26,7 @@ export enum Appearance {
   changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-space-list',
   templateUrl: './space-list.component.html',
-  styleUrls: ['./space-list.component.css']
+  styleUrls: ['./space-list.component.scss']
 })
 export class SpaceListComponent implements OnInit {
   // Workaround to make enum accessible in template
@@ -37,8 +37,12 @@ export class SpaceListComponent implements OnInit {
 
   spaces$: Observable<Space[]>;
   activeSpace$: Observable<Space>;
+  spaceToBeDeleted: Space;
 
-  constructor(private store: Store<SpaceState>) {}
+  constructor(
+    private store: Store<SpaceState>,
+    private modalService: NgbModal
+  ) {}
 
   ngOnInit() {
     this.spaces$ = this.store.select(selectAllSpaces);
@@ -65,5 +69,17 @@ export class SpaceListComponent implements OnInit {
 
   deleteSpace(space: Space) {
     this.store.dispatch(new spaceActions.Delete(space.id));
+  }
+
+  openDeleteConfirmationDialog(content, space: Space) {
+    this.spaceToBeDeleted = space;
+    this.modalService.open(content).result.then(
+      result => {
+        console.log('closed');
+      },
+      reason => {
+        console.log('dismissed');
+      }
+    );
   }
 }
