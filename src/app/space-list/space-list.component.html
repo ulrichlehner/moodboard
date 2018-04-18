@@ -1,4 +1,4 @@
-<div ngbDropdown *ngIf="activeSpace$ | async as activeSpace" autoClose="false" #dropdownSpaces="ngbDropdown">
+<div ngbDropdown *ngIf="activeSpace$ | async as activeSpace" autoClose="outside" #dropdownSpaces="ngbDropdown">
   <button ngbDropdownToggle class="btn btn-sm" [class.btn-outline-primary]="appearance === Appearance.Dark" [class.btn-outline-light]="appearance === Appearance.Light"
     type="button" id="dropdownSpaces" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
     {{ (activeSpace$ | async).name }}
