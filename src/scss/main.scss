@@ -14,18 +14,9 @@
 // @import "modules/canvas";
 // @import "modules/splash-screen";
 
-/*****************************
-* Variables
-*****************************/
+@import 'variables';
 
-// $backgroundImageUrl: "/assets/img/background-pattern/background-pattern-14.png";
-$canvasShadow: inset rgba(0, 0, 0, 0.1) 0px 0px 15px;
-// $canvasBackgroundColor: rgba(255, 255, 255, 0.7);
-$splashScreenGradientStartColor: rgba(0, 0, 0, 0);
-$splashScreenGradientEndColor: rgba(0, 0, 0, 0.05);
-
-$btn-color: rgba(0, 0, 0, 0.2);
-$btn-color-hover: rgba(0, 0, 0, 0.6);
+@import '~bootstrap/scss/bootstrap';
 
 /*****************************
 * Global

@@ -1,22 +1,32 @@
-.dropdown-item {
-  position: relative;
-  &:hover {
-    // padding-right: 60px;
-    .dropdown-item__actions {
-      opacity: 1;
-      pointer-events: auto;
-    }
+@import '../../scss/variables';
+
+.dropdown {
+  &__action {
+    padding: 0 $dropdown-item-padding-x;
   }
-  &__actions {
-    align-items: center;
-    background-color: #ffffff;
-    bottom: 0;
-    display: flex;
-    opacity: 0;
-    pointer-events: none;
-    position: absolute;
-    right: 0;
-    transition: opacity 0.2s;
-    top: 0;
+
+  .dropdown-item {
+    position: relative;
+
+    &:hover {
+      // padding-right: 60px;
+      .dropdown-item__actions {
+        opacity: 1;
+        pointer-events: auto;
+      }
+    }
+
+    &__actions {
+      align-items: center;
+      background-color: #ffffff;
+      bottom: 0;
+      display: flex;
+      opacity: 0;
+      pointer-events: none;
+      position: absolute;
+      right: 0;
+      transition: opacity 0.2s;
+      top: 0;
+    }
   }
 }
