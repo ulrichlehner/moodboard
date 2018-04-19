@@ -6,10 +6,10 @@
   <div ngbDropdownMenu aria-labelledby="dropdownSpaces">
     <header class="dropdown-header">Your Spaces ({{ (spaces$ | async).length }})</header>
     <button *ngFor="let space of spaces$ | async" class="dropdown-item" [class.active]="space.id === activeSpace.id" (click)="activateSpace(space)">{{ space.name }}
-      <div class="dropdown-item__actions">
+      <span class="dropdown-item__actions">
         <button class="btn btn-link" (click)="$event.stopPropagation();openDeleteConfirmationDialog(modalDeleteConfirmation, space);"
           [disabled]="(spaces$ | async).length <= 1">Delete</button>
-      </div>
+      </span>
     </button>
     <div class="dropdown-divider"></div>
     <div class="px-4 py-0">
@@ -19,8 +19,8 @@
 </div>
 <ng-template #modalDeleteConfirmation let-c="close" let-d="dismiss">
   <div class="modal-header">
-    <header class="modal-title">Delete {{ spaceToBeDeleted.name }}</header>
-    <button type="button" class="close" aria-label="Close" (click)="d()">
+    <header class="modal-title h5">Delete {{ spaceToBeDeleted.name }}</header>
+    <button type="button" class="close" aria-label="Close" (click)="$event.stopPropagation(); d();">
       <span aria-hidden="true">&times;</span>
     </button>
   </div>
@@ -28,7 +28,7 @@
     Do you really want to delete this space? This will permanently remove it including all containing artifacts.
   </div>
   <div class="modal-footer">
-    <button type="button" class="btn btn-secondary" (click)="c()">Cancel</button>
-    <button type="button" class="btn btn-danger" (click)="deleteSpace(spaceToBeDeleted);d();">Delete</button>
+    <button type="button" class="btn btn-secondary" (click)="$event.stopPropagation(); c();">Cancel</button>
+    <button type="button" class="btn btn-danger" (click)="$event.stopPropagation(); deleteSpace(spaceToBeDeleted); d();">Delete</button>
   </div>
 </ng-template>

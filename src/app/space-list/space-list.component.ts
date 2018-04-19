@@ -16,6 +16,7 @@ import {
   selectActiveSpace,
   selectAllSpaces
 } from '../store/reducers/space.reducer';
+import { timer } from 'rxjs/observable/timer';
 
 export enum Appearance {
   Light = 'light',
@@ -65,6 +66,12 @@ export class SpaceListComponent implements OnInit {
       updateDate: new Date()
     };
     this.store.dispatch(new spaceActions.Create(space));
+
+    // Close dropdown with small delay so a user sees that new item has been created
+    // timer(300).subscribe(done => {
+    // console.log('should close');
+    this.dropdownSpaces.close(); // Doesn't work??
+    // });
   }
 
   deleteSpace(space: Space) {
@@ -72,13 +79,16 @@ export class SpaceListComponent implements OnInit {
   }
 
   openDeleteConfirmationDialog(content, space: Space) {
+    this.dropdownSpaces.autoClose = false;
     this.spaceToBeDeleted = space;
     this.modalService.open(content).result.then(
       result => {
-        console.log('closed');
+        this.dropdownSpaces.autoClose = 'outside';
+        // console.log('closed');
       },
       reason => {
-        console.log('dismissed');
+        this.dropdownSpaces.autoClose = 'outside';
+        // console.log('dismissed');
       }
     );
   }

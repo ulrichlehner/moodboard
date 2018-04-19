@@ -50,7 +50,10 @@ export function spaceReducer(
       return loadSuccessState;
 
     case spaceActions.CREATE:
-      return spaceAdapter.addOne(action.space, state);
+      return spaceAdapter.addOne(action.space, {
+        ...state,
+        activeSpaceId: action.space.id
+      });
 
     case spaceActions.UPDATE:
       return spaceAdapter.updateOne(
