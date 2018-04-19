@@ -6,12 +6,19 @@
   <ng-container *ngIf="spaces$ | async as spaces">
     <div ngbDropdownMenu aria-labelledby="dropdownSpaces">
       <header class="dropdown-header">Your Spaces ({{ spaces.length }})</header>
-      <button *ngFor="let space of spaces" class="dropdown-item" [class.active]="space.id === activeSpace.id" (click)="activateSpace(space)">{{ space.name }}
-        <span class="dropdown-item__actions">
+      <div *ngFor="let space of spaces" class="wrapper">
+        <button class="dropdown-item" [class.active]="space.id === activeSpace.id" (click)="activateSpace(space)">
+          {{ space.name }}</button>
+        <div class="actions">
+          <button class="btn btn-link" aria-label="Edit space">
+            <fa-icon [icon]="['far', 'edit']" [fixedWidth]="true"></fa-icon>
+          </button>
           <button class="btn btn-link" (click)="$event.stopPropagation(); openDeleteConfirmationDialog(modalDeleteConfirmation, space);"
-            [disabled]="spaces.length <= 1">Delete</button>
-        </span>
-      </button>
+            [disabled]="spaces.length <= 1" aria-label="Delete space">
+            <fa-icon [icon]="['far', 'trash-alt']" [fixedWidth]="true"></fa-icon>
+          </button>
+        </div>
+      </div>
       <div class="dropdown-divider"></div>
       <div class="px-4 py-0">
         <button class="btn btn-link btn-sm pl-0 ml-0" (click)="addSpace()">Start new Space</button>

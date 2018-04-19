@@ -1,32 +1,52 @@
 @import '../../scss/variables';
 
+$transitionTime: 0.3s;
+
 .dropdown {
   &__action {
     padding: 0 $dropdown-item-padding-x;
   }
 
-  .dropdown-item {
+  .wrapper {
     position: relative;
 
+    .dropdown-item {
+      transition: all $transitionTime;
+    }
+
     &:hover {
-      // padding-right: 60px;
-      .dropdown-item__actions {
+      .actions {
         opacity: 1;
         pointer-events: auto;
+        width: 60px;
+      }
+
+      .dropdown-item {
+        overflow: hidden;
+        // padding-right: 0;
+        text-overflow: ellipsis;
+        width: calc(100% - 60px);
       }
     }
 
-    &__actions {
+    .actions {
       align-items: center;
-      background-color: #ffffff;
       bottom: 0;
       display: flex;
       opacity: 0;
+      overflow: hidden;
       pointer-events: none;
       position: absolute;
       right: 0;
-      transition: opacity 0.2s;
+      transition: all $transitionTime;
       top: 0;
+      width: 0;
+
+      .btn {
+        height: 100%;
+        margin: 0 5px;
+        padding: 0;
+      }
     }
   }
 }

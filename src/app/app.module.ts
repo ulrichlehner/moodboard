@@ -18,6 +18,12 @@ import { SpaceListComponent } from './space-list/space-list.component'; // Angul
 import { ArtifactEffects } from './store/effects/artifact.effects';
 import { SpaceEffects } from './store/effects/space.effects';
 import { reducers } from './store/reducers';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { library } from '@fortawesome/fontawesome-svg-core';
+import { faTrashAlt, faEdit } from '@fortawesome/free-regular-svg-icons';
+
+// Add an icon to the library for convenient access in other components
+library.add(faTrashAlt, faEdit);
 
 @NgModule({
   declarations: [
@@ -38,7 +44,8 @@ import { reducers } from './store/reducers';
     StoreDevtoolsModule.instrument({
       maxAge: 25,
       logOnly: environment.production
-    })
+    }),
+    FontAwesomeModule
   ],
   providers: [DataService, MessageService],
   bootstrap: [AppComponent]
