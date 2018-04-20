@@ -3,7 +3,8 @@ import {
   Component,
   Input,
   OnInit,
-  ViewChild
+  ViewChild,
+  OnDestroy
 } from '@angular/core';
 import { NgbDropdown, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { Store } from '@ngrx/store';
@@ -17,6 +18,7 @@ import {
   selectAllSpaces
 } from '../store/reducers/space.reducer';
 import { timer } from 'rxjs/observable/timer';
+import { Subscription } from 'rxjs/Subscription';
 
 export enum Appearance {
   Light = 'light',
@@ -29,7 +31,7 @@ export enum Appearance {
   templateUrl: './space-list.component.html',
   styleUrls: ['./space-list.component.scss']
 })
-export class SpaceListComponent implements OnInit {
+export class SpaceListComponent implements OnInit, OnDestroy {
   // Workaround to make enum accessible in template
   // see https://stackoverflow.com/questions/37277527/how-to-use-enum-in-angular-2-templates#37277643
   Appearance = Appearance;
@@ -40,6 +42,9 @@ export class SpaceListComponent implements OnInit {
   activeSpace$: Observable<Space>;
   spaceToBeDeleted: Space;
 
+  spacesSubcription: Subscription;
+  spaces: Space[];
+
   constructor(
     private store: Store<SpaceState>,
     private modalService: NgbModal
@@ -49,6 +54,14 @@ export class SpaceListComponent implements OnInit {
     this.spaces$ = this.store.select(selectAllSpaces);
     this.activeSpace$ = this.store.select(selectActiveSpace);
     this.store.dispatch(new spaceActions.Load());
+
+    this.spacesSubcription = this.spaces$.subscribe(
+      (spaces: Space[]) => (this.spaces = spaces)
+    );
+  }
+
+  ngOnDestroy() {
+    this.spacesSubcription.unsubscribe();
   }
 
   activateSpace(space: Space) {
@@ -56,22 +69,27 @@ export class SpaceListComponent implements OnInit {
     this.dropdownSpaces.close();
   }
 
-  addSpace() {
-    const id: string = DataService.generateSpaceId();
+  addSpace(name?: string) {
     const space: Space = {
-      id: id,
+      id: DataService.generateSpaceId(),
+      name: name
+        ? name
+        : `Inspirespace${
+            this.spaces.length > 0 ? ' ' + (this.spaces.length + 1) : ''
+          }`,
       viewportTransform: [1, 0, 0, 1, 0, 0],
-      name: `Space @${id}`,
       createDate: new Date(),
       updateDate: new Date()
     };
     this.store.dispatch(new spaceActions.Create(space));
 
-    // Close dropdown with small delay so a user sees that new item has been created
-    // timer(300).subscribe(done => {
-    // console.log('should close');
-    this.dropdownSpaces.close(); // Doesn't work??
-    // });
+    if (this.dropdownSpaces) {
+      // Close dropdown with small delay so a user sees that new item has been created
+      // timer(300).subscribe(done => {
+      // console.log('should close');
+      this.dropdownSpaces.close(); // Doesn't work??
+      // });
+    }
   }
 
   deleteSpace(space: Space) {

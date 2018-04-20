@@ -1,5 +1,18 @@
 @import '../../scss/variables';
 
+.toolbar {
+  .add-files {
+    margin: 0;
+    input[type='file'] {
+      display: none;
+    }
+  }
+
+  > * {
+    margin-left: 10px;
+  }
+}
+
 progress {
   appearance: none;
   bottom: 10px;

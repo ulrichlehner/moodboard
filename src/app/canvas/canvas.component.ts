@@ -40,7 +40,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
   private readonly attachmentImageMimeType = 'image/webp';
   private readonly attachmentImageQuality = 0.6;
   private readonly attachmentImageMaxSide = 1600;
-  private readonly attachmentImageInitialPositionOffsetY = 85;
+  private readonly attachmentImageInitialPositionOffsetY = 40;
 
   private readonly canvasBackgroundImage = '/assets/img/background-pattern/background-pattern-14.png';
   private readonly canvasMinZoom = 0.05;
@@ -246,7 +246,31 @@ export class CanvasComponent implements OnInit, OnDestroy {
     );
   }
 
-  resetView() {}
+  viewAllObjectsOnCanvas() {
+    const bounds = this.calculateBounds();
+    if (bounds) {
+      const vw = this.fabricCanvas.getWidth();
+      const vh = this.fabricCanvas.getHeight();
+      const vr = vw / vh;
+
+      const bw = bounds.width;
+      const bh = bounds.height;
+      const bx = bounds.left;
+      const by = bounds.top;
+      const br = bw / bh;
+
+      // Translate to center
+      const dx = vw / 2 - bx - bw / 2;
+      const dy = vh / 2 - by - bh / 2;
+      // this.translate(dx, dy);
+
+      // Scale to fit bounds
+      const s = vr < br ? vw / bw : vh / bh;
+      // this.fabricCanvas.setZoom(s * 0.95);
+
+      this.fabricCanvas.zoomToPoint({ x: dx, y: dy }, s);
+    }
+  }
 
   setCanvasObjectsSelectable(isSelectable: boolean) {
     this.fabricCanvas.selection = isSelectable;
@@ -689,6 +713,42 @@ export class CanvasComponent implements OnInit, OnDestroy {
 
   isArrayEqual(a: Array<any>, b: Array<any>): boolean {
     return a.every((e, i) => e === b[i]);
+  }
+
+  calculateBounds() {
+    const xCoords = [];
+    const yCoords = [];
+
+    this.fabricCanvas.forEachObject((object: any) => {
+      const c = object.oCoords;
+      xCoords.push(c.tl.x);
+      xCoords.push(c.tr.x);
+      xCoords.push(c.br.x);
+      xCoords.push(c.bl.x);
+      yCoords.push(c.tl.y);
+      yCoords.push(c.tr.y);
+      yCoords.push(c.br.y);
+      yCoords.push(c.bl.y);
+    });
+
+    const minX = fabric.util.array.min(xCoords);
+    const maxX = fabric.util.array.max(xCoords);
+    const width = Math.abs(minX - maxX);
+
+    const minY = fabric.util.array.min(yCoords);
+    const maxY = fabric.util.array.max(yCoords);
+    const height = Math.abs(minY - maxY);
+
+    if (minX && minY && width && height) {
+      return {
+        left: minX,
+        top: minY,
+        width: width,
+        height: height
+      };
+    } else {
+      return null;
+    }
   }
   //#endregion
 }
