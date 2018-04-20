@@ -2,14 +2,14 @@
 
 .toolbar {
   .add-files {
-    margin: 0;
+    margin-bottom: 0;
     input[type='file'] {
       display: none;
     }
   }
 
   > * {
-    margin-left: 10px;
+    margin-left: 5px;
   }
 }
 
