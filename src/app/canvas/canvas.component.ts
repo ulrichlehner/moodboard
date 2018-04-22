@@ -249,6 +249,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
   viewAllObjectsOnCanvas() {
     const bounds = this.calculateBounds();
     if (bounds) {
+      // console.log(bounds);
       const vw = this.fabricCanvas.getWidth();
       const vh = this.fabricCanvas.getHeight();
       const vr = vw / vh;
@@ -259,16 +260,23 @@ export class CanvasComponent implements OnInit, OnDestroy {
       const by = bounds.top;
       const br = bw / bh;
 
-      // Translate to center
+      // Calculate translation to center
       const dx = vw / 2 - bx - bw / 2;
       const dy = vh / 2 - by - bh / 2;
-      // this.translate(dx, dy);
 
-      // Scale to fit bounds
+      // Calculate scale to fit bounds
       const s = vr < br ? vw / bw : vh / bh;
-      // this.fabricCanvas.setZoom(s * 0.95);
 
-      this.fabricCanvas.zoomToPoint({ x: dx, y: dy }, s);
+      // Apply transform
+      this.fabricCanvas.setZoom(1);
+      this.fabricCanvas.absolutePan(new fabric.Point(-dx, -dy));
+      this.fabricCanvas.zoomToPoint(
+        {
+          x: this.fabricCanvas.getWidth() / 2,
+          y: this.fabricCanvas.getHeight() / 2
+        },
+        s * 0.98
+      );
     }
   }
 
@@ -632,7 +640,9 @@ export class CanvasComponent implements OnInit, OnDestroy {
     if (this.isSpacePressed) {
       const delta = event.wheelDelta
         ? event.wheelDelta / 40
-        : event.detail ? -event.detail : 0;
+        : event.detail
+          ? -event.detail
+          : 0;
       const originX = event.offsetX || event.pageX - this.domCanvas.offsetLeft;
       const originY = event.offsetY || event.pageY - this.domCanvas.offsetTop;
 
@@ -720,7 +730,8 @@ export class CanvasComponent implements OnInit, OnDestroy {
     const yCoords = [];
 
     this.fabricCanvas.forEachObject((object: any) => {
-      const c = object.oCoords;
+      const c = object.aCoords;
+      // console.log(object);
       xCoords.push(c.tl.x);
       xCoords.push(c.tr.x);
       xCoords.push(c.br.x);
