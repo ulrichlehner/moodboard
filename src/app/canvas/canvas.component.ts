@@ -248,8 +248,8 @@ export class CanvasComponent implements OnInit, OnDestroy {
 
   viewAllObjectsOnCanvas() {
     const bounds = this.calculateBounds();
+    const padding = 10;
     if (bounds) {
-      // console.log(bounds);
       const vw = this.fabricCanvas.getWidth();
       const vh = this.fabricCanvas.getHeight();
       const vr = vw / vh;
@@ -265,7 +265,10 @@ export class CanvasComponent implements OnInit, OnDestroy {
       const dy = vh / 2 - by - bh / 2;
 
       // Calculate scale to fit bounds
-      const s = vr < br ? vw / bw : vh / bh;
+      const s =
+        vr < br
+          ? vw / bw * (1 - 2 * padding / vw)
+          : vh / bh * (1 - 2 * padding / vh);
 
       // Apply transform
       this.fabricCanvas.setZoom(1);
@@ -275,7 +278,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
           x: this.fabricCanvas.getWidth() / 2,
           y: this.fabricCanvas.getHeight() / 2
         },
-        s * 0.98
+        s
       );
     }
   }
