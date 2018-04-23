@@ -99,7 +99,7 @@ export class SpaceListComponent implements OnInit, OnDestroy {
   openDeleteConfirmationDialog(content, space: Space) {
     this.dropdownSpaces.autoClose = false;
     this.spaceToBeDeleted = space;
-    this.modalService.open(content).result.then(
+    this.modalService.open(content, { centered: true }).result.then(
       result => {
         this.dropdownSpaces.autoClose = 'outside';
         // console.log('closed');
