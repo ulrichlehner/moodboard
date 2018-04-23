@@ -734,7 +734,6 @@ export class CanvasComponent implements OnInit, OnDestroy {
 
     this.fabricCanvas.forEachObject((object: any) => {
       const c = object.aCoords;
-      // console.log(object);
       xCoords.push(c.tl.x);
       xCoords.push(c.tr.x);
       xCoords.push(c.br.x);
