@@ -10,9 +10,9 @@
         <button class="dropdown-item" [class.active]="space.id === activeSpace.id" (click)="activateSpace(space)">
           {{ space.name }}</button>
         <div class="actions">
-          <button class="btn btn-link" aria-label="Edit space">
+          <!-- <button class="btn btn-link" aria-label="Edit space">
             <fa-icon [icon]="['far', 'edit']" [fixedWidth]="true"></fa-icon>
-          </button>
+          </button> -->
           <button class="btn btn-link" (click)="$event.stopPropagation(); openDeleteConfirmationDialog(modalDeleteConfirmation, space);"
             [disabled]="spaces.length <= 1" aria-label="Delete space">
             <fa-icon [icon]="['far', 'trash-alt']" [fixedWidth]="true"></fa-icon>
