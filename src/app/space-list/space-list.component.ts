@@ -70,16 +70,21 @@ export class SpaceListComponent implements OnInit, OnDestroy {
   }
 
   addSpace(name?: string) {
+    const date = new Date();
     const space: Space = {
       id: DataService.generateSpaceId(),
       name: name
         ? name
-        : `Inspirespace${
-            this.spaces.length > 0 ? ' ' + (this.spaces.length + 1) : ''
-          }`,
+        : `Inspirespace (${date.toLocaleString([], {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          })})`,
       viewportTransform: [1, 0, 0, 1, 0, 0],
-      createDate: new Date(),
-      updateDate: new Date()
+      createDate: date,
+      updateDate: date
     };
     this.store.dispatch(new spaceActions.Create(space));
 
