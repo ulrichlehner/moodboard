@@ -9,6 +9,7 @@ import {
   // selectActiveArtifact,
   selectAllArtifacts
 } from '../store/reducers/artifact.reducer';
+import { DomSanitizer } from '@angular/platform-browser';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -27,7 +28,8 @@ export class ArtifactListComponent implements OnInit {
 
   constructor(
     private store: Store<ArtifactState>,
-    private dataService: DataService
+    private dataService: DataService,
+    private sanitizer: DomSanitizer
   ) {}
 
   ngOnInit() {
@@ -43,5 +45,9 @@ export class ArtifactListComponent implements OnInit {
     this.activeArtifact = artifact;
     // this.store.dispatch(new artifactActions.Select(artifact.id));
     // console.log(`Artifact selected: ${artifact.name}`);
+  }
+
+  dataUrl(file: File) {
+    return this.sanitizer.bypassSecurityTrustUrl(URL.createObjectURL(file));
   }
 }

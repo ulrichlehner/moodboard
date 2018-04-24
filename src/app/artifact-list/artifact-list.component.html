@@ -1,13 +1,24 @@
-<h2>Artifacts</h2>
-<ul>
-  <li *ngFor="let artifact of artifacts$ | async" (click)="selectArtifact(artifact)" [class.selected]="artifact === activeArtifact">
-    <h3>{{ artifact.name }}</h3>
-  </li>
-</ul>
-<div *ngIf="activeArtifact">
-  <strong>Selected: </strong>{{ activeArtifact.name }}
-</div>
-<!-- <app-artifact-detail [artifact]="activeArtifact"></app-artifact-detail> -->
-<app-artifact-detail></app-artifact-detail>
+<div class="container">
+  <div class="row">
+    <h1>Artifacts</h1>
+    <ul class="list-unstyled">
+      <li *ngFor="let artifact of artifacts$ | async" (click)="selectArtifact(artifact)" [class.selected]="artifact === activeArtifact"
+        class="media">
+        <img class="mr-3" [src]="dataUrl(artifact._attachments[artifact.id+'.webp'].data)" alt="" style="width: 60px; height: 60px; object-fit: contain">
+        <div class="media-body">
+          <h2 class="h5 mt-0 mb-1">{{ artifact.name }}</h2>
+          <p>
+            <strong>Space:</strong> {{ artifact.spaceId }}</p>
+        </div>
+      </li>
+    </ul>
+    <div *ngIf="activeArtifact">
+      <strong>Selected: </strong>{{ activeArtifact.name }}
+    </div>
 
-<app-space-list></app-space-list>
+    <!-- <app-artifact-detail [artifact]="activeArtifact"></app-artifact-detail> -->
+    <app-artifact-detail></app-artifact-detail>
+
+    <app-space-list></app-space-list>
+  </div>
+</div>
