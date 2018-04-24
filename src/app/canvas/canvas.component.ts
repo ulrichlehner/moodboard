@@ -304,9 +304,8 @@ export class CanvasComponent implements OnInit, OnDestroy {
   }
 
   removeAllCanvasObjects() {
-    this.fabricCanvas.forEachObject((canvasObject: any) => {
-      this.fabricCanvas.remove(canvasObject);
-    });
+    this.fabricCanvas.discardActiveObject();
+    this.fabricCanvas._objects = [];
   }
 
   syncCanvas(artifacts: Artifact[]) {
