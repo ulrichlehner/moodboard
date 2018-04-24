@@ -335,12 +335,13 @@ export class CanvasComponent implements OnInit, OnDestroy {
         }
       });
     }
+    this.fabricCanvas.renderAll();
   }
   //#endregion
 
   //#region Data manipulation
 
-  deleteArtifact() {
+  deleteSelectedArtifacts() {
     if (this.fabricCanvas.getActiveObjects()) {
       this.fabricCanvas
         .getActiveObjects()
@@ -592,17 +593,17 @@ export class CanvasComponent implements OnInit, OnDestroy {
           this.setCanvasObjectsSelectable(false);
           break;
         case 88: // 'x'
-          this.deleteArtifact();
+          this.deleteSelectedArtifacts();
           break;
         case 8: // BACKSPACE
           if (this.fabricCanvas.isDrawingMode) {
             // this.undoDrawing();
           } else {
-            this.deleteArtifact();
+            this.deleteSelectedArtifacts();
           }
           break;
         case 46: // DELETE
-          this.deleteArtifact();
+          this.deleteSelectedArtifacts();
           break;
         case 38: // UP ARROW
           this.sendObject('forward');
@@ -616,23 +617,23 @@ export class CanvasComponent implements OnInit, OnDestroy {
         case 34: // PAGE DOWN
           this.sendObject('back');
           break;
-        case 13: // ENTER
-          if (this.fabricCanvas.isDrawingMode) {
-            // disableDrawing();
-            // saveDrawing();
-          }
-          break;
-        case 27: // ESCAPE
-          if (this.fabricCanvas.isDrawingMode) {
-            // cancelDrawing();
-            // disableDrawing();
-          }
-          break;
-        case 68: // 'D'
-          if (!this.fabricCanvas.isDrawingMode) {
-            // enableDrawing();
-          }
-          break;
+        // case 13: // ENTER
+        //   if (this.fabricCanvas.isDrawingMode) {
+        //     // disableDrawing();
+        //     // saveDrawing();
+        //   }
+        //   break;
+        // case 27: // ESCAPE
+        //   if (this.fabricCanvas.isDrawingMode) {
+        //     // cancelDrawing();
+        //     // disableDrawing();
+        //   }
+        //   break;
+        // case 68: // 'D'
+        //   if (!this.fabricCanvas.isDrawingMode) {
+        //     // enableDrawing();
+        //   }
+        //   break;
       }
     }
   }
