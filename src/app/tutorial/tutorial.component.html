@@ -1,6 +1,7 @@
-<button class="btn btn-link btn-sm text-muted" (click)="$event.stopPropagation(); openTutoroalDialog(modalTutorial);">
+<button class="btn btn-link btn-sm text-light" (click)="$event.stopPropagation(); openTutoroalDialog(modalTutorial);">
   <fa-icon [icon]="['far', 'question-circle']"></fa-icon> Help
 </button>
+<small class="text-muted">To get started just drag some images inside</small>
 <ng-template #modalTutorial let-c="close" let-d="dismiss">
   <div class="modal-header">
     <header class="modal-title h2">Welcome to Inspirespace - your zoomable moodboard!</header>
