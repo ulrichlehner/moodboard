@@ -1,12 +1,12 @@
 <div *ngIf="activeSpace" class="toolbar position-fixed d-flex" style="right: 10px; top: 10px; z-index: 10">
   <button class="view-all btn btn-outline-light btn-sm" (click)="viewAllObjectsOnCanvas()">
-    <fa-icon [icon]="['fas', 'compress']" [fixedWidth]="true"></fa-icon>
+    <fa-icon [icon]="['fas', 'compress']" [fixedWidth]="true"></fa-icon> View All
   </button>
   <a class="download-space btn btn-outline-light btn-sm" href="#" role="button" download="{{activeSpace.name}}.jpg" onclick="this.setAttribute('href', document.getElementById('canvas').toDataURL('image/jpeg'))">
-    <fa-icon [icon]="['fas', 'camera']" [fixedWidth]="true"></fa-icon>
+    <fa-icon [icon]="['fas', 'camera']" [fixedWidth]="true"></fa-icon> Download Screenshot
   </a>
   <label class="add-files btn btn-outline-light btn-sm">
-    <fa-icon [icon]="['fas', 'plus']" [fixedWidth]="true"></fa-icon>
+    <fa-icon [icon]="['fas', 'plus']" [fixedWidth]="true"></fa-icon> Upload
     <input type="file" multiple (change)="uploadFile($event)" aria-label="Upload images">
   </label>
 </div>
