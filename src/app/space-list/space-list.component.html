@@ -28,7 +28,11 @@
 </div>
 
 <ng-template #blank>
-  <button class="btn btn-primary btn-sm" (click)="addSpace('My first Inspirespace')">Start new Space</button>
+  <div class="text-center">
+    <h1 class="display-4 text-light mb-5">Welcome to Inspirespace</h1>
+    <button class="btn btn-primary btn-lg" (click)="addSpace('My first Inspirespace')">Start new Space</button>
+  </div>
+
 </ng-template>
 
 <ng-template #modalDeleteConfirmation let-c="close" let-d="dismiss">
