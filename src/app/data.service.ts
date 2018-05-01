@@ -118,7 +118,12 @@ export class DataService {
       })
     ).pipe(
       map((docs: IPouchDBAllDocsResult) => {
-        return docs.rows.map(row => row.doc);
+        return docs.rows
+          .sort(
+            (a, b) =>
+              Date.parse(a.doc.createDate) - Date.parse(b.doc.createDate)
+          )
+          .map(row => row.doc);
       })
     );
   }
