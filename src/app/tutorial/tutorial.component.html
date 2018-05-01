@@ -1,0 +1,39 @@
+<button class="btn btn-link btn-sm text-muted" (click)="$event.stopPropagation(); openTutoroalDialog(modalTutorial);">
+  <fa-icon [icon]="['far', 'question-circle']"></fa-icon> Help
+</button>
+<ng-template #modalTutorial let-c="close" let-d="dismiss">
+  <div class="modal-header">
+    <header class="modal-title h2">Welcome to Inspirespace - your zoomable moodboard!</header>
+    <button type="button" class="close" aria-label="Close" (click)="$event.stopPropagation(); d();">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    <p class="lead">With this app you can craft beautiful moodboads and freely zoom in and out on the canvas. Your moodboard is stored on
+      your computer - no login required!</p>
+    <h3 class="h5">Usage</h3>
+    <ul>
+      <li>You can
+        <kbd>drag & drop</kbd> images onto the canvas or use the
+        <kbd>Upload</kbd> button
+        <strong>to add images</strong>.</li>
+      <li>Select one or more images by making a selection on the canvas and
+        <strong>use the handles to transform images</strong>.</li>
+      <li>To
+        <strong>delete</strong> selected images simply press
+        <kbd>Delete</kbd> or
+        <kbd>Backspace</kbd> on your keyboard.</li>
+      <li>You can
+        <strong>pan the canvas</strong> by holding
+        <kbd>Space&nbsp;+&nbsp;move</kbd> with the mouse. You
+        <strong>zoom in and out</strong> by holding
+        <kbd>Space&nbsp;+&nbsp;scroll</kbd> with the mouse.</li>
+    </ul>
+    <div class="alert alert-warning m-0" role="alert">
+      Please note that the app is in beta - expect that things change and can get lost from time to time!
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-primary" (click)="$event.stopPropagation(); d();">Done</button>
+  </div>
+</ng-template>

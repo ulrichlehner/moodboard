@@ -12,6 +12,7 @@
 </div>
 <!-- <progress max="100" [value]="saveProgress" *ngIf="saveProgress > 0"></progress> -->
 <app-space-list class="position-fixed" appearance="light" style="left: 10px; top: 10px; z-index: 10"></app-space-list>
+<app-tutorial *ngIf="activeSpace" class="position-fixed" style="left: 0; bottom: 0; z-index: 10"></app-tutorial>
 <div id="canvas-wrapper" class="canvas-wrapper" (mousewheel)="mouseWheel($event)" (mousedown)="mouseDown($event)" (mousemove)="mouseMove($event)"
   (mouseup)="mouseUp($event)" (dragover)="dragOver()" (dragleave)="dragEnd()" (dragend)="dragEnd()" (drop)="drop($event)" [class.dragover]="isDragOver">
   <canvas id="canvas" class="canvas"></canvas>

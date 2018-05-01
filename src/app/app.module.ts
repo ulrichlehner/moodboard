@@ -3,7 +3,11 @@ import { FormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { library } from '@fortawesome/fontawesome-svg-core';
-import { faEdit, faTrashAlt } from '@fortawesome/free-regular-svg-icons';
+import {
+  faEdit,
+  faTrashAlt,
+  faQuestionCircle
+} from '@fortawesome/free-regular-svg-icons';
 import {
   faCamera,
   faCompress,
@@ -26,9 +30,10 @@ import { SpaceListComponent } from './space-list/space-list.component'; // Angul
 import { ArtifactEffects } from './store/effects/artifact.effects';
 import { SpaceEffects } from './store/effects/space.effects';
 import { reducers } from './store/reducers';
+import { TutorialComponent } from './tutorial/tutorial.component';
 
 // Add an icon to the library for convenient access in other components
-library.add(faTrashAlt, faEdit, faPlus, faCompress, faCamera);
+library.add(faTrashAlt, faEdit, faPlus, faCompress, faCamera, faQuestionCircle);
 
 @NgModule({
   declarations: [
@@ -37,7 +42,8 @@ library.add(faTrashAlt, faEdit, faPlus, faCompress, faCamera);
     ArtifactDetailComponent,
     MessagesComponent,
     SpaceListComponent,
-    CanvasComponent
+    CanvasComponent,
+    TutorialComponent
   ],
   imports: [
     NgbModule.forRoot(),
