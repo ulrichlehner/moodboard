@@ -1,8 +1,7 @@
-import { CanvasComponent } from './canvas/canvas.component';
+import { CanvasComponent } from '@components/canvas/canvas.component';
+import { ArtifactListComponent } from '@components/artifact-list/artifact-list.component';
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-
-import { ArtifactListComponent } from './artifact-list/artifact-list.component';
 
 const routes: Routes = [
   { path: '', redirectTo: '/canvas', pathMatch: 'full' },
@@ -11,7 +10,7 @@ const routes: Routes = [
 ];
 
 @NgModule({
-  imports: [ RouterModule.forRoot(routes) ],
-  exports: [ RouterModule ]
+  imports: [RouterModule.forRoot(routes)],
+  exports: [RouterModule]
 })
-export class AppRoutingModule { }
+export class AppRoutingModule {}

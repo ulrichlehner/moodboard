@@ -2,21 +2,21 @@ import {
   ChangeDetectionStrategy,
   Component,
   Input,
+  OnDestroy,
   OnInit,
-  ViewChild,
-  OnDestroy
+  ViewChild
 } from '@angular/core';
+import { DataService } from '@app/data.service';
+import { Space } from '@models/space';
 import { NgbDropdown, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { Store } from '@ngrx/store';
-import { Observable ,  timer ,  Subscription } from 'rxjs';
-import { DataService } from '../data.service';
-import { Space } from '../models/space';
-import * as spaceActions from '../store/actions/space.actions';
+import * as spaceActions from '@store/actions/space.actions';
 import {
   SpaceState,
   selectActiveSpace,
   selectAllSpaces
-} from '../store/reducers/space.reducer';
+} from '@store/reducers/space.reducer';
+import { Observable, Subscription } from 'rxjs';
 
 export enum Appearance {
   Light = 'light',

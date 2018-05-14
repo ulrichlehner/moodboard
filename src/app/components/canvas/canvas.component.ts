@@ -1,25 +1,15 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  HostListener,
-  OnDestroy,
-  OnInit
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, HostListener, OnDestroy, OnInit } from '@angular/core';
+import { DataService } from '@app/data.service';
+import { Artifact } from '@models/artifact';
+import { Space } from '@models/space';
 import { Store } from '@ngrx/store';
+import * as artifactActions from '@store/actions/artifact.actions';
+import * as spaceActions from '@store/actions/space.actions';
+import { ArtifactState, selectAllArtifacts } from '@store/reducers/artifact.reducer';
+import { selectActiveSpace, selectAllSpaces } from '@store/reducers/space.reducer';
 import 'fabric';
-import { Observable ,  Subscription ,  fromEvent } from 'rxjs';
+import { Observable, Subscription, fromEvent } from 'rxjs';
 import { debounceTime, skip, take } from 'rxjs/operators';
-import * as artifactActions from '../store/actions/artifact.actions';
-import * as spaceActions from '../store/actions/space.actions';
-import {
-  ArtifactState,
-  selectAllArtifacts
-} from '../store/reducers/artifact.reducer';
-import { selectAllSpaces } from '../store/reducers/space.reducer';
-import { Artifact } from './../models/artifact';
-import { Space } from './../models/space';
-import { selectActiveSpace } from './../store/reducers/space.reducer';
-import { DataService } from '../data.service';
 
 declare const fabric: any;
 

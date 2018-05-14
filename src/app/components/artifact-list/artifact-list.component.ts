@@ -1,14 +1,14 @@
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
-import { DataService } from '../data.service';
-import { Artifact } from '../models/artifact';
-import * as artifactActions from '../store/actions/artifact.actions';
+import { DataService } from '@app/data.service';
+import { Artifact } from '@models/artifact';
+import * as artifactActions from '@store/actions/artifact.actions';
 import {
   ArtifactState,
   // selectActiveArtifact,
   selectAllArtifacts
-} from '../store/reducers/artifact.reducer';
+} from '@store/reducers/artifact.reducer';
 import { DomSanitizer } from '@angular/platform-browser';
 
 @Component({
