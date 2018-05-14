@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 import { DataService } from '../data.service';
 import { Artifact } from '../models/artifact';
 import * as artifactActions from '../store/actions/artifact.actions';

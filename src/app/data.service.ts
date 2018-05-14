@@ -1,8 +1,6 @@
 import { Injectable } from '@angular/core';
 import PouchDB from 'pouchdb';
-import { Observable } from 'rxjs/Observable';
-import { fromPromise } from 'rxjs/observable/fromPromise';
-import { of } from 'rxjs/observable/of';
+import { Observable ,  from as fromPromise ,  of } from 'rxjs';
 import { catchError, concatAll, concatMap, map, reduce } from 'rxjs/operators';
 import * as UUID from 'uuidjs';
 import { MessageService } from './message.service';

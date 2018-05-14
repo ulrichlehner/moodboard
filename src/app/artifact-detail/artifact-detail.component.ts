@@ -9,7 +9,7 @@ import * as ArtifactActions from '../store/actions/artifact.actions';
 
 import { Artifact } from '../models/artifact';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 // import { selectActiveArtifact } from '../store/reducers/artifact.reducer';
 
 @Component({

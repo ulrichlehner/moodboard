@@ -8,7 +8,7 @@ import {
 } from '@angular/core';
 import { NgbDropdown, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Observable';
+import { Observable ,  timer ,  Subscription } from 'rxjs';
 import { DataService } from '../data.service';
 import { Space } from '../models/space';
 import * as spaceActions from '../store/actions/space.actions';
@@ -17,8 +17,6 @@ import {
   selectActiveSpace,
   selectAllSpaces
 } from '../store/reducers/space.reducer';
-import { timer } from 'rxjs/observable/timer';
-import { Subscription } from 'rxjs/Subscription';
 
 export enum Appearance {
   Light = 'light',

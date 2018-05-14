@@ -7,9 +7,7 @@ import {
 } from '@angular/core';
 import { Store } from '@ngrx/store';
 import 'fabric';
-import { Observable } from 'rxjs/Observable';
-import { Subscription } from 'rxjs/Subscription';
-import { fromEvent } from 'rxjs/observable/fromEvent';
+import { Observable ,  Subscription ,  fromEvent } from 'rxjs';
 import { debounceTime, skip, take } from 'rxjs/operators';
 import * as artifactActions from '../store/actions/artifact.actions';
 import * as spaceActions from '../store/actions/space.actions';

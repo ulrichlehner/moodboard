@@ -1,12 +1,11 @@
 import { Action } from '@ngrx/store';
-import { Observable } from 'rxjs/Observable';
+import { Observable ,  of } from 'rxjs';
 import { DataService } from './../../data.service';
 import { Artifact } from './../../models/artifact';
 import { Injectable } from '@angular/core';
 import { Effect, Actions, ofType } from '@ngrx/effects';
 import * as artifactActions from '../actions/artifact.actions';
 import { catchError, map, mergeMap, switchMap } from 'rxjs/operators';
-import { of } from 'rxjs/observable/of';
 
 @Injectable()
 export class ArtifactEffects {
