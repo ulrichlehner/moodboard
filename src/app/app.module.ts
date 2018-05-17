@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
 import { ArtifactDetailComponent } from '@components/artifact-detail/artifact-detail.component';
 import { ArtifactListComponent } from '@components/artifact-list/artifact-list.component';
@@ -31,6 +31,7 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { DataService } from './data.service';
 import { MessageService } from './message.service';
+import { SpaceDetailComponent } from './components/space-detail/space-detail.component';
 
 // Add an icon to the library for convenient access in other components
 library.add(faTrashAlt, faEdit, faPlus, faCompress, faCamera, faQuestionCircle);
@@ -43,12 +44,14 @@ library.add(faTrashAlt, faEdit, faPlus, faCompress, faCamera, faQuestionCircle);
     MessagesComponent,
     SpaceListComponent,
     CanvasComponent,
-    TutorialComponent
+    TutorialComponent,
+    SpaceDetailComponent
   ],
   imports: [
     NgbModule.forRoot(),
     BrowserModule,
     FormsModule,
+    ReactiveFormsModule,
     AppRoutingModule,
     StoreModule.forRoot(reducers),
     EffectsModule.forRoot([SpaceEffects, ArtifactEffects]),

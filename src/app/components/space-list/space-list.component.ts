@@ -38,7 +38,7 @@ export class SpaceListComponent implements OnInit, OnDestroy {
 
   spaces$: Observable<Space[]>;
   activeSpace$: Observable<Space>;
-  spaceToBeDeleted: Space;
+  spaceInModel: Space;
 
   spacesSubcription: Subscription;
   spaces: Space[];
@@ -101,7 +101,22 @@ export class SpaceListComponent implements OnInit, OnDestroy {
 
   openDeleteConfirmationDialog(content, space: Space) {
     this.dropdownSpaces.autoClose = false;
-    this.spaceToBeDeleted = space;
+    this.spaceInModel = space;
+    this.modalService.open(content, { centered: true }).result.then(
+      result => {
+        this.dropdownSpaces.autoClose = 'outside';
+        // console.log('closed');
+      },
+      reason => {
+        this.dropdownSpaces.autoClose = 'outside';
+        // console.log('dismissed');
+      }
+    );
+  }
+
+  openEditDialog(content, space: Space) {
+    this.dropdownSpaces.autoClose = false;
+    this.spaceInModel = space;
     this.modalService.open(content, { centered: true }).result.then(
       result => {
         this.dropdownSpaces.autoClose = 'outside';

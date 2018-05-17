@@ -10,9 +10,9 @@
         <button class="dropdown-item" [class.active]="space.id === activeSpace.id" (click)="activateSpace(space)">
           {{ space.name }}</button>
         <div class="actions">
-          <!-- <button class="btn btn-link" aria-label="Edit space">
+          <button class="btn btn-link" (click)="$event.stopPropagation(); openEditDialog(modalEdit, space); " aria-label="Edit space">
             <fa-icon [icon]="['far', 'edit']" [fixedWidth]="true"></fa-icon>
-          </button> -->
+          </button>
           <button class="btn btn-link" (click)="$event.stopPropagation(); openDeleteConfirmationDialog(modalDeleteConfirmation, space);"
             [disabled]="spaces.length <= 1" aria-label="Delete space">
             <fa-icon [icon]="['far', 'trash-alt']" [fixedWidth]="true"></fa-icon>
@@ -52,12 +52,27 @@
     </ul>
     <button class="btn btn-primary btn-lg" (click)="addSpace('My first Inspirespace')">Start a Space</button>
   </div>
+</ng-template>
 
+<ng-template #modalEdit let-c="close" let-d="dismiss">
+  <div class="modal-header">
+    <header class="modal-title h5">Edit {{ spaceInModel.name }}</header>
+    <button type="button" class="close" aria-label="Close" (click)="$event.stopPropagation(); d();">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    <app-space-detail #spaceDetail [space]="spaceInModel"></app-space-detail>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="$event.stopPropagation(); c();">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)="$event.stopPropagation(); spaceDetail.saveSpace(); d();">Save</button>
+  </div>
 </ng-template>
 
 <ng-template #modalDeleteConfirmation let-c="close" let-d="dismiss">
   <div class="modal-header">
-    <header class="modal-title h5">Delete {{ spaceToBeDeleted.name }}</header>
+    <header class="modal-title h5">Delete {{ spaceInModel.name }}</header>
     <button type="button" class="close" aria-label="Close" (click)="$event.stopPropagation(); d();">
       <span aria-hidden="true">&times;</span>
     </button>
@@ -67,6 +82,6 @@
   </div>
   <div class="modal-footer">
     <button type="button" class="btn btn-secondary" (click)="$event.stopPropagation(); c();">Cancel</button>
-    <button type="button" class="btn btn-danger" (click)="$event.stopPropagation(); deleteSpace(spaceToBeDeleted); d();">Delete</button>
+    <button type="button" class="btn btn-danger" (click)="$event.stopPropagation(); deleteSpace(spaceInModel); d();">Delete</button>
   </div>
 </ng-template>

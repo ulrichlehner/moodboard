@@ -1,12 +1,24 @@
-import { ChangeDetectionStrategy, Component, HostListener, OnDestroy, OnInit } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  HostListener,
+  OnDestroy,
+  OnInit
+} from '@angular/core';
 import { DataService } from '@app/data.service';
 import { Artifact } from '@models/artifact';
 import { Space } from '@models/space';
 import { Store } from '@ngrx/store';
 import * as artifactActions from '@store/actions/artifact.actions';
 import * as spaceActions from '@store/actions/space.actions';
-import { ArtifactState, selectAllArtifacts } from '@store/reducers/artifact.reducer';
-import { selectActiveSpace, selectAllSpaces } from '@store/reducers/space.reducer';
+import {
+  ArtifactState,
+  selectAllArtifacts
+} from '@store/reducers/artifact.reducer';
+import {
+  selectActiveSpace,
+  selectAllSpaces
+} from '@store/reducers/space.reducer';
 import 'fabric';
 import { Observable, Subscription, fromEvent } from 'rxjs';
 import { debounceTime, skip, take } from 'rxjs/operators';
@@ -566,11 +578,10 @@ export class CanvasComponent implements OnInit, OnDestroy {
 
   @HostListener('window:keydown', ['$event'])
   onKeyDown(event) {
-    // prevent browser shortcuts to interfer with app
-    event.preventDefault();
-
     // Key-combos
     if (event.key === 'a' && (event.ctrlKey || event.metaKey)) {
+      // prevent browser shortcuts to interfer with app
+      event.preventDefault();
       this.selectAllCanvasObjects();
     } else if (event.key === 'd' && (event.ctrlKey || event.metaKey)) {
       this.unselectAllCanvasObjects();
