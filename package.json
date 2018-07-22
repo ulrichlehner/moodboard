@@ -9,7 +9,8 @@
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e",
-    "postinstall": "node patch.js"
+    "postinstall": "node patch.js",
+    "deploy": "npm run build && git-directory-deploy --directory dist/"
   },
   "private": true,
   "dependencies": {
@@ -22,10 +23,10 @@
     "@angular/platform-browser": "6.0.3",
     "@angular/platform-browser-dynamic": "6.0.3",
     "@angular/router": "6.0.3",
-    "@fortawesome/angular-fontawesome": "prerelease",
-    "@fortawesome/fontawesome-svg-core": "prerelease",
-    "@fortawesome/free-solid-svg-icons": "prerelease",
-    "@fortawesome/free-regular-svg-icons": "prerelease",
+    "@fortawesome/angular-fontawesome": "^0.1.1",
+    "@fortawesome/fontawesome-svg-core": "^1.2.1",
+    "@fortawesome/free-regular-svg-icons": "^5.1.1",
+    "@fortawesome/free-solid-svg-icons": "^5.1.1",
     "@ng-bootstrap/ng-bootstrap": "^2.0.0",
     "@ngrx/effects": "^6.0.1",
     "@ngrx/entity": "^6.0.1",
@@ -48,6 +49,7 @@
     "@types/jasminewd2": "~2.0.2",
     "@types/node": "^6.0.112",
     "codelyzer": "^4.3.0",
+    "git-directory-deploy": "^1.5.1",
     "jasmine-core": "~2.8.0",
     "jasmine-spec-reporter": "~4.2.1",
     "karma": "^2.0.2",
