@@ -11,7 +11,7 @@ export class TutorialComponent implements OnInit {
 
   ngOnInit() {}
 
-  openTutoroalDialog(content) {
+  openTutorialDialog(content) {
     this.modalService.open(content, { centered: true, size: 'lg' });
   }
 }

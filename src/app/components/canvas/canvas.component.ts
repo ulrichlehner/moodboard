@@ -42,7 +42,8 @@ export class CanvasComponent implements OnInit, OnDestroy {
   private readonly attachmentImageMaxSide = 1600;
   private readonly attachmentImageInitialPositionOffsetY = 40;
 
-  private readonly canvasBackgroundImage = '/assets/img/background-pattern/background-pattern-14.png';
+  private readonly canvasBackgroundImage =
+    '/assets/img/background-pattern/background-pattern-14.png';
   private readonly canvasMinZoom = 0.05;
 
   private readonly acceptedMimeTypes = {
@@ -94,57 +95,57 @@ export class CanvasComponent implements OnInit, OnDestroy {
 
   // Based on http://stackoverflow.com/questions/4770025/how-to-disable-scrolling-
 
-  static preventDefault(e) {
-    e = e || window.event;
-    if (e.preventDefault) {
-      e.preventDefault();
-    }
-    e.returnValue = false;
-  }
+  // static preventDefault(e) {
+  //   e = e || window.event;
+  //   if (e.preventDefault) {
+  //     e.preventDefault();
+  //   }
+  //   e.returnValue = false;
+  // }
 
-  static preventDefaultForScrollKeys(e) {
-    if (CanvasComponent.keys[e.keyCode]) {
-      CanvasComponent.preventDefault(e);
-      return false;
-    }
-  }
+  // static preventDefaultForScrollKeys(e) {
+  //   if (CanvasComponent.keys[e.keyCode]) {
+  //     CanvasComponent.preventDefault(e);
+  //     return false;
+  //   }
+  // }
 
-  static disableScroll() {
-    if (window.addEventListener) {
-      // older FF
-      window.addEventListener(
-        'DOMMouseScroll',
-        CanvasComponent.preventDefault,
-        false
-      );
-    }
-    window.onwheel = CanvasComponent.preventDefault; // modern standard
-    window.onmousewheel = document.onmousewheel =
-      CanvasComponent.preventDefault; // older browsers, IE
-    window.ontouchmove = CanvasComponent.preventDefault; // mobile
-    document.onkeydown = CanvasComponent.preventDefaultForScrollKeys;
-  }
+  // static disableScroll() {
+  //   if (window.addEventListener) {
+  //     // older FF
+  //     window.addEventListener(
+  //       'DOMMouseScroll',
+  //       CanvasComponent.preventDefault,
+  //       false
+  //     );
+  //   }
+  //   window.onwheel = CanvasComponent.preventDefault; // modern standard
+  //   window.onmousewheel = document.onmousewheel =
+  //     CanvasComponent.preventDefault; // older browsers, IE
+  //   window.ontouchmove = CanvasComponent.preventDefault; // mobile
+  //   document.onkeydown = CanvasComponent.preventDefaultForScrollKeys;
+  // }
 
-  static enableScroll() {
-    if (window.removeEventListener) {
-      window.removeEventListener(
-        'DOMMouseScroll',
-        CanvasComponent.preventDefault,
-        false
-      );
-    }
-    window.onmousewheel = document.onmousewheel = null;
-    window.onwheel = null;
-    window.ontouchmove = null;
-    document.onkeydown = null;
-  }
+  // static enableScroll() {
+  //   if (window.removeEventListener) {
+  //     window.removeEventListener(
+  //       'DOMMouseScroll',
+  //       CanvasComponent.preventDefault,
+  //       false
+  //     );
+  //   }
+  //   window.onmousewheel = document.onmousewheel = null;
+  //   window.onwheel = null;
+  //   window.ontouchmove = null;
+  //   document.onkeydown = null;
+  // }
   //#endregion
 
   //#region Component lifecylce event handlers
   constructor(private store: Store<ArtifactState>) {}
 
   ngOnInit() {
-    CanvasComponent.disableScroll();
+    // CanvasComponent.disableScroll();
     this.initCanvas();
 
     this.spaces$ = this.store.select(selectAllSpaces);
@@ -183,7 +184,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    CanvasComponent.enableScroll();
+    // CanvasComponent.enableScroll();
     this.artifactSubscription.unsubscribe();
     this.spaceSubscription.unsubscribe();
   }
@@ -267,8 +268,8 @@ export class CanvasComponent implements OnInit, OnDestroy {
       // Calculate scale to fit bounds
       const s =
         vr < br
-          ? vw / bw * (1 - 2 * padding / vw)
-          : vh / bh * (1 - 2 * padding / vh);
+          ? (vw / bw) * (1 - (2 * padding) / vw)
+          : (vh / bh) * (1 - (2 * padding) / vh);
 
       // Apply transform
       this.fabricCanvas.setZoom(1);
@@ -314,8 +315,8 @@ export class CanvasComponent implements OnInit, OnDestroy {
         this.removeAllCanvasObjects();
       } else {
         this.fabricCanvas.forEachObject((canvasObject: any) => {
-          const tmpObjects = artifacts.filter(
-            artifact => (canvasObject ? artifact.id === canvasObject.id : true)
+          const tmpObjects = artifacts.filter(artifact =>
+            canvasObject ? artifact.id === canvasObject.id : true
           );
 
           if (tmpObjects.length === 0) {
@@ -643,8 +644,8 @@ export class CanvasComponent implements OnInit, OnDestroy {
       const delta = event.wheelDelta
         ? event.wheelDelta / 40
         : event.detail
-          ? -event.detail
-          : 0;
+        ? -event.detail
+        : 0;
       const originX = event.offsetX || event.pageX - this.domCanvas.offsetLeft;
       const originY = event.offsetY || event.pageY - this.domCanvas.offsetTop;
 

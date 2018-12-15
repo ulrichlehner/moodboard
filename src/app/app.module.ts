@@ -32,6 +32,7 @@ import { AppComponent } from './app.component';
 import { DataService } from './data.service';
 import { MessageService } from './message.service';
 import { SpaceDetailComponent } from './components/space-detail/space-detail.component';
+import { InfoComponent } from './components/info/info.component';
 
 // Add an icon to the library for convenient access in other components
 library.add(faTrashAlt, faEdit, faPlus, faCompress, faCamera, faQuestionCircle);
@@ -45,7 +46,8 @@ library.add(faTrashAlt, faEdit, faPlus, faCompress, faCamera, faQuestionCircle);
     SpaceListComponent,
     CanvasComponent,
     TutorialComponent,
-    SpaceDetailComponent
+    SpaceDetailComponent,
+    InfoComponent
   ],
   imports: [
     NgbModule.forRoot(),
