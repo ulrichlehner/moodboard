@@ -10,7 +10,7 @@
     "lint": "ng lint",
     "e2e": "ng e2e",
     "postinstall": "node patch.js",
-    "deploy": "npm run build && git-directory-deploy --repo https://github.com/ulrichson/inspirespace.net.git --directory dist/",
+    "deploy": "npm run build && git-directory-deploy --repo https://github.com/ulrichson/inspirespace.net.git --branch stage --directory dist/",
     "favicon": "node ./tools/favicon.js"
   },
   "private": true,
