@@ -82,7 +82,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
   lastX: number;
   lastY: number;
   dragStartPosition: { x: number; y: number };
-  saveProgress = 0;
+  // saveProgress = 0;
   lastCanvasViewportTransform = [];
 
   isSpacePressed = false;

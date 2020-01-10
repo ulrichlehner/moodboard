@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
   selector: 'app-tutorial',
@@ -7,11 +6,12 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
   styleUrls: ['./tutorial.component.scss']
 })
 export class TutorialComponent implements OnInit {
-  constructor(private modalService: NgbModal) {}
+  constructor() {}
 
   ngOnInit() {}
 
   openTutorialDialog(content) {
-    this.modalService.open(content, { centered: true, size: 'lg' });
+    // TODO: implement tutorial dialog
+    // this.modalService.open(content, { centered: true, size: 'lg' });
   }
 }

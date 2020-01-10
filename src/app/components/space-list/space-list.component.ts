@@ -8,7 +8,6 @@ import {
 } from '@angular/core';
 import { DataService } from '@app/data.service';
 import { Space } from '@models/space';
-import { NgbDropdown, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { Store } from '@ngrx/store';
 import * as spaceActions from '@store/actions/space.actions';
 import {
@@ -34,7 +33,7 @@ export class SpaceListComponent implements OnInit, OnDestroy {
   // see https://stackoverflow.com/questions/37277527/how-to-use-enum-in-angular-2-templates#37277643
   Appearance = Appearance;
   @Input() appearance: Appearance = Appearance.Dark;
-  @ViewChild('dropdownSpaces', { static: false }) dropdownSpaces: NgbDropdown;
+  // @ViewChild('dropdownSpaces', { static: false }) dropdownSpaces: NgbDropdown;
 
   spaces$: Observable<Space[]>;
   activeSpace$: Observable<Space>;
@@ -43,10 +42,7 @@ export class SpaceListComponent implements OnInit, OnDestroy {
   spacesSubcription: Subscription;
   spaces: Space[];
 
-  constructor(
-    private store: Store<SpaceState>,
-    private modalService: NgbModal
-  ) {}
+  constructor(private store: Store<SpaceState>) {}
 
   ngOnInit() {
     this.spaces$ = this.store.select(selectAllSpaces);
@@ -64,7 +60,7 @@ export class SpaceListComponent implements OnInit, OnDestroy {
 
   activateSpace(space: Space) {
     this.store.dispatch(new spaceActions.Activate(space.id));
-    this.dropdownSpaces.close();
+    // this.dropdownSpaces.close();
   }
 
   addSpace(name?: string) {
@@ -86,13 +82,13 @@ export class SpaceListComponent implements OnInit, OnDestroy {
     };
     this.store.dispatch(new spaceActions.Create(space));
 
-    if (this.dropdownSpaces) {
-      // Close dropdown with small delay so a user sees that new item has been created
-      // timer(300).subscribe(done => {
-      // console.log('should close');
-      this.dropdownSpaces.close(); // Doesn't work??
-      // });
-    }
+    // if (this.dropdownSpaces) {
+    //   // Close dropdown with small delay so a user sees that new item has been created
+    //   // timer(300).subscribe(done => {
+    //   // console.log('should close');
+    //   this.dropdownSpaces.close(); // Doesn't work??
+    //   // });
+    // }
   }
 
   deleteSpace(space: Space) {
@@ -100,32 +96,32 @@ export class SpaceListComponent implements OnInit, OnDestroy {
   }
 
   openDeleteConfirmationDialog(content, space: Space) {
-    this.dropdownSpaces.autoClose = false;
     this.spaceInModel = space;
-    this.modalService.open(content, { centered: true }).result.then(
-      result => {
-        this.dropdownSpaces.autoClose = 'outside';
-        // console.log('closed');
-      },
-      reason => {
-        this.dropdownSpaces.autoClose = 'outside';
-        // console.log('dismissed');
-      }
-    );
+    // TODO: imeplement confirm dialog
+    // this.modalService.open(content, { centered: true }).result.then(
+    //   result => {
+    //     this.dropdownSpaces.autoClose = 'outside';
+    //     // console.log('closed');
+    //   },
+    //   reason => {
+    //     this.dropdownSpaces.autoClose = 'outside';
+    //     // console.log('dismissed');
+    //   }
+    // );
   }
 
   openEditDialog(content, space: Space) {
-    this.dropdownSpaces.autoClose = false;
     this.spaceInModel = space;
-    this.modalService.open(content, { centered: true }).result.then(
-      result => {
-        this.dropdownSpaces.autoClose = 'outside';
-        // console.log('closed');
-      },
-      reason => {
-        this.dropdownSpaces.autoClose = 'outside';
-        // console.log('dismissed');
-      }
-    );
+    // TODO: implement edit dialog
+    // this.modalService.open(content, { centered: true }).result.then(
+    //   result => {
+    //     this.dropdownSpaces.autoClose = 'outside';
+    //     // console.log('closed');
+    //   },
+    //   reason => {
+    //     this.dropdownSpaces.autoClose = 'outside';
+    //     // console.log('dismissed');
+    //   }
+    // );
   }
 }

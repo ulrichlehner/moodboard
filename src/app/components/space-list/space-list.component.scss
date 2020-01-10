@@ -1,5 +1,7 @@
 @import '../../../scss/variables';
 
+// LEGACY
+
 $transitionTime: 0.15s;
 $transitionDelay: 0s;
 
@@ -9,7 +11,7 @@ $transitionDelay: 0s;
   }
 
   &__action {
-    padding: 0 $dropdown-item-padding-x;
+    // padding: 0 $dropdown-item-padding-x;
   }
 
   .wrapper {

@@ -15,7 +15,7 @@ import { DomSanitizer } from '@angular/platform-browser';
   changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-artifact-list',
   templateUrl: './artifact-list.component.html',
-  styleUrls: ['./artifact-list.component.css']
+  styleUrls: ['./artifact-list.component.scss']
 })
 export class ArtifactListComponent implements OnInit {
   // artifacts: Artifact[];

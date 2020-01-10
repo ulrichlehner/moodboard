@@ -12,7 +12,7 @@ import * as ArtifactActions from '@store/actions/artifact.actions';
   changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-artifact-detail',
   templateUrl: './artifact-detail.component.html',
-  styleUrls: ['./artifact-detail.component.css']
+  styleUrls: ['./artifact-detail.component.scss']
 })
 export class ArtifactDetailComponent implements OnInit {
   @Input() artifact: Artifact;

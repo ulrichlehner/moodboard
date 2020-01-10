@@ -1,94 +1,97 @@
-<button class="btn btn-link btn-sm text-light" (click)="$event.stopPropagation(); openInfoDialog(modalTutorial);">
+<button (click)="$event.stopPropagation(); openInfoDialog(modalTutorial)">
   Info
 </button>
 
 <ng-template #modalTutorial let-c="close" let-d="dismiss">
   <div class="modal-header">
     <header class="modal-title h5">Background</header>
-    <button type="button" class="close" aria-label="Close" (click)="$event.stopPropagation(); d();">
+    <button
+      type="button"
+      class="close"
+      aria-label="Close"
+      (click)="$event.stopPropagation(); d()"
+    >
       <span aria-hidden="true">&times;</span>
     </button>
   </div>
   <div class="modal-body">
     <p>
-        Thanks for using Inspirespace! It's a personal project that evolved into
-        this app. My name is Ulrich Lehner and I'm a designer and developer
-        based in Vienna. If you want to know more about me please visit
-        <a href="https://ulrichlehner.com/" target="_blank" rel="noreferrer"
-          >my online portfolio</a
+      Thanks for using Inspirespace! It's a personal project that evolved into
+      this app. My name is Ulrich Lehner and I'm a designer and developer based
+      in Vienna. If you want to know more about me please visit
+      <a href="https://ulrichlehner.com/" target="_blank" rel="noreferrer"
+        >my online portfolio</a
+      >
+      or just
+      <a href="https://lehner.photography/" target="_blank" rel="noreferrer"
+        >have a look at my photographs</a
+      >. I'm happy to share my thoughts with you why I created this app.
+    </p>
+    <p>
+      Moodboards are physical collection of pictures as means of inspiration to
+      convey a certain direction for design-driven work. It's used by visual
+      designers to arrange inspiring user interfaces on a canvas and explore the
+      look and feel of an app.
+    </p>
+    <p>
+      Beside the analog moodboards there are existing online solutions which
+      have a similar objective to collect pictures. However, current digital
+      moodboards are limited in the free arrangement of pictures. I couldn't
+      find any suitable tool that will break this barrier and therefore I
+      started to build it on my own. Over time I created Inspirespace, which
+      bridges this gap and allows the users to arrange images freely on a
+      canvas. The canvas itself can be zoomed seamlessly to refine and explore
+      areas of interests. This is another dimension that cannot be achieved by
+      the analog counterparts. You will have a continuous overview and never
+      lose orientation even when many pictures are present.
+    </p>
+    <p>
+      In the future I plan to enhance Inspirespace to bring it to the next
+      level:
+    </p>
+    <ul>
+      <li>
+        Utilize object recognition to automatically tag images with the power of
+        <a href="https://js.tensorflow.org" target="_blank" rel="noreferrer"
+          >client-side machine learning</a
         >
-        or just
-        <a href="https://lehner.photography/" target="_blank" rel="noreferrer"
-          >have a look at my photographs</a
-        >. I'm happy to share my thoughts with you why I created this app.
-      </p>
-      <p>
-        Moodboards are physical collection of pictures as means of inspiration
-        to convey a certain direction for design-driven work. It's used by
-        visual designers to arrange inspiring user interfaces on a canvas and
-        explore the look and feel of an app.
-      </p>
-      <p>
-        Beside the analog moodboards there are existing online solutions which
-        have a similar objective to collect pictures. However, current digital
-        moodboards are limited in the free arrangement of pictures. I couldn't
-        find any suitable tool that will break this barrier and therefore I
-        started to build it on my own. Over time I created Inspirespace, which
-        bridges this gap and allows the users to arrange images freely on a
-        canvas. The canvas itself can be zoomed seamlessly to refine and explore
-        areas of interests. This is another dimension that cannot be achieved by
-        the analog counterparts. You will have a continuous overview and never
-        lose orientation even when many pictures are present.
-      </p>
-      <p>
-        In the future I plan to enhance Inspirespace to bring it to the next
-        level:
-      </p>
-      <ul>
-        <li>
-          Utilize object recognition to automatically tag images with the power
-          of
-          <a href="https://js.tensorflow.org" target="_blank" rel="noreferrer"
-            >client-side machine learning</a
-          >
-        </li>
-        <li>Allow text-based search</li>
-        <li>Support for other media types, e.g. text or video</li>
-        <li>
-          Optimize it for mobile usage, e.g. touch support, progressive web apps
-          etc.
-        </li>
-        <li>Allow cross-browser syncing</li>
-        <li>
-          Enhance for other use cases, such as a collaboration tool during
-          meetings
-        </li>
-        <li>Create a mobile companion app to send images to the canvas</li>
-      </ul>
-      <p>
-        Your images are stored in your browser (using
-        <a href="https://pouchdb.com/" target="_blank" rel="noreferrer"
-          >PouchDB</a
-        >) and are not transferred to a central storage. This also means that
-        you can only use the app with one browser. In the future I consider to
-        optionally sync the data to a storage provider, such as Dropbox, where
-        only you have access to.
-      </p>
-      <p>
-        <strong>Do you have feedback?</strong> For now please
-        <a
-          href="https://github.com/ulrichson/inspirespace.net/issues"
-          target="_blank"
-          rel="noreferrer"
-          >open an issue on GitHub</a
-        >
-        or
-        <a
-          href="https://ulrichlehner.com/contact/"
-          target="_blank"
-          rel="noreferrer"
-          >contact me via my website</a
-        >.
-      </p>
+      </li>
+      <li>Allow text-based search</li>
+      <li>Support for other media types, e.g. text or video</li>
+      <li>
+        Optimize it for mobile usage, e.g. touch support, progressive web apps
+        etc.
+      </li>
+      <li>Allow cross-browser syncing</li>
+      <li>
+        Enhance for other use cases, such as a collaboration tool during
+        meetings
+      </li>
+      <li>Create a mobile companion app to send images to the canvas</li>
+    </ul>
+    <p>
+      Your images are stored in your browser (using
+      <a href="https://pouchdb.com/" target="_blank" rel="noreferrer">PouchDB</a
+      >) and are not transferred to a central storage. This also means that you
+      can only use the app with one browser. In the future I consider to
+      optionally sync the data to a storage provider, such as Dropbox, where
+      only you have access to.
+    </p>
+    <p>
+      <strong>Do you have feedback?</strong> For now please
+      <a
+        href="https://github.com/ulrichson/inspirespace.net/issues"
+        target="_blank"
+        rel="noreferrer"
+        >open an issue on GitHub</a
+      >
+      or
+      <a
+        href="https://ulrichlehner.com/contact/"
+        target="_blank"
+        rel="noreferrer"
+        >contact me via my website</a
+      >.
+    </p>
   </div>
 </ng-template>
