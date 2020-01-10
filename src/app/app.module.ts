@@ -50,7 +50,7 @@ library.add(faTrashAlt, faEdit, faPlus, faCompress, faCamera, faQuestionCircle);
     InfoComponent
   ],
   imports: [
-    NgbModule.forRoot(),
+    NgbModule,
     BrowserModule,
     FormsModule,
     ReactiveFormsModule,

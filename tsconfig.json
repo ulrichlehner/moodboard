@@ -16,6 +16,7 @@
       "@store/*": ["app/store/*"],
       "@models/*": ["app/models/*"],
       "@app/*": ["app/*"]
-    }
+    },
+    "allowSyntheticDefaultImports": true
   }
 }

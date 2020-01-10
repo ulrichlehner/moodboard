@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import PouchDB from 'pouchdb';
-import { Observable ,  from as fromPromise ,  of } from 'rxjs';
+import { Observable, from as fromPromise, of } from 'rxjs';
 import { catchError, concatAll, concatMap, map, reduce } from 'rxjs/operators';
 import * as UUID from 'uuidjs';
 import { MessageService } from './message.service';
@@ -56,7 +56,7 @@ export class DataService {
   static ARTIFACT_ID_PREFIX = 'artifact';
   readonly DB_NAME = 'inspirespace';
 
-  private db;
+  private db: any;
 
   public static generateArtifactId(spaceId: string): string {
     return `${this.ARTIFACT_ID_PREFIX}:${spaceId}:${UUID.generate()}`;
@@ -72,7 +72,9 @@ export class DataService {
 
   //#region Space
   createSpace(space: Space): Observable<Space> {
-    return fromPromise(this.db.put({ ...space, _id: space.id }));
+    return fromPromise(this.db.put({ ...space, _id: space.id })) as Observable<
+      Space
+    >;
   }
 
   deleteSpace(spaceId: string): Observable<any> {
@@ -104,7 +106,7 @@ export class DataService {
       this.db.get(spaceId).then(doc => {
         this.db.put({ ...doc, ...changes, _rev: doc._rev });
       })
-    );
+    ) as Observable<Space>;
   }
 
   getAllSpaces(): Observable<Space[]> {
@@ -127,7 +129,7 @@ export class DataService {
   }
 
   getSpace(id: string): Observable<Space> {
-    return fromPromise(this.db.get(`space:${id}`));
+    return fromPromise(this.db.get(`space:${id}`)) as Observable<Space>;
   }
   //#endregion
 
@@ -137,7 +139,7 @@ export class DataService {
       this.db.put({
         ...artifact,
         _id: artifact.id
-      })
+      }) as Observable<Artifact>
     );
   }
 
@@ -155,11 +157,11 @@ export class DataService {
       this.db
         .get(artifactId)
         .then(doc => this.db.put({ ...doc, ...changes, _rev: doc._rev }))
-    );
+    ) as Observable<Artifact>;
   }
 
   getArtifact(artifactId: string): Observable<Artifact> {
-    return fromPromise(this.db.get(artifactId));
+    return fromPromise(this.db.get(artifactId)) as Observable<Artifact>;
   }
 
   getAllArtifacts(spaceId: string): Observable<Artifact[]> {
@@ -203,7 +205,9 @@ export class DataService {
 
   //#region Generic
   getAttachment(docId: string, attachmentId): Observable<Blob> {
-    return fromPromise(this.db.getAttachment(docId, attachmentId));
+    return fromPromise(
+      this.db.getAttachment(docId, attachmentId)
+    ) as Observable<Blob>;
   }
   //#endregion
 }
