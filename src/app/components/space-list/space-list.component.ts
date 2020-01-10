@@ -34,7 +34,7 @@ export class SpaceListComponent implements OnInit, OnDestroy {
   // see https://stackoverflow.com/questions/37277527/how-to-use-enum-in-angular-2-templates#37277643
   Appearance = Appearance;
   @Input() appearance: Appearance = Appearance.Dark;
-  @ViewChild('dropdownSpaces') dropdownSpaces: NgbDropdown;
+  @ViewChild('dropdownSpaces', { static: false }) dropdownSpaces: NgbDropdown;
 
   spaces$: Observable<Space[]>;
   activeSpace$: Observable<Space>;
