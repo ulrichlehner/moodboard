@@ -39,7 +39,7 @@
     "pouchdb": "^7.1.1",
     "rxjs": "~6.5.4",
     "tslib": "^1.10.0",
-    "uuidjs": "^4.0.3",
+    "uuidjs": "^4.2.4",
     "zone.js": "~0.9.1"
   },
   "devDependencies": {
