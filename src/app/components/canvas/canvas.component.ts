@@ -141,7 +141,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
   // }
   //#endregion
 
-  //#region Component lifecylce event handlers
+  //#region Lifecycle hooks
   constructor(private store: Store<ArtifactState>) {}
 
   ngOnInit() {
@@ -560,6 +560,26 @@ export class CanvasComponent implements OnInit, OnDestroy {
   //#endregion
 
   //#region Event handlers
+  onCreateSpaceClick() {
+    const date = new Date();
+    const space: Space = {
+      id: DataService.generateSpaceId(),
+      name: name
+        ? name
+        : `Inspirespace (${date.toLocaleString([], {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          })})`,
+      viewportTransform: [1, 0, 0, 1, 0, 0],
+      createDate: date,
+      updateDate: date
+    };
+    this.store.dispatch(new spaceActions.Create(space));
+  }
+
   @HostListener('window:resize', ['$event'])
   onResize(event) {
     this.initCanvas();

@@ -4,16 +4,18 @@ import {
   Input,
   OnDestroy,
   OnInit,
-  ViewChild
+  ViewChild,
+  TemplateRef
 } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
 import { DataService } from '@app/data.service';
 import { Space } from '@models/space';
 import { Store } from '@ngrx/store';
 import * as spaceActions from '@store/actions/space.actions';
 import {
-  SpaceState,
   selectActiveSpace,
-  selectAllSpaces
+  selectAllSpaces,
+  SpaceState
 } from '@store/reducers/space.reducer';
 import { Observable, Subscription } from 'rxjs';
 
@@ -32,17 +34,25 @@ export class SpaceListComponent implements OnInit, OnDestroy {
   // Workaround to make enum accessible in template
   // see https://stackoverflow.com/questions/37277527/how-to-use-enum-in-angular-2-templates#37277643
   Appearance = Appearance;
+
   @Input() appearance: Appearance = Appearance.Dark;
-  // @ViewChild('dropdownSpaces', { static: false }) dropdownSpaces: NgbDropdown;
 
   spaces$: Observable<Space[]>;
+
+  /**
+   * The active space on the canvas
+   */
   activeSpace$: Observable<Space>;
-  spaceInModel: Space;
+
+  /**
+   * The space that is edited / deleted by a user
+   */
+  currentSpace: Space;
 
   spacesSubcription: Subscription;
   spaces: Space[];
 
-  constructor(private store: Store<SpaceState>) {}
+  constructor(private store: Store<SpaceState>, public dialog: MatDialog) {}
 
   ngOnInit() {
     this.spaces$ = this.store.select(selectAllSpaces);
@@ -58,12 +68,12 @@ export class SpaceListComponent implements OnInit, OnDestroy {
     this.spacesSubcription.unsubscribe();
   }
 
-  activateSpace(space: Space) {
+  onActivateSpaceClick(space: Space) {
     this.store.dispatch(new spaceActions.Activate(space.id));
     // this.dropdownSpaces.close();
   }
 
-  addSpace(name?: string) {
+  onCreateSpaceClick(name?: string) {
     const date = new Date();
     const space: Space = {
       id: DataService.generateSpaceId(),
@@ -81,47 +91,14 @@ export class SpaceListComponent implements OnInit, OnDestroy {
       updateDate: date
     };
     this.store.dispatch(new spaceActions.Create(space));
-
-    // if (this.dropdownSpaces) {
-    //   // Close dropdown with small delay so a user sees that new item has been created
-    //   // timer(300).subscribe(done => {
-    //   // console.log('should close');
-    //   this.dropdownSpaces.close(); // Doesn't work??
-    //   // });
-    // }
   }
 
-  deleteSpace(space: Space) {
+  onDeleteSpaceClick(space: Space) {
     this.store.dispatch(new spaceActions.Delete(space.id));
   }
 
-  openDeleteConfirmationDialog(content, space: Space) {
-    this.spaceInModel = space;
-    // TODO: imeplement confirm dialog
-    // this.modalService.open(content, { centered: true }).result.then(
-    //   result => {
-    //     this.dropdownSpaces.autoClose = 'outside';
-    //     // console.log('closed');
-    //   },
-    //   reason => {
-    //     this.dropdownSpaces.autoClose = 'outside';
-    //     // console.log('dismissed');
-    //   }
-    // );
-  }
-
-  openEditDialog(content, space: Space) {
-    this.spaceInModel = space;
-    // TODO: implement edit dialog
-    // this.modalService.open(content, { centered: true }).result.then(
-    //   result => {
-    //     this.dropdownSpaces.autoClose = 'outside';
-    //     // console.log('closed');
-    //   },
-    //   reason => {
-    //     this.dropdownSpaces.autoClose = 'outside';
-    //     // console.log('dismissed');
-    //   }
-    // );
+  onOpenDialogClick(template: TemplateRef<any>, space: Space) {
+    this.currentSpace = space;
+    this.dialog.open(template);
   }
 }

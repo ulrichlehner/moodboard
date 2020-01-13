@@ -1,8 +1,14 @@
 import { NgModule } from '@angular/core';
+import { FlexLayoutModule } from '@angular/flex-layout';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import { MatListModule } from '@angular/material/list';
 import { MatSidenavModule } from '@angular/material/sidenav';
+import { MatToolbarModule } from '@angular/material/toolbar';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ArtifactDetailComponent } from '@components/artifact-detail/artifact-detail.component';
@@ -24,7 +30,6 @@ import { InfoComponent } from './components/info/info.component';
 import { SpaceDetailComponent } from './components/space-detail/space-detail.component';
 import { DataService } from './data.service';
 import { MessageService } from './message.service';
-import { MatListModule } from '@angular/material/list';
 
 @NgModule({
   declarations: [
@@ -50,11 +55,16 @@ import { MatListModule } from '@angular/material/list';
       logOnly: environment.production
     }),
     BrowserAnimationsModule,
+    FlexLayoutModule,
     MatButtonModule,
+    MatDialogModule,
+    MatFormFieldModule,
     MatIconModule,
+    MatInputModule,
     MatListModule,
     // MatMenuModule
-    MatSidenavModule
+    MatSidenavModule,
+    MatToolbarModule
   ],
   providers: [DataService, MessageService],
   bootstrap: [AppComponent]

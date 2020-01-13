@@ -1,10 +1,9 @@
-<form [formGroup]="spaceForm" novalidate>
-  <div class="form-group">
-    <label for="name">Name</label>
-    <input formControlName="name" type="text" class="form-control" [class.is-invalid]="spaceForm.get('name').invalid" id="name"
-      placeholder="Enter name">
-    <div class="invalid-feedback" [hidden]="spaceForm.get('name').valid">
-      Please provide a name
-    </div>
-  </div>
+<form [formGroup]="spaceForm">
+  <mat-form-field appearance="outline">
+    <mat-label>Name</mat-label>
+    <input matInput formControlName="name" required />
+    <mat-error *ngIf="spaceForm.get('name').invalid"
+      >Please provide a name</mat-error
+    >
+  </mat-form-field>
 </form>

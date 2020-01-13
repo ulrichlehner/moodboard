@@ -10,43 +10,25 @@ mat-sidenav-content {
   height: 100%;
 }
 
-// LEGACY:
-
-.toolbar {
-  .add-files {
-    margin-bottom: 0;
-    input[type='file'] {
-      display: none;
-    }
-  }
-
-  > * {
-    margin-left: 5px;
+mat-sidenav-content {
+  * > {
+    position: absolute;
   }
 }
 
-// progress {
-//   appearance: none;
-//   bottom: 10px;
-//   box-shadow: 0 0 10px rgba(0, 0, 0, 0.6);
-//   height: 10px;
-//   left: 50%;
-//   position: absolute;
-//   transform: translateX(-50%);
-//   width: 60vw;
-//   // z-index: 2;
+.dummy-toolbar {
+  background-color: transparent;
+  left: 0;
+  pointer-events: none;
+  position: absolute;
+  top: 0;
 
-//   &::-webkit-progress-bar {
-//     background-color: #eee;
-//     border-radius: 2px;
-//     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.25) inset;
-//   }
+  & > * {
+    pointer-events: all;
+  }
+}
 
-//   &::-webkit-progress-value {
-//     background-color: rgb(0, 128, 128);
-//     border-radius: 2px;
-//   }
-// }
+// LEGACY:
 
 .canvas-wrapper {
   // background: url($backgroundImageUrl) repeat top left;
