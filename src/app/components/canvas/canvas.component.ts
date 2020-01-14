@@ -3,8 +3,11 @@ import {
   Component,
   HostListener,
   OnDestroy,
-  OnInit
+  OnInit,
+  TemplateRef,
+  ViewChild
 } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
 import { DataService } from '@app/data.service';
 import { Artifact } from '@models/artifact';
 import { Space } from '@models/space';
@@ -20,7 +23,7 @@ import {
   selectAllSpaces
 } from '@store/reducers/space.reducer';
 import 'fabric';
-import { Observable, Subscription, fromEvent } from 'rxjs';
+import { fromEvent, Observable, Subscription } from 'rxjs';
 import { debounceTime, skip, take } from 'rxjs/operators';
 
 declare const fabric: any;
@@ -91,6 +94,9 @@ export class CanvasComponent implements OnInit, OnDestroy {
   drawnPathObjects = new Array();
   //#endregion
 
+  @ViewChild('blankDialogTemplate', { static: false })
+  blankDialogTemplate: TemplateRef<any>;
+
   //#region Disable scrolling
 
   // Based on http://stackoverflow.com/questions/4770025/how-to-disable-scrolling-
@@ -142,7 +148,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
   //#endregion
 
   //#region Lifecycle hooks
-  constructor(private store: Store<ArtifactState>) {}
+  constructor(private store: Store<ArtifactState>, private dialog: MatDialog) {}
 
   ngOnInit() {
     // CanvasComponent.disableScroll();
@@ -553,6 +559,9 @@ export class CanvasComponent implements OnInit, OnDestroy {
           );
         } else {
           console.warn('No space found');
+          this.dialog.open(this.blankDialogTemplate, {
+            disableClose: true
+          });
         }
       });
     }

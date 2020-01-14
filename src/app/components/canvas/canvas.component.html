@@ -85,15 +85,9 @@
   </mat-sidenav-content>
 </mat-sidenav-container>
 
-<ng-template #blankTemplate>
-  <section
-    fxLayout="column"
-    [fxHide]="activeSpace"
-    typography
-    spacing="p-x"
-    class="blank"
-  >
-    <h1>Welcome to Inspirespace.</h1>
+<ng-template #blankDialogTemplate>
+  <h1 mat-dialog-title>Welcome to Inspirespace</h1>
+  <section mat-dialog-content>
     <p>
       With this app you can craft beautiful moodboads and freely zoom in and out
       on the canvas. Your moodboard is stored on your computer - no login
@@ -120,12 +114,21 @@
         <kbd>Space&nbsp;+&nbsp;scroll</kbd> with the mouse.
       </li>
     </ul>
+  </section>
+  <div
+    mat-dialog-actions
+    mat-dialog-actions
+    fxLayout="row"
+    fxLayoutAlign="center"
+  >
     <button
       mat-raised-button
       color="primary"
+      mat-dialog-close
+      cdkFocusInitial
       (click)="onCreateSpaceClick('My first Inspirespace')"
     >
       Start a new space
     </button>
-  </section>
+  </div>
 </ng-template>
