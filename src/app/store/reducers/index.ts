@@ -1,6 +1,6 @@
-import { createSelector, createFeatureSelector, ActionReducerMap } from '@ngrx/store';
-import * as fromSpace from './space.reducer';
+import { ActionReducerMap } from '@ngrx/store';
 import * as fromArtifact from './artifact.reducer';
+import * as fromSpace from './space.reducer';
 
 export interface State {
   space: fromSpace.SpaceState;
