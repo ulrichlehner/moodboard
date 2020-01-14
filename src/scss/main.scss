@@ -37,6 +37,14 @@ $inspirespace-app-theme: mat-dark-theme(
     color: mat-color($inspirespace-app-primary) !important;
   }
 }
+
+.mat-typography {
+  // See https://material.angular.io/guide/theming-your-components
+  $primary: map-get($inspirespace-app-theme, primary);
+  a {
+    color: mat-color($primary);
+  }
+}
 //#endregion
 
 @import '~normalize.css/normalize';
@@ -161,6 +169,8 @@ code {
 html,
 body {
   height: 100%;
+  user-select: none;
+  -webkit-touch-callout: none;
 }
 body {
   margin: 0;

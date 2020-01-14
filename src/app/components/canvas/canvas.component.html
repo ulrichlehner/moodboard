@@ -52,31 +52,34 @@
     </mat-toolbar>
 
     <div *ngIf="activeSpace" style="right: 10px; top: 10px">
-      <button (click)="viewAllObjectsOnCanvas()">
-        <!-- TODO: compress icon -->
-        <!-- <fa-icon [icon]="['fas', 'compress']" [fixedWidth]="true"></fa-icon> -->
-        View All
+      <button
+        mat-icon-button
+        (click)="onZoomToFitClick()"
+        title="Zoom to fit"
+        aria-label="Zoom to fit"
+      >
+        <mat-icon>zoom_out_map</mat-icon>
       </button>
       <a
+        mat-icon-button
         href="#"
         role="button"
+        title="Download screenshot"
+        aria-label="Download screenshot"
         download="{{ activeSpace.name }}.jpg"
         onclick="this.setAttribute('href', document.getElementById('canvas').toDataURL('image/jpeg'))"
       >
-        <!-- TODO: camera icon -->
-        <!-- <fa-icon [icon]="['fas', 'camera']" [fixedWidth]="true"></fa-icon> -->
-        Download Screenshot
+        <mat-icon>camera</mat-icon>
       </a>
-      <label>
-        <!-- TODO: pluss / add icon -->
-        <!-- <fa-icon [icon]="['fas', 'plus']" [fixedWidth]="true"></fa-icon> -->
-        Upload
+      <label class="mat-icon-button">
         <input
+          fxHide
           type="file"
           multiple
-          (change)="uploadFile($event)"
+          (change)="onUploadFileChange($event)"
           aria-label="Upload images"
         />
+        <a mat-icon-button><mat-icon>add_to_queue</mat-icon></a>
       </label>
     </div>
 
@@ -115,12 +118,7 @@
       </li>
     </ul>
   </section>
-  <div
-    mat-dialog-actions
-    mat-dialog-actions
-    fxLayout="row"
-    fxLayoutAlign="center"
-  >
+  <div mat-dialog-actions fxLayout="row" fxLayoutAlign="center">
     <button
       mat-raised-button
       color="primary"

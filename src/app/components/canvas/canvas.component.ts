@@ -253,7 +253,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
     );
   }
 
-  viewAllObjectsOnCanvas() {
+  onZoomToFitClick() {
     const bounds = this.calculateBounds();
     const padding = 10;
     if (bounds) {
@@ -716,7 +716,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
     }
   }
 
-  uploadFile(event) {
+  onUploadFileChange(event) {
     this.saveFiles(event.target.files);
   }
 

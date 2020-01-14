@@ -1,20 +1,15 @@
-<button (click)="$event.stopPropagation(); openInfoDialog(modalTutorial)">
-  Info
+<button
+  mat-icon-button
+  aria-label="Open info dialog"
+  (click)="onOpenInfoClick(infoDialog)"
+>
+  <mat-icon>info</mat-icon>
 </button>
 
-<ng-template #modalTutorial let-c="close" let-d="dismiss">
-  <div class="modal-header">
-    <header class="modal-title h5">Background</header>
-    <button
-      type="button"
-      class="close"
-      aria-label="Close"
-      (click)="$event.stopPropagation(); d()"
-    >
-      <span aria-hidden="true">&times;</span>
-    </button>
-  </div>
-  <div class="modal-body">
+<ng-template #infoDialog>
+  <header mat-dialog-title>Background</header>
+
+  <section mat-dialog-content typography>
     <p>
       Thanks for using Inspirespace! It's a personal project that evolved into
       this app. My name is Ulrich Lehner and I'm a designer and developer based
@@ -93,5 +88,8 @@
         >contact me via my website</a
       >.
     </p>
+  </section>
+  <div mat-dialog-actions fxLayout="row" fxLayoutAlign="end">
+    <button mat-button mat-dialog-close cdkFocusInitial>Close</button>
   </div>
 </ng-template>

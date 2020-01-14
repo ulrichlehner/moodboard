@@ -29,7 +29,7 @@ export type LayoutWidthType = 'sidebar' | 'dialog' | undefined;
  * Directive to apply consistent spacing
  */
 @Directive({
-  selector: '[appLayout], [spacing], [width], [typography]'
+  selector: '[appLayout], [spacing], [width], [typography], [muted]'
 })
 export class LayoutDirective implements OnChanges {
   /**
@@ -47,6 +47,11 @@ export class LayoutDirective implements OnChanges {
    */
   @Input() typography: any | undefined;
 
+  /**
+   * Apply muted text style
+   */
+  @Input() muted: any | undefined;
+
   constructor(private renderer: Renderer2, private el: ElementRef) {}
 
   ngOnChanges(changes: SimpleChanges) {
@@ -60,6 +65,10 @@ export class LayoutDirective implements OnChanges {
 
     if (changes['typography']) {
       this.applyTypography();
+    }
+
+    if (changes['muted']) {
+      this.applyMuted();
     }
   }
 
@@ -148,5 +157,9 @@ export class LayoutDirective implements OnChanges {
   private applyTypography() {
     this.renderer.addClass(this.el.nativeElement, 'mat-typography');
     this.renderer.setStyle(this.el.nativeElement, 'color', '#ffffff');
+  }
+
+  private applyMuted() {
+    this.renderer.setStyle(this.el.nativeElement, 'opacity', '0.6');
   }
 }

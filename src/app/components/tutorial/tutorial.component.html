@@ -1,28 +1,23 @@
-<button (click)="$event.stopPropagation(); openTutorialDialog(modalTutorial)">
-  <!-- <fa-icon [icon]="['far', 'question-circle']"></fa-icon> -->
-  <!-- TODO: help ucon -->
-  Help
+<button
+  mat-icon-button
+  aria-label="Open tutorial dialog"
+  (click)="onOpenTutorialClick(templateTutorialDialog)"
+>
+  <mat-icon>help</mat-icon>
 </button>
-<small class="text-muted">To get started just drag some images inside</small>
-<ng-template #modalTutorial let-c="close" let-d="dismiss">
-  <div class="modal-header">
-    <header class="modal-title h2">Welcome to Inspirespace.</header>
-    <button
-      type="button"
-      class="close"
-      aria-label="Close"
-      (click)="$event.stopPropagation(); d()"
-    >
-      <span aria-hidden="true">&times;</span>
-    </button>
-  </div>
-  <div class="modal-body">
-    <p class="lead">
+
+<small muted>To get started just drag some images inside</small>
+
+<ng-template #templateTutorialDialog>
+  <header mat-dialog-title>Welcome to Inspirespace.</header>
+
+  <section mat-dialog-content typography>
+    <p>
       With this app you can craft beautiful moodboards and freely zoom in and
       out on the canvas. Your moodboard is stored on your computer - no login
       required!
     </p>
-    <h3 class="h5">Usage</h3>
+    <h3>Usage</h3>
     <ul>
       <li>
         You can <kbd>drag & drop</kbd> images onto the canvas or use the
@@ -43,9 +38,12 @@
         <kbd>Space&nbsp;+&nbsp;scroll</kbd> with the mouse.
       </li>
     </ul>
-    <div class="alert alert-warning m-0" role="alert">
+    <div>
       Please note that the app is in beta - expect that things change and can
       get lost from time to time!
     </div>
+  </section>
+  <div mat-dialog-actions fxLayout="row" fxLayoutAlign="end">
+    <button mat-button mat-dialog-close cdkFocusInitial>Close</button>
   </div>
 </ng-template>

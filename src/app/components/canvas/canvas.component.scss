@@ -12,16 +12,10 @@ mat-sidenav-content {
 }
 
 mat-sidenav-content {
-  // pointer-events: none;
   & > * {
     position: absolute;
-    pointer-events: all;
   }
 }
-
-// mat-sidenav {
-//   pointer-events: all;
-// }
 
 mat-sidenav-container {
   background-color: transparent;
@@ -83,42 +77,4 @@ mat-sidenav-container {
   top: -20px;
   width: 190px;
   z-index: -1;
-}
-
-.splash-screen {
-  position: absolute;
-  display: none;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  right: 0;
-  opacity: 1;
-  background-color: #fff;
-  transition: all 0.3s;
-
-  .loading-message {
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 50%;
-    height: 90px;
-    margin-top: -20px;
-    line-height: 30px;
-    text-align: center;
-    h2 {
-      font-weight: 800;
-    }
-    p {
-      font-style: italic;
-    }
-  }
-
-  &.hide-start {
-    opacity: 0;
-    transform: scale(1.1);
-  }
-
-  &.hide-end {
-    display: none;
-  }
 }

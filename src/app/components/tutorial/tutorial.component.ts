@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, TemplateRef } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-tutorial',
@@ -6,12 +7,11 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./tutorial.component.scss']
 })
 export class TutorialComponent implements OnInit {
-  constructor() {}
+  constructor(private dialog: MatDialog) {}
 
   ngOnInit() {}
 
-  openTutorialDialog(content) {
-    // TODO: implement tutorial dialog
-    // this.modalService.open(content, { centered: true, size: 'lg' });
+  onOpenTutorialClick(template: TemplateRef<any>) {
+    this.dialog.open(template);
   }
 }
