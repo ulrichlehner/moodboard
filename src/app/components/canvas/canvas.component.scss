@@ -3,6 +3,7 @@
 :host {
   display: block;
   height: 100%;
+  position: relative;
 }
 
 mat-sidenav-container,
@@ -11,9 +12,19 @@ mat-sidenav-content {
 }
 
 mat-sidenav-content {
-  * > {
+  // pointer-events: none;
+  & > * {
     position: absolute;
+    pointer-events: all;
   }
+}
+
+// mat-sidenav {
+//   pointer-events: all;
+// }
+
+mat-sidenav-container {
+  background-color: transparent;
 }
 
 .dummy-toolbar {
@@ -26,6 +37,17 @@ mat-sidenav-content {
   & > * {
     pointer-events: all;
   }
+}
+
+.blank {
+  left: 0;
+  margin: 0 auto;
+  max-width: 480px;
+  min-width: 300px;
+  right: 0;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 // LEGACY:

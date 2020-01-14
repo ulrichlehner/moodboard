@@ -560,7 +560,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
   //#endregion
 
   //#region Event handlers
-  onCreateSpaceClick() {
+  onCreateSpaceClick(name?: string) {
     const date = new Date();
     const space: Space = {
       id: DataService.generateSpaceId(),

@@ -4,11 +4,11 @@ import {
   Input,
   OnDestroy,
   OnInit,
-  ViewChild,
   TemplateRef
 } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { DataService } from '@app/data.service';
+import { LayoutService } from '@app/layout/layout.service';
 import { Space } from '@models/space';
 import { Store } from '@ngrx/store';
 import * as spaceActions from '@store/actions/space.actions';
@@ -52,7 +52,11 @@ export class SpaceListComponent implements OnInit, OnDestroy {
   spacesSubcription: Subscription;
   spaces: Space[];
 
-  constructor(private store: Store<SpaceState>, public dialog: MatDialog) {}
+  constructor(
+    public layout: LayoutService,
+    private store: Store<SpaceState>,
+    private dialog: MatDialog
+  ) {}
 
   ngOnInit() {
     this.spaces$ = this.store.select(selectAllSpaces);

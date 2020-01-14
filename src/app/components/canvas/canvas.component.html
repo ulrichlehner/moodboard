@@ -1,7 +1,7 @@
 <!-- <div class="media-dropzone"></div> -->
 
 <mat-sidenav-container>
-  <mat-sidenav #sidenav mode="over">
+  <mat-sidenav #sidenav mode="over" width="sidebar">
     <mat-toolbar role="header" color="primary">
       <button
         mat-icon-button
@@ -84,3 +84,48 @@
     <app-tutorial *ngIf="activeSpace" style="left: 0; bottom: 0"></app-tutorial>
   </mat-sidenav-content>
 </mat-sidenav-container>
+
+<ng-template #blankTemplate>
+  <section
+    fxLayout="column"
+    [fxHide]="activeSpace"
+    typography
+    spacing="p-x"
+    class="blank"
+  >
+    <h1>Welcome to Inspirespace.</h1>
+    <p>
+      With this app you can craft beautiful moodboads and freely zoom in and out
+      on the canvas. Your moodboard is stored on your computer - no login
+      required!
+    </p>
+    <h2>Usage</h2>
+    <ul>
+      <li>
+        You can <kbd>drag & drop</kbd> images onto the canvas or use the
+        <kbd>Upload</kbd> button <strong>to add images</strong>.
+      </li>
+      <li>
+        Select one or more images by making a selection on the canvas and
+        <strong>use the handles to transform images</strong>.
+      </li>
+      <li>
+        To <strong>delete</strong> selected images simply press
+        <kbd>Delete</kbd> or <kbd>Backspace</kbd> on your keyboard.
+      </li>
+      <li>
+        You can <strong>pan the canvas</strong> by holding
+        <kbd>Space&nbsp;+&nbsp;move</kbd> with the mouse. You
+        <strong>zoom in and out</strong> by holding
+        <kbd>Space&nbsp;+&nbsp;scroll</kbd> with the mouse.
+      </li>
+    </ul>
+    <button
+      mat-raised-button
+      color="primary"
+      (click)="onCreateSpaceClick('My first Inspirespace')"
+    >
+      Start a new space
+    </button>
+  </section>
+</ng-template>

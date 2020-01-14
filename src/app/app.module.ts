@@ -1,5 +1,4 @@
 import { NgModule } from '@angular/core';
-import { FlexLayoutModule } from '@angular/flex-layout';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule } from '@angular/material/dialog';
@@ -29,6 +28,7 @@ import { AppComponent } from './app.component';
 import { InfoComponent } from './components/info/info.component';
 import { SpaceDetailComponent } from './components/space-detail/space-detail.component';
 import { DataService } from './data.service';
+import { LayoutModule } from './layout/layout.module';
 import { MessageService } from './message.service';
 
 @NgModule({
@@ -55,7 +55,6 @@ import { MessageService } from './message.service';
       logOnly: environment.production
     }),
     BrowserAnimationsModule,
-    FlexLayoutModule,
     MatButtonModule,
     MatDialogModule,
     MatFormFieldModule,
@@ -64,7 +63,8 @@ import { MessageService } from './message.service';
     MatListModule,
     // MatMenuModule
     MatSidenavModule,
-    MatToolbarModule
+    MatToolbarModule,
+    LayoutModule
   ],
   providers: [DataService, MessageService],
   bootstrap: [AppComponent]
