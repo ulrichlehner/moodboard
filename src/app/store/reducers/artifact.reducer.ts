@@ -1,9 +1,5 @@
-import {
-  createSelector,
-  createFeatureSelector,
-  ActionReducerMap
-} from '@ngrx/store';
-import { createEntityAdapter, EntityState, EntityAdapter } from '@ngrx/entity';
+import { createEntityAdapter, EntityAdapter, EntityState } from '@ngrx/entity';
+import { createFeatureSelector } from '@ngrx/store';
 import { Artifact } from '../../models/artifact';
 import * as artifactActions from '../actions/artifact.actions';
 
