@@ -205,7 +205,8 @@ export class CanvasComponent implements OnInit, OnDestroy {
 
     if (!this.fabricCanvas) {
       this.fabricCanvas = new fabric.Canvas('canvas', {
-        noScaleCache: true
+        noScaleCache: true,
+        backgroundVpt: false
       });
 
       this.fabricCanvas.setBackgroundColor(
