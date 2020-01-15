@@ -7,17 +7,17 @@ import {
   TemplateRef
 } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { DataService } from '@app/data.service';
-import { LayoutService } from '@app/layout/layout.service';
-import { Space } from '@models/space';
 import { Store } from '@ngrx/store';
-import * as spaceActions from '@store/actions/space.actions';
+import { Observable, Subscription } from 'rxjs';
+import { DataService } from '../../data.service';
+import { LayoutService } from '../../layout/layout.service';
+import { Space } from '../../models/space';
+import * as spaceActions from '../../store/actions/space.actions';
 import {
   selectActiveSpace,
   selectAllSpaces,
   SpaceState
-} from '@store/reducers/space.reducer';
-import { Observable, Subscription } from 'rxjs';
+} from '../../store/reducers/space.reducer';
 
 export enum Appearance {
   Light = 'light',

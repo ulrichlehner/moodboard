@@ -10,26 +10,26 @@ import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { ArtifactDetailComponent } from '@components/artifact-detail/artifact-detail.component';
-import { ArtifactListComponent } from '@components/artifact-list/artifact-list.component';
-import { CanvasComponent } from '@components/canvas/canvas.component';
-import { MessagesComponent } from '@components/messages/messages.component';
-import { SpaceListComponent } from '@components/space-list/space-list.component'; // Angular CLI environemnt
-import { TutorialComponent } from '@components/tutorial/tutorial.component';
 import { EffectsModule } from '@ngrx/effects';
 import { StoreModule } from '@ngrx/store';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
-import { ArtifactEffects } from '@store/effects/artifact.effects';
-import { SpaceEffects } from '@store/effects/space.effects';
-import { reducers } from '@store/reducers';
 import { environment } from '../environments/environment';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
+import { ArtifactDetailComponent } from './components/artifact-detail/artifact-detail.component';
+import { ArtifactListComponent } from './components/artifact-list/artifact-list.component';
+import { CanvasComponent } from './components/canvas/canvas.component';
 import { InfoComponent } from './components/info/info.component';
+import { MessagesComponent } from './components/messages/messages.component';
 import { SpaceDetailComponent } from './components/space-detail/space-detail.component';
+import { SpaceListComponent } from './components/space-list/space-list.component'; // Angular CLI environemnt
+import { TutorialComponent } from './components/tutorial/tutorial.component';
 import { DataService } from './data.service';
 import { LayoutModule } from './layout/layout.module';
 import { MessageService } from './message.service';
+import { ArtifactEffects } from './store/effects/artifact.effects';
+import { SpaceEffects } from './store/effects/space.effects';
+import { reducers } from './store/reducers';
 
 @NgModule({
   declarations: [

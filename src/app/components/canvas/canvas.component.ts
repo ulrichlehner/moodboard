@@ -8,23 +8,23 @@ import {
   ViewChild
 } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { DataService } from '@app/data.service';
-import { Artifact } from '@models/artifact';
-import { Space } from '@models/space';
 import { Store } from '@ngrx/store';
-import * as artifactActions from '@store/actions/artifact.actions';
-import * as spaceActions from '@store/actions/space.actions';
-import {
-  ArtifactState,
-  selectAllArtifacts
-} from '@store/reducers/artifact.reducer';
-import {
-  selectActiveSpace,
-  selectAllSpaces
-} from '@store/reducers/space.reducer';
 import 'fabric';
 import { fromEvent, Observable, Subscription } from 'rxjs';
 import { debounceTime, skip, take } from 'rxjs/operators';
+import { DataService } from '../../data.service';
+import { Artifact } from '../../models/artifact';
+import { Space } from '../../models/space';
+import * as artifactActions from '../../store/actions/artifact.actions';
+import * as spaceActions from '../../store/actions/space.actions';
+import {
+  ArtifactState,
+  selectAllArtifacts
+} from '../../store/reducers/artifact.reducer';
+import {
+  selectActiveSpace,
+  selectAllSpaces
+} from '../../store/reducers/space.reducer';
 
 declare const fabric: any;
 

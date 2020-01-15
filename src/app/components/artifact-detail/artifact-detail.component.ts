@@ -4,9 +4,9 @@ import {
   Input,
   OnInit
 } from '@angular/core';
-import { Artifact } from '@models/artifact';
 import { Store } from '@ngrx/store';
-import * as ArtifactActions from '@store/actions/artifact.actions';
+import { Artifact } from '../../models/artifact';
+import * as ArtifactActions from '../../store/actions/artifact.actions';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,

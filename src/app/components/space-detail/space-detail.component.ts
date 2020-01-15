@@ -1,9 +1,9 @@
-import { Component, OnInit, Input } from '@angular/core';
-import { FormGroup, FormBuilder, Validators } from '@angular/forms';
-import { Space } from '@models/space';
+import { Component, Input, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { SpaceState } from '@store/reducers/space.reducer';
-import * as spaceActions from '@store/actions/space.actions';
+import { Space } from '../../models/space';
+import * as spaceActions from '../../store/actions/space.actions';
+import { SpaceState } from '../../store/reducers/space.reducer';
 
 @Component({
   selector: 'app-space-detail',
