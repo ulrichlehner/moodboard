@@ -60,3 +60,11 @@ import 'zone.js/dist/zone'; // Included with Angular CLI.
 /***************************************************************************************************
  * APPLICATION IMPORTS
  */
+
+/***************************************************************************************************
+ * CUSTOM _HACKY_ POLYFILLS
+ */
+console.warn('window.global polyfill is active - check if it can be removed');
+if (typeof (window as any).global === 'undefined') {
+  (window as any).global = window;
+}
