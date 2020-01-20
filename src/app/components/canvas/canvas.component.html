@@ -40,6 +40,17 @@
       <canvas id="canvas" class="canvas"></canvas>
     </div>
 
+    <h1
+      *ngIf="activeSpace"
+      textDisabled
+      matCaption
+      textCenter
+      spacing="p"
+      style="left: 0; right: 0; top: 0"
+    >
+      {{ activeSpace.name }}
+    </h1>
+
     <mat-toolbar class="dummy-toolbar">
       <button
         mat-mini-fab
