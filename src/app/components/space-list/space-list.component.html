@@ -45,7 +45,7 @@
 
 <ng-template #dialogTemplateEdit>
   <header mat-dialog-title>Edit {{ currentSpace.name }}</header>
-  <div mat-dialog-content>
+  <div mat-dialog-content matTypography>
     <app-space-detail #spaceDetail [space]="currentSpace"></app-space-detail>
   </div>
   <div mat-dialog-actions fxLayout="row" fxLayoutAlign="end">
@@ -65,7 +65,7 @@
 
 <ng-template #dialogTemplateDelete>
   <header mat-dialog-title>Delete {{ currentSpace.name }}</header>
-  <div mat-dialog-content>
+  <div mat-dialog-content matTypography>
     <p>Do you really want to delete this space?</p>
     <p>This will permanently remove it including all containing artifacts.</p>
   </div>
