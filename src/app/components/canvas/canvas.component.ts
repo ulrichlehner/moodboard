@@ -94,7 +94,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
   drawnPathObjects = new Array();
   //#endregion
 
-  @ViewChild('blankDialogTemplate', { static: false })
+  @ViewChild('blankDialogTemplate')
   blankDialogTemplate: TemplateRef<any>;
 
   //#region Disable scrolling
