@@ -3,7 +3,7 @@
     <mat-nav-list>
       <header mat-subheader>Your Spaces ({{ spaces.length }})</header>
       <mat-list-item
-        *ngFor="let space of spaces; trackBy: space?.id"
+        *ngFor="let space of spaces; trackBy: trackBySpace"
         [class.list-item-active]="space.id === activeSpace.id"
         (click)="onActivateSpaceClick(space)"
       >

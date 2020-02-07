@@ -47,7 +47,7 @@ export class ArtifactListComponent implements OnInit {
     // console.log(`Artifact selected: ${artifact.name}`);
   }
 
-  dataUrl(file: File) {
+  dataUrl(file: File | Blob) {
     return this.sanitizer.bypassSecurityTrustUrl(URL.createObjectURL(file));
   }
 }

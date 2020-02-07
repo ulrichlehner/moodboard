@@ -105,4 +105,8 @@ export class SpaceListComponent implements OnInit, OnDestroy {
     this.currentSpace = space;
     this.dialog.open(template);
   }
+
+  trackBySpace(index: number, space: Space) {
+    return space.id;
+  }
 }
