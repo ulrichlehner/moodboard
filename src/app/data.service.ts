@@ -6,6 +6,7 @@ import * as UUID from 'uuidjs';
 import { MessageService } from './message.service';
 import { Artifact } from './models/artifact';
 import { Space } from './models/space';
+import * as mobilenet from '@tensorflow-models/mobilenet';
 
 //#region PouchDB interfaces
 // see https://www.bennadel.com/blog/3194-experimenting-with-simple-crud-operations-using-pouchdb-in-angular-2-1-1.htm
@@ -135,6 +136,42 @@ export class DataService {
 
   //#region Artifact
   createArtifact(artifact: Artifact): Observable<Artifact> {
+    console.log('1', artifact._attachments);
+    console.log(mobilenet);
+    mobilenet
+      .load({
+        version: 2,
+        alpha: 1
+      })
+      .then(async model => {
+        console.log('2', model);
+        const attachments = artifact._attachments
+          ? Object.values(artifact._attachments)
+          : undefined;
+        if (attachments && attachments.length > 0) {
+          console.log('3', attachments[0].data);
+          const reader = new FileReader();
+          reader.onload = () => {
+            //  document.getElementById("image1").src=base64data;
+            const img = new Image();
+            const canvas = document.createElement('canvas');
+
+            const ctx = canvas.getContext('2d');
+            img.onload = () => {
+              ctx.drawImage(img, 0, 0);
+
+              const features = model.infer(img);
+              console.log('features', features);
+              console.log(model.classify(img));
+            };
+            img.src = reader.result as string;
+          };
+          reader.readAsDataURL(attachments[0].data);
+        }
+      })
+      .catch(error => {
+        console.error('ohoh', error);
+      });
     return fromPromise(
       this.db.put({
         ...artifact,
