@@ -18,6 +18,7 @@ export type LayoutSpacingType =
   | 'm-y'
   | 'm'
   | 'p'
+  | 'p-0'
   | undefined;
 
 /**
@@ -70,7 +71,8 @@ export type LayoutTypographyType =
     [matBody2],
     [matButton]
     [matCaption],
-    [matInput]
+    [matInput],
+    [truncate]
   `
 })
 export class LayoutDirective implements OnChanges {
@@ -169,6 +171,11 @@ export class LayoutDirective implements OnChanges {
    */
   @Input() matInput?;
 
+  /**
+   * Truncate a text with ellipses
+   */
+  @Input() truncate?;
+
   // private readonly inputNameToTypographyType: {
   //   [key: string]: LayoutTypographyType;
   // } = {
@@ -239,6 +246,10 @@ export class LayoutDirective implements OnChanges {
     } else if (changes.matInput) {
       this.applyTypography('input');
     }
+
+    if (changes.truncate) {
+      this.applyTruncate();
+    }
   }
 
   private applySpacing() {
@@ -305,6 +316,9 @@ export class LayoutDirective implements OnChanges {
           `${layoutSpacing}px`
         );
         break;
+      case 'p-0':
+        this.renderer.setStyle(this.el.nativeElement, 'padding', 0);
+        break;
       default:
         console.warn('Cannot apply spacing due to unknown spacing type');
     }
@@ -341,5 +355,11 @@ export class LayoutDirective implements OnChanges {
 
   private applyTextAlign(align: 'center') {
     this.renderer.setStyle(this.el.nativeElement, 'text-align', align);
+  }
+
+  private applyTruncate() {
+    this.renderer.setStyle(this.el.nativeElement, 'white-space', 'nowrap');
+    this.renderer.setStyle(this.el.nativeElement, 'overflow', 'hidden');
+    this.renderer.setStyle(this.el.nativeElement, 'text-overflow', 'ellipsis');
   }
 }
