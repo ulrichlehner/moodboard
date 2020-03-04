@@ -107,9 +107,21 @@ $inspirespace-app-theme: mat-dark-theme-custom(
 /* You can add global styles to this file, and also import other style files */
 
 //region Angular Material Tweaks
-.list-item-active {
-  .mat-list-text {
-    color: mat-color($inspirespace-app-primary) !important;
+// .list-item-active {
+//   .mat-list-text {
+//     color: mat-color($inspirespace-app-primary) !important;
+//   }
+// }
+
+.mat-selection-list {
+  &--with-actions {
+    .mat-list-item-content {
+      padding-right: 4px !important;
+    }
+
+    .mat-list-text {
+      padding-right: 0 !important;
+    }
   }
 }
 
