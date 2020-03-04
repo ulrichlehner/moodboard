@@ -72,7 +72,7 @@ export class SpaceListComponent implements OnInit, OnDestroy {
     this.spacesSubcription.unsubscribe();
   }
 
-  onActivateSpaceClick(space: Space) {
+  onSpaceSelectionChange(space: Space) {
     this.store.dispatch(new spaceActions.Activate(space.id));
     // this.dropdownSpaces.close();
   }
