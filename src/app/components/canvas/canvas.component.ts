@@ -11,7 +11,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { select, Store } from '@ngrx/store';
 import 'fabric';
 import { fromEvent, Observable, Subscription } from 'rxjs';
-import { debounceTime, skip } from 'rxjs/operators';
+import { debounceTime, skip, take } from 'rxjs/operators';
 import { ArtifactService } from 'src/app/store/artifact.service';
 import {
   AppState,
@@ -20,6 +20,7 @@ import {
 import { SpaceService } from 'src/app/store/space.service';
 import { Artifact } from '../../models/artifact';
 import { Space } from '../../models/space';
+import { activateSpace } from 'src/app/store/actions/moodboard.actions';
 
 declare const fabric: any;
 
@@ -548,33 +549,27 @@ export class CanvasComponent implements OnInit, OnDestroy {
       this.lastCanvasViewportTransform = this.fabricCanvas.viewportTransform.slice();
 
       // TODO: check if needed
-      console.warn('TODO: check if needed & handle activeSpace$');
-      // this.activeSpace$.pipe(take(1)).subscribe(space => {
-      //   if (space) {
-      //     // this.store.dispatch(
-      //     //   new spaceActions.Update(space.id, {
-      //     //     viewportTransform: this.lastCanvasViewportTransform,
-      //     //     updateDate: new Date()
-      //     //   })
-      //     // );
-      //     this.spaceService.update({
-      //       id: space.id,
-      //       viewportTransform: this.lastCanvasViewportTransform,
-      //       updateDate: new Date()
-      //     });
-      //   } else {
-      //     console.warn('No space found');
-      //     this.dialog.open(this.blankDialogTemplate, {
-      //       disableClose: true
-      //     });
-      //   }
-      // });
+      console.warn('TODO: check if needed & handle better');
+      this.activeSpace$.pipe(take(1)).subscribe(space => {
+        if (space) {
+          this.spaceService.update({
+            id: space.id,
+            viewportTransform: this.lastCanvasViewportTransform,
+            updateDate: new Date()
+          });
+        } else {
+          console.warn('No space found');
+          this.dialog.open(this.blankDialogTemplate, {
+            disableClose: true
+          });
+        }
+      });
     }
   }
   //#endregion
 
   //#region Event handlers
-  onCreateSpaceClick(name?: string) {
+  async onCreateSpaceClick(name?: string) {
     const date = new Date();
     const space: Space = {
       id: SpaceService.generateId(),
@@ -591,7 +586,14 @@ export class CanvasComponent implements OnInit, OnDestroy {
       createDate: date,
       updateDate: date
     };
-    this.spaceService.add(space);
+    this.store.dispatch(
+      activateSpace({
+        space: await this.spaceService
+          .add(space)
+          .pipe(take(1))
+          .toPromise()
+      })
+    );
   }
 
   @HostListener('window:resize', ['$event'])
