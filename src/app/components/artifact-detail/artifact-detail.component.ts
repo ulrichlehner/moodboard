@@ -4,9 +4,8 @@ import {
   Input,
   OnInit
 } from '@angular/core';
-import { Store } from '@ngrx/store';
+import { ArtifactService } from 'src/app/store/artifact.service';
 import { Artifact } from '../../models/artifact';
-import * as ArtifactActions from '../../store/actions/artifact.actions';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -16,16 +15,13 @@ import * as ArtifactActions from '../../store/actions/artifact.actions';
 })
 export class ArtifactDetailComponent implements OnInit {
   @Input() artifact: Artifact;
-  // artifact$: Observable<Artifact>;
 
-  constructor(private store: Store<any>) {}
+  constructor(private artifactService: ArtifactService) {}
 
-  ngOnInit() {
-    // this.artifact$ = this.store.select(selectActiveArtifact);
-  }
+  ngOnInit() {}
 
   deleteArtifact(artifact: Artifact) {
-    this.store.dispatch(new ArtifactActions.Delete(artifact.id));
+    this.artifactService.delete(artifact);
     console.log(`Artifact deleted: ${artifact.name}`);
   }
 }

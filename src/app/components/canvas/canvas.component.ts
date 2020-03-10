@@ -12,16 +12,14 @@ import { select, Store } from '@ngrx/store';
 import 'fabric';
 import { fromEvent, Observable, Subscription } from 'rxjs';
 import { debounceTime, skip } from 'rxjs/operators';
+import { ArtifactService } from 'src/app/store/artifact.service';
 import {
   AppState,
   selectActiveSpace
 } from 'src/app/store/reducers/moodboard.reducers';
 import { SpaceService } from 'src/app/store/space.service';
-import { DataService } from '../../data.service';
 import { Artifact } from '../../models/artifact';
 import { Space } from '../../models/space';
-import * as artifactActions from '../../store/actions/artifact.actions';
-import { selectAllArtifacts } from '../../store/reducers/artifact.reducer';
 
 declare const fabric: any;
 
@@ -36,6 +34,10 @@ export class CanvasComponent implements OnInit, OnDestroy {
 
   /* left: 37, up: 38, right: 39, down: 40, spacebar: 32, pageup: 33, pagedown: 34, end: 35, home: 36 */
   private static readonly keys = { 37: 1, 38: 1, 39: 1, 40: 1 };
+
+  activeSpace: Space;
+  isSpacePressed = false;
+  isDragOver = false;
 
   private readonly attachmentImageMimeType = 'image/webp';
   private readonly attachmentImageQuality = 0.6;
@@ -63,35 +65,31 @@ export class CanvasComponent implements OnInit, OnDestroy {
   //#endregion
 
   //#region Member variables
-  activeSpace$: Observable<Space>;
-  artifacts$: Observable<Artifact[]>;
+  private activeSpace$: Observable<Space>;
+  private artifacts$: Observable<Artifact[]>;
 
-  artifacts: Artifact[];
-  activeSpace: Space;
+  private artifacts: Artifact[];
 
-  artifactSubscription: Subscription;
-  spaceSubscription: Subscription;
+  private artifactSubscription: Subscription;
+  private spaceSubscription: Subscription;
 
-  fabricCanvas = null;
-  domCanvas;
+  private fabricCanvas = null;
+  private domCanvas;
 
   //#endregion
 
   //#region State variables
-  lastX: number;
-  lastY: number;
-  dragStartPosition: { x: number; y: number };
+  private lastX: number;
+  private lastY: number;
+  private dragStartPosition: { x: number; y: number };
   // saveProgress = 0;
-  lastCanvasViewportTransform = [];
+  private lastCanvasViewportTransform = [];
 
-  isSpacePressed = false;
-  isDragOver = false;
-
-  drawnPathObjects = new Array();
+  private drawnPathObjects = new Array();
   //#endregion
 
   @ViewChild('blankDialogTemplate')
-  blankDialogTemplate: TemplateRef<any>;
+  private blankDialogTemplate: TemplateRef<any>;
 
   //#region Disable scrolling
 
@@ -146,6 +144,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
   //#region Lifecycle hooks
   constructor(
     private spaceService: SpaceService,
+    private artifactService: ArtifactService,
     private store: Store<AppState>,
     private dialog: MatDialog
   ) {}
@@ -155,7 +154,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
     this.initCanvas();
 
     this.activeSpace$ = this.store.pipe(select(selectActiveSpace));
-    this.artifacts$ = this.store.select(selectAllArtifacts);
+    this.artifacts$ = this.artifactService.entities$;
 
     // Load space
     // this.store.dispatch(new spaceActions.Load());
@@ -170,7 +169,11 @@ export class CanvasComponent implements OnInit, OnDestroy {
         if (space) {
           if (!this.activeSpace || space.id !== this.activeSpace.id) {
             this.removeAllCanvasObjects();
-            this.store.dispatch(new artifactActions.Load(space.id));
+            console.warn(
+              'artifactService.clearCache() classed - maybe there are alternatives'
+            );
+            this.artifactService.clearCache();
+            this.artifactService.getWithQuery({ spaceId: space.id });
           }
           this.activeSpace = space;
           this.lastCanvasViewportTransform = space.viewportTransform;
@@ -353,9 +356,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
     if (this.fabricCanvas.getActiveObjects()) {
       this.fabricCanvas
         .getActiveObjects()
-        .forEach((obj: any) =>
-          this.store.dispatch(new artifactActions.Delete(obj.id))
-        );
+        .forEach((obj: any) => this.artifactService.delete(obj as Artifact));
     }
   }
 
@@ -423,13 +424,11 @@ export class CanvasComponent implements OnInit, OnDestroy {
             ctx.drawImage(imgEl, 0, 0, canvas.width, canvas.height);
 
             const bounds = this.fabricCanvas.calcViewportBoundaries();
-            const id: string = DataService.generateArtifactId(
-              this.activeSpace.id
-            );
+            const id: string = ArtifactService.generateId(this.activeSpace.id);
             const date = new Date();
             const distance = 10 / this.fabricCanvas.getZoom();
             const artifact: Artifact = {
-              id: id,
+              id,
               name: `Artifact @${id}`,
               spaceId: this.activeSpace.id,
               transform: {
@@ -460,7 +459,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
                 };
 
                 this.addArtifactToCanvas(artifact, () => {
-                  this.store.dispatch(new artifactActions.Create(artifact));
+                  this.artifactService.add(artifact);
                 });
 
                 canvas.remove();
@@ -523,17 +522,16 @@ export class CanvasComponent implements OnInit, OnDestroy {
       const object =
         currentObjects[this.fabricCanvas.getObjects().indexOf(objects[i])];
       if (object) {
-        this.store.dispatch(
-          new artifactActions.Update(id, {
-            transform: {
-              scale: object.scaleX,
-              angle: object.angle,
-              x: object.left,
-              y: object.top,
-              order: this.fabricCanvas.getObjects().indexOf(objects[i])
-            }
-          })
-        );
+        this.artifactService.update({
+          id,
+          transform: {
+            scale: object.scaleX,
+            angle: object.angle,
+            x: object.left,
+            y: object.top,
+            order: this.fabricCanvas.getObjects().indexOf(objects[i])
+          }
+        });
       }
     }
   }
@@ -579,7 +577,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
   onCreateSpaceClick(name?: string) {
     const date = new Date();
     const space: Space = {
-      id: DataService.generateSpaceId(),
+      id: SpaceService.generateId(),
       name: name
         ? name
         : `Inspirespace (${date.toLocaleString([], {

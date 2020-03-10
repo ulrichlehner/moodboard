@@ -17,8 +17,8 @@ import { SpaceDataService } from './space-data.service';
   declarations: [],
   imports: [
     HttpClientModule, // REMOVABLE?
-    StoreModule.forFeature(moodboardFeatureKey, moodboardReducer),
-    // StoreModule.forRoot({ moodboard: moodboardReducer }),
+    // StoreModule.forFeature(moodboardFeatureKey, moodboardReducer),
+    StoreModule.forRoot({ [moodboardFeatureKey]: moodboardReducer }),
     // StoreModule.forFeature('activeSpace', moodboardReducer),
     EffectsModule.forRoot([]),
     EntityDataModule.forRoot(entityConfig),
@@ -36,6 +36,6 @@ export class MoodboardStoreModule {
     artifactDataService: ArtifactDataService
   ) {
     entityDataService.registerService('Space', spaceDataService);
-    entityDataService.registerService('Artifcat', artifactDataService);
+    entityDataService.registerService('Artifact', artifactDataService);
   }
 }

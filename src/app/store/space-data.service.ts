@@ -16,7 +16,7 @@ import {
 export class SpaceDataService implements EntityCollectionDataService<Space> {
   name = 'Space';
 
-  private db: any;
+  private db: any; // PouchDB.Database;
 
   constructor() {
     this.db = new PouchDB(POUCH_DB_NAME, { auto_compaction: true });

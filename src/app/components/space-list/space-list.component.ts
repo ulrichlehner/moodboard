@@ -15,7 +15,6 @@ import {
   selectActiveSpace
 } from 'src/app/store/reducers/moodboard.reducers';
 import { SpaceService } from 'src/app/store/space.service';
-import { DataService } from '../../data.service';
 import { LayoutService } from '../../layout/layout.service';
 import { Space } from '../../models/space';
 
@@ -74,7 +73,7 @@ export class SpaceListComponent implements OnInit, OnDestroy {
   onCreateSpaceClick(name?: string) {
     const date = new Date();
     const space: Space = {
-      id: DataService.generateSpaceId(),
+      id: SpaceService.generateId(),
       name: name
         ? name
         : `Inspirespace (${date.toLocaleString([], {

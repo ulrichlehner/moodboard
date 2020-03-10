@@ -10,10 +10,6 @@ import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { EffectsModule } from '@ngrx/effects';
-import { StoreModule } from '@ngrx/store';
-import { StoreDevtoolsModule } from '@ngrx/store-devtools';
-import { environment } from '../environments/environment';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { ArtifactDetailComponent } from './components/artifact-detail/artifact-detail.component';
@@ -24,12 +20,9 @@ import { MessagesComponent } from './components/messages/messages.component';
 import { SpaceDetailComponent } from './components/space-detail/space-detail.component';
 import { SpaceListComponent } from './components/space-list/space-list.component'; // Angular CLI environemnt
 import { TutorialComponent } from './components/tutorial/tutorial.component';
-import { DataService } from './data.service';
 import { LayoutModule } from './layout/layout.module';
 import { MessageService } from './message.service';
-import { ArtifactEffects } from './store/effects/artifact.effects';
 import { MoodboardStoreModule } from './store/moodboard-store.module';
-import { reducers } from './store/reducers';
 
 @NgModule({
   declarations: [
@@ -48,12 +41,6 @@ import { reducers } from './store/reducers';
     FormsModule,
     ReactiveFormsModule,
     AppRoutingModule,
-    StoreModule.forRoot(reducers),
-    EffectsModule.forRoot([ArtifactEffects]),
-    StoreDevtoolsModule.instrument({
-      maxAge: 25,
-      logOnly: environment.production
-    }),
     BrowserAnimationsModule,
     MatButtonModule,
     MatDialogModule,
@@ -61,13 +48,12 @@ import { reducers } from './store/reducers';
     MatIconModule,
     MatInputModule,
     MatListModule,
-    // MatMenuModule
     MatSidenavModule,
     MatToolbarModule,
     LayoutModule,
     MoodboardStoreModule
   ],
-  providers: [DataService, MessageService],
+  providers: [MessageService],
   bootstrap: [AppComponent]
 })
 export class AppModule {}
