@@ -7,7 +7,7 @@ import {
 } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { select, Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { activateSpace } from 'src/app/store/actions/moodboard.actions';
 import {
@@ -30,12 +30,18 @@ export class SpaceListComponent implements OnInit, OnDestroy {
   /**
    * The active space on the canvas
    */
-  activeSpace$: Observable<Space>;
+  activeSpace$: Observable<Space | null>;
 
   /**
    * The space that is edited / deleted by a user
    */
   currentSpace: Space;
+
+  private activeSpace: Space | null = null;
+  private activeSpaceSubscription: Subscription;
+
+  private spaces: Space[] = [];
+  private spacesSubscription: Subscription;
 
   constructor(
     public layout: LayoutService,
@@ -47,6 +53,12 @@ export class SpaceListComponent implements OnInit, OnDestroy {
   async ngOnInit() {
     this.spaces$ = this.spaceService.entities$;
     this.activeSpace$ = this.store.pipe(select(selectActiveSpace));
+    this.activeSpaceSubscription = this.activeSpace$.subscribe(
+      activeSpace => (this.activeSpace = activeSpace)
+    );
+    this.spacesSubscription = this.spaces$.subscribe(
+      spaces => (this.spaces = spaces)
+    );
 
     try {
       const [spaces] = await Promise.all([
@@ -64,7 +76,10 @@ export class SpaceListComponent implements OnInit, OnDestroy {
     }
   }
 
-  ngOnDestroy() {}
+  ngOnDestroy() {
+    this.activeSpaceSubscription.unsubscribe();
+    this.spacesSubscription.unsubscribe();
+  }
 
   onSpaceSelectionChange(space: Space) {
     this.store.dispatch(activateSpace({ space }));
@@ -92,6 +107,12 @@ export class SpaceListComponent implements OnInit, OnDestroy {
 
   onDeleteSpaceClick(space: Space) {
     this.spaceService.delete(space);
+    console.warn('setting active spaces where it should be done via an effect');
+    if (space.id === this.activeSpace?.id) {
+      this.store.dispatch(
+        activateSpace(this.spaces.length > 0 ? { space: this.spaces[0] } : null)
+      );
+    }
   }
 
   onOpenDialogClick(template: TemplateRef<any>, space: Space) {
