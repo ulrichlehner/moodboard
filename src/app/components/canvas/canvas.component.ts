@@ -151,6 +151,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
+    console.warn('enabled strict null checks');
     // CanvasComponent.disableScroll();
     this.initCanvas();
 
