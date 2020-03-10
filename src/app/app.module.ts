@@ -28,7 +28,7 @@ import { DataService } from './data.service';
 import { LayoutModule } from './layout/layout.module';
 import { MessageService } from './message.service';
 import { ArtifactEffects } from './store/effects/artifact.effects';
-import { SpaceEffects } from './store/effects/space.effects';
+import { MoodboardStoreModule } from './store/moodboard-store.module';
 import { reducers } from './store/reducers';
 
 @NgModule({
@@ -49,7 +49,7 @@ import { reducers } from './store/reducers';
     ReactiveFormsModule,
     AppRoutingModule,
     StoreModule.forRoot(reducers),
-    EffectsModule.forRoot([SpaceEffects, ArtifactEffects]),
+    EffectsModule.forRoot([ArtifactEffects]),
     StoreDevtoolsModule.instrument({
       maxAge: 25,
       logOnly: environment.production
@@ -64,7 +64,8 @@ import { reducers } from './store/reducers';
     // MatMenuModule
     MatSidenavModule,
     MatToolbarModule,
-    LayoutModule
+    LayoutModule,
+    MoodboardStoreModule
   ],
   providers: [DataService, MessageService],
   bootstrap: [AppComponent]

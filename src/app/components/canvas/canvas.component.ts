@@ -8,23 +8,20 @@ import {
   ViewChild
 } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { Store } from '@ngrx/store';
+import { Store, select } from '@ngrx/store';
 import 'fabric';
 import { fromEvent, Observable, Subscription } from 'rxjs';
 import { debounceTime, skip, take } from 'rxjs/operators';
+import { SpaceService } from 'src/app/store/space.service';
 import { DataService } from '../../data.service';
 import { Artifact } from '../../models/artifact';
 import { Space } from '../../models/space';
 import * as artifactActions from '../../store/actions/artifact.actions';
-import * as spaceActions from '../../store/actions/space.actions';
 import {
   ArtifactState,
   selectAllArtifacts
 } from '../../store/reducers/artifact.reducer';
-import {
-  selectActiveSpace,
-  selectAllSpaces
-} from '../../store/reducers/space.reducer';
+import { selectActiveSpace } from 'src/app/store/reducers/moodboard.reducers';
 
 declare const fabric: any;
 
@@ -66,7 +63,6 @@ export class CanvasComponent implements OnInit, OnDestroy {
   //#endregion
 
   //#region Member variables
-  spaces$: Observable<Space[]>;
   activeSpace$: Observable<Space>;
   artifacts$: Observable<Artifact[]>;
 
@@ -148,18 +144,22 @@ export class CanvasComponent implements OnInit, OnDestroy {
   //#endregion
 
   //#region Lifecycle hooks
-  constructor(private store: Store<ArtifactState>, private dialog: MatDialog) {}
+  constructor(
+    private spaceService: SpaceService,
+    private store: Store<ArtifactState>,
+    private dialog: MatDialog
+  ) {}
 
   ngOnInit() {
     // CanvasComponent.disableScroll();
     this.initCanvas();
 
-    this.spaces$ = this.store.select(selectAllSpaces);
-    this.activeSpace$ = this.store.select(selectActiveSpace);
+    this.activeSpace$ = this.store.pipe(select(selectActiveSpace));
     this.artifacts$ = this.store.select(selectAllArtifacts);
 
     // Load space
-    this.store.dispatch(new spaceActions.Load());
+    // this.store.dispatch(new spaceActions.Load());
+    console.warn('Get all spaces here required?');
 
     // Load artifacts when active space is set
     this.spaceSubscription = this.activeSpace$
@@ -550,21 +550,27 @@ export class CanvasComponent implements OnInit, OnDestroy {
       this.lastCanvasViewportTransform = this.fabricCanvas.viewportTransform.slice();
 
       // TODO: check if needed
-      this.activeSpace$.pipe(take(1)).subscribe(space => {
-        if (space) {
-          this.store.dispatch(
-            new spaceActions.Update(space.id, {
-              viewportTransform: this.lastCanvasViewportTransform,
-              updateDate: new Date()
-            })
-          );
-        } else {
-          console.warn('No space found');
-          this.dialog.open(this.blankDialogTemplate, {
-            disableClose: true
-          });
-        }
-      });
+      console.warn('TODO: check if needed & handle activeSpace$');
+      // this.activeSpace$.pipe(take(1)).subscribe(space => {
+      //   if (space) {
+      //     // this.store.dispatch(
+      //     //   new spaceActions.Update(space.id, {
+      //     //     viewportTransform: this.lastCanvasViewportTransform,
+      //     //     updateDate: new Date()
+      //     //   })
+      //     // );
+      //     this.spaceService.update({
+      //       id: space.id,
+      //       viewportTransform: this.lastCanvasViewportTransform,
+      //       updateDate: new Date()
+      //     });
+      //   } else {
+      //     console.warn('No space found');
+      //     this.dialog.open(this.blankDialogTemplate, {
+      //       disableClose: true
+      //     });
+      //   }
+      // });
     }
   }
   //#endregion
@@ -587,7 +593,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
       createDate: date,
       updateDate: date
     };
-    this.store.dispatch(new spaceActions.Create(space));
+    this.spaceService.add(space);
   }
 
   @HostListener('window:resize', ['$event'])

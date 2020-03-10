@@ -1,28 +1,23 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  Input,
   OnDestroy,
   OnInit,
   TemplateRef
 } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { Store } from '@ngrx/store';
-import { Observable, Subscription } from 'rxjs';
+import { select, Store } from '@ngrx/store';
+import { Observable } from 'rxjs';
+import { take, skip } from 'rxjs/operators';
+import { activateSpace } from 'src/app/store/actions/moodboard.actions';
+import {
+  MooodboardState,
+  selectActiveSpace
+} from 'src/app/store/reducers/moodboard.reducers';
+import { SpaceService } from 'src/app/store/space.service';
 import { DataService } from '../../data.service';
 import { LayoutService } from '../../layout/layout.service';
 import { Space } from '../../models/space';
-import * as spaceActions from '../../store/actions/space.actions';
-import {
-  selectActiveSpace,
-  selectAllSpaces,
-  SpaceState
-} from '../../store/reducers/space.reducer';
-
-export enum Appearance {
-  Light = 'light',
-  Dark = 'dark'
-}
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -31,12 +26,6 @@ export enum Appearance {
   styleUrls: ['./space-list.component.scss']
 })
 export class SpaceListComponent implements OnInit, OnDestroy {
-  // Workaround to make enum accessible in template
-  // see https://stackoverflow.com/questions/37277527/how-to-use-enum-in-angular-2-templates#37277643
-  Appearance = Appearance;
-
-  @Input() appearance: Appearance = Appearance.Dark;
-
   spaces$: Observable<Space[]>;
 
   /**
@@ -49,32 +38,37 @@ export class SpaceListComponent implements OnInit, OnDestroy {
    */
   currentSpace: Space;
 
-  spacesSubcription: Subscription;
-  spaces: Space[];
-
   constructor(
     public layout: LayoutService,
-    private store: Store<SpaceState>,
-    private dialog: MatDialog
+    private store: Store<MooodboardState>,
+    private dialog: MatDialog,
+    private spaceService: SpaceService
   ) {}
 
-  ngOnInit() {
-    this.spaces$ = this.store.select(selectAllSpaces);
-    this.activeSpace$ = this.store.select(selectActiveSpace);
-    this.store.dispatch(new spaceActions.Load());
+  async ngOnInit() {
+    this.spaces$ = this.spaceService.entities$;
+    this.activeSpace$ = this.store.pipe(select(selectActiveSpace));
 
-    this.spacesSubcription = this.spaces$.subscribe(
-      (spaces: Space[]) => (this.spaces = spaces)
-    );
+    try {
+      const [spaces] = await Promise.all([
+        this.spaceService
+          .getAll()
+          .pipe(take(1))
+          .toPromise(),
+        this.spaceService.loaded$.pipe(take(1)).toPromise()
+      ]);
+      if (spaces.length > 0) {
+        this.store.dispatch(activateSpace({ space: spaces[0] }));
+      }
+    } catch (e) {
+      console.error('Error loading spaces', e);
+    }
   }
 
-  ngOnDestroy() {
-    this.spacesSubcription.unsubscribe();
-  }
+  ngOnDestroy() {}
 
   onSpaceSelectionChange(space: Space) {
-    this.store.dispatch(new spaceActions.Activate(space.id));
-    // this.dropdownSpaces.close();
+    this.store.dispatch(activateSpace({ space }));
   }
 
   onCreateSpaceClick(name?: string) {
@@ -94,11 +88,11 @@ export class SpaceListComponent implements OnInit, OnDestroy {
       createDate: date,
       updateDate: date
     };
-    this.store.dispatch(new spaceActions.Create(space));
+    this.spaceService.add(space);
   }
 
   onDeleteSpaceClick(space: Space) {
-    this.store.dispatch(new spaceActions.Delete(space.id));
+    this.spaceService.delete(space);
   }
 
   onOpenDialogClick(template: TemplateRef<any>, space: Space) {
