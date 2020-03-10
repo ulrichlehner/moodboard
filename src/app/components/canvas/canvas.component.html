@@ -1,22 +1,143 @@
-<div *ngIf="activeSpace" class="toolbar position-fixed d-flex" style="right: 10px; top: 10px; z-index: 10">
-  <button class="view-all btn btn-outline-light btn-sm" (click)="viewAllObjectsOnCanvas()">
-    <fa-icon [icon]="['fas', 'compress']" [fixedWidth]="true"></fa-icon> View All
-  </button>
-  <a class="download-space btn btn-outline-light btn-sm" href="#" role="button" download="{{activeSpace.name}}.jpg" onclick="this.setAttribute('href', document.getElementById('canvas').toDataURL('image/jpeg'))">
-    <fa-icon [icon]="['fas', 'camera']" [fixedWidth]="true"></fa-icon> Download Screenshot
-  </a>
-  <label class="add-files btn btn-outline-light btn-sm">
-    <fa-icon [icon]="['fas', 'plus']" [fixedWidth]="true"></fa-icon> Upload
-    <input type="file" multiple (change)="uploadFile($event)" aria-label="Upload images">
-  </label>
-</div>
-<!-- <progress max="100" [value]="saveProgress" *ngIf="saveProgress > 0"></progress> -->
-<app-space-list class="position-fixed" appearance="light" style="z-index: 10" [style.left]="activeSpace ? '10px' : '50vw'"
-  [style.top]="activeSpace ? '10px' : '50vh'" [style.transform]="activeSpace ? 'translate(0, 0)' : 'translate(-50%, -50%)' "></app-space-list>
-<app-tutorial *ngIf="activeSpace" class="position-fixed" style="left: 0; bottom: 0; z-index: 10"></app-tutorial>
-<app-info class="position-fixed" style="right: 0; bottom: 0; z-index: 10"></app-info>
-<div id="canvas-wrapper" class="canvas-wrapper" (mousewheel)="mouseWheel($event)" (mousedown)="mouseDown($event)" (mousemove)="mouseMove($event)"
-  (mouseup)="mouseUp($event)" (dragover)="dragOver()" (dragleave)="dragEnd()" (dragend)="dragEnd()" (drop)="drop($event)" [class.dragover]="isDragOver">
-  <canvas id="canvas" class="canvas"></canvas>
-</div>
 <!-- <div class="media-dropzone"></div> -->
+
+<mat-sidenav-container>
+  <mat-sidenav #sidenav mode="over" width="sidebar">
+    <mat-toolbar role="header" color="primary">
+      <button
+        mat-icon-button
+        aria-label="Close menu"
+        (click)="sidenav.toggle()"
+      >
+        <mat-icon>menu</mat-icon>
+      </button>
+      <span fxFlex="1 1 auto">Inspirespace</span
+      ><button
+        mat-icon-button
+        aria-label="Start new Space"
+        (click)="onCreateSpaceClick()"
+      >
+        <mat-icon>add</mat-icon>
+      </button></mat-toolbar
+    >
+
+    <app-space-list></app-space-list>
+  </mat-sidenav>
+
+  <mat-sidenav-content>
+    <div
+      id="canvas-wrapper"
+      class="canvas-wrapper"
+      (mousewheel)="mouseWheel($event)"
+      (mousedown)="mouseDown($event)"
+      (mousemove)="mouseMove($event)"
+      (mouseup)="mouseUp($event)"
+      (dragover)="dragOver()"
+      (dragleave)="dragEnd()"
+      (dragend)="dragEnd()"
+      (drop)="drop($event)"
+      [class.dragover]="isDragOver"
+    >
+      <canvas id="canvas" class="canvas"></canvas>
+    </div>
+
+    <h1
+      *ngIf="activeSpace"
+      textDisabled
+      matCaption
+      textCenter
+      spacing="p"
+      style="left: 0; right: 0; top: 0"
+    >
+      {{ activeSpace.name }}
+    </h1>
+
+    <mat-toolbar class="dummy-toolbar">
+      <button
+        mat-mini-fab
+        color="primary"
+        aria-label="Open menu"
+        (click)="sidenav.toggle()"
+      >
+        <mat-icon>menu</mat-icon>
+      </button>
+    </mat-toolbar>
+
+    <div *ngIf="activeSpace" style="right: 10px; top: 10px">
+      <button
+        mat-icon-button
+        (click)="onZoomToFitClick()"
+        title="Zoom to fit"
+        aria-label="Zoom to fit"
+      >
+        <mat-icon>zoom_out_map</mat-icon>
+      </button>
+      <a
+        mat-icon-button
+        href="#"
+        role="button"
+        title="Download screenshot"
+        aria-label="Download screenshot"
+        download="{{ activeSpace.name }}.jpg"
+        onclick="this.setAttribute('href', document.getElementById('canvas').toDataURL('image/jpeg'))"
+      >
+        <mat-icon>camera</mat-icon>
+      </a>
+      <label class="mat-icon-button" title="Upload media">
+        <input
+          fxHide
+          type="file"
+          multiple
+          (change)="onUploadFileChange($event)"
+          aria-label="Upload images"
+        />
+        <a mat-icon-button><mat-icon>add_to_queue</mat-icon></a>
+      </label>
+    </div>
+
+    <app-info style="right: 0; bottom: 0"></app-info>
+    <app-tutorial *ngIf="activeSpace" style="left: 0; bottom: 0"></app-tutorial>
+  </mat-sidenav-content>
+</mat-sidenav-container>
+
+<ng-template #blankDialogTemplate>
+  <h1 mat-dialog-title>Welcome to Inspirespace</h1>
+  <section mat-dialog-content matTypography>
+    <p>
+      With this app you can craft beautiful moodboads and freely zoom in and out
+      on the canvas. Your moodboard is stored on your computer - no login
+      required!
+    </p>
+    <h2>Usage</h2>
+    <ul>
+      <li>
+        You can <kbd>drag & drop</kbd> images onto the canvas or use the
+        <kbd>Upload</kbd> button <strong>to add images</strong>.
+      </li>
+      <li>
+        Select one or more images by making a selection on the canvas and
+        <strong>use the handles to transform images</strong>.
+      </li>
+      <li>
+        To <strong>delete</strong> selected images simply press
+        <kbd>Delete</kbd> or <kbd>Backspace</kbd> on your keyboard.
+      </li>
+      <li>
+        You can <strong>pan the canvas</strong> by holding
+        <kbd>Space&nbsp;+&nbsp;move</kbd> with the mouse. You
+        <strong>zoom in and out</strong> by holding
+        <kbd>Space&nbsp;+&nbsp;scroll</kbd> with the mouse.
+      </li>
+    </ul>
+  </section>
+  <div mat-dialog-actions fxLayout="row" fxLayoutAlign="center">
+    <button
+      mat-raised-button
+      color="primary"
+      mat-dialog-close
+      cdkFocusInitial
+      (click)="onCreateSpaceClick('My first Inspirespace')"
+    >
+      Start a new space
+    </button>
+  </div>
+</ng-template>

@@ -4,28 +4,24 @@ import {
   Input,
   OnInit
 } from '@angular/core';
-import { Artifact } from '@models/artifact';
-import { Store } from '@ngrx/store';
-import * as ArtifactActions from '@store/actions/artifact.actions';
+import { ArtifactService } from 'src/app/store/artifact.service';
+import { Artifact } from '../../models/artifact';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-artifact-detail',
   templateUrl: './artifact-detail.component.html',
-  styleUrls: ['./artifact-detail.component.css']
+  styleUrls: ['./artifact-detail.component.scss']
 })
 export class ArtifactDetailComponent implements OnInit {
   @Input() artifact: Artifact;
-  // artifact$: Observable<Artifact>;
 
-  constructor(private store: Store<any>) {}
+  constructor(private artifactService: ArtifactService) {}
 
-  ngOnInit() {
-    // this.artifact$ = this.store.select(selectActiveArtifact);
-  }
+  ngOnInit() {}
 
   deleteArtifact(artifact: Artifact) {
-    this.store.dispatch(new ArtifactActions.Delete(artifact.id));
+    this.artifactService.delete(artifact);
     console.log(`Artifact deleted: ${artifact.name}`);
   }
 }

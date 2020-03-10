@@ -1,27 +1,22 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  Input,
   OnDestroy,
   OnInit,
-  ViewChild
+  TemplateRef
 } from '@angular/core';
-import { DataService } from '@app/data.service';
-import { Space } from '@models/space';
-import { NgbDropdown, NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { Store } from '@ngrx/store';
-import * as spaceActions from '@store/actions/space.actions';
-import {
-  SpaceState,
-  selectActiveSpace,
-  selectAllSpaces
-} from '@store/reducers/space.reducer';
+import { MatDialog } from '@angular/material/dialog';
+import { select, Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
-
-export enum Appearance {
-  Light = 'light',
-  Dark = 'dark'
-}
+import { take } from 'rxjs/operators';
+import { activateSpace } from 'src/app/store/actions/moodboard.actions';
+import {
+  AppState,
+  selectActiveSpace
+} from 'src/app/store/reducers/moodboard.reducers';
+import { SpaceService } from 'src/app/store/space.service';
+import { LayoutService } from '../../layout/layout.service';
+import { Space } from '../../models/space';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -30,47 +25,70 @@ export enum Appearance {
   styleUrls: ['./space-list.component.scss']
 })
 export class SpaceListComponent implements OnInit, OnDestroy {
-  // Workaround to make enum accessible in template
-  // see https://stackoverflow.com/questions/37277527/how-to-use-enum-in-angular-2-templates#37277643
-  Appearance = Appearance;
-  @Input() appearance: Appearance = Appearance.Dark;
-  @ViewChild('dropdownSpaces') dropdownSpaces: NgbDropdown;
-
   spaces$: Observable<Space[]>;
-  activeSpace$: Observable<Space>;
-  spaceInModel: Space;
 
-  spacesSubcription: Subscription;
-  spaces: Space[];
+  /**
+   * The active space on the canvas
+   */
+  activeSpace$: Observable<Space | null>;
+
+  /**
+   * The space that is edited / deleted by a user
+   */
+  currentSpace: Space;
+
+  private activeSpace: Space | null = null;
+  private activeSpaceSubscription: Subscription;
+
+  private spaces: Space[] = [];
+  private spacesSubscription: Subscription;
 
   constructor(
-    private store: Store<SpaceState>,
-    private modalService: NgbModal
+    public layout: LayoutService,
+    private store: Store<AppState>,
+    private dialog: MatDialog,
+    private spaceService: SpaceService
   ) {}
 
-  ngOnInit() {
-    this.spaces$ = this.store.select(selectAllSpaces);
-    this.activeSpace$ = this.store.select(selectActiveSpace);
-    this.store.dispatch(new spaceActions.Load());
-
-    this.spacesSubcription = this.spaces$.subscribe(
-      (spaces: Space[]) => (this.spaces = spaces)
+  async ngOnInit() {
+    this.spaces$ = this.spaceService.entities$;
+    this.activeSpace$ = this.store.pipe(select(selectActiveSpace));
+    this.activeSpaceSubscription = this.activeSpace$.subscribe(
+      activeSpace => (this.activeSpace = activeSpace)
     );
+    this.spacesSubscription = this.spaces$.subscribe(
+      spaces => (this.spaces = spaces)
+    );
+
+    try {
+      const [spaces] = await Promise.all([
+        this.spaceService
+          .getAll()
+          .pipe(take(1))
+          .toPromise(),
+        this.spaceService.loaded$.pipe(take(1)).toPromise()
+      ]);
+      if (spaces.length > 0) {
+        this.store.dispatch(activateSpace({ space: spaces[0] }));
+      }
+    } catch (e) {
+      console.error('Error loading spaces', e);
+    }
   }
 
   ngOnDestroy() {
-    this.spacesSubcription.unsubscribe();
+    this.activeSpaceSubscription.unsubscribe();
+    this.spacesSubscription.unsubscribe();
   }
 
-  activateSpace(space: Space) {
-    this.store.dispatch(new spaceActions.Activate(space.id));
-    this.dropdownSpaces.close();
+  onSpaceSelectionChange(space: Space) {
+    this.store.dispatch(activateSpace({ space }));
   }
 
-  addSpace(name?: string) {
+  onCreateSpaceClick(name?: string) {
     const date = new Date();
     const space: Space = {
-      id: DataService.generateSpaceId(),
+      id: SpaceService.generateId(),
       name: name
         ? name
         : `Inspirespace (${date.toLocaleString([], {
@@ -84,48 +102,25 @@ export class SpaceListComponent implements OnInit, OnDestroy {
       createDate: date,
       updateDate: date
     };
-    this.store.dispatch(new spaceActions.Create(space));
+    this.spaceService.add(space);
+  }
 
-    if (this.dropdownSpaces) {
-      // Close dropdown with small delay so a user sees that new item has been created
-      // timer(300).subscribe(done => {
-      // console.log('should close');
-      this.dropdownSpaces.close(); // Doesn't work??
-      // });
+  onDeleteSpaceClick(space: Space) {
+    this.spaceService.delete(space);
+    console.warn('setting active spaces where it should be done via an effect');
+    if (space.id === this.activeSpace?.id) {
+      this.store.dispatch(
+        activateSpace(this.spaces.length > 0 ? { space: this.spaces[0] } : null)
+      );
     }
   }
 
-  deleteSpace(space: Space) {
-    this.store.dispatch(new spaceActions.Delete(space.id));
+  onOpenDialogClick(template: TemplateRef<any>, space: Space) {
+    this.currentSpace = space;
+    this.dialog.open(template);
   }
 
-  openDeleteConfirmationDialog(content, space: Space) {
-    this.dropdownSpaces.autoClose = false;
-    this.spaceInModel = space;
-    this.modalService.open(content, { centered: true }).result.then(
-      result => {
-        this.dropdownSpaces.autoClose = 'outside';
-        // console.log('closed');
-      },
-      reason => {
-        this.dropdownSpaces.autoClose = 'outside';
-        // console.log('dismissed');
-      }
-    );
-  }
-
-  openEditDialog(content, space: Space) {
-    this.dropdownSpaces.autoClose = false;
-    this.spaceInModel = space;
-    this.modalService.open(content, { centered: true }).result.then(
-      result => {
-        this.dropdownSpaces.autoClose = 'outside';
-        // console.log('closed');
-      },
-      reason => {
-        this.dropdownSpaces.autoClose = 'outside';
-        // console.log('dismissed');
-      }
-    );
+  trackBySpace(index: number, space: Space) {
+    return space.id;
   }
 }

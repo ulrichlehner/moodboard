@@ -1,9 +1,7 @@
-import { Component, OnInit, Input } from '@angular/core';
-import { FormGroup, FormBuilder, Validators } from '@angular/forms';
-import { Space } from '@models/space';
-import { Store } from '@ngrx/store';
-import { SpaceState } from '@store/reducers/space.reducer';
-import * as spaceActions from '@store/actions/space.actions';
+import { Component, Input, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { SpaceService } from 'src/app/store/space.service';
+import { Space } from '../../models/space';
 
 @Component({
   selector: 'app-space-detail',
@@ -15,7 +13,7 @@ export class SpaceDetailComponent implements OnInit {
 
   spaceForm: FormGroup;
 
-  constructor(private fb: FormBuilder, private store: Store<SpaceState>) {
+  constructor(private fb: FormBuilder, private spaceService: SpaceService) {
     this.createForm();
   }
 
@@ -34,9 +32,6 @@ export class SpaceDetailComponent implements OnInit {
       console.warn('Tried to save invalid space');
       return;
     }
-
-    this.store.dispatch(
-      new spaceActions.Update(this.space.id, this.spaceForm.value)
-    );
+    this.spaceService.update({ id: this.space.id, ...this.spaceForm.value });
   }
 }

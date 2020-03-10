@@ -3,25 +3,24 @@ import {
   Component,
   HostListener,
   OnDestroy,
-  OnInit
+  OnInit,
+  TemplateRef,
+  ViewChild
 } from '@angular/core';
-import { DataService } from '@app/data.service';
-import { Artifact } from '@models/artifact';
-import { Space } from '@models/space';
-import { Store } from '@ngrx/store';
-import * as artifactActions from '@store/actions/artifact.actions';
-import * as spaceActions from '@store/actions/space.actions';
-import {
-  ArtifactState,
-  selectAllArtifacts
-} from '@store/reducers/artifact.reducer';
-import {
-  selectActiveSpace,
-  selectAllSpaces
-} from '@store/reducers/space.reducer';
+import { MatDialog } from '@angular/material/dialog';
+import { select, Store } from '@ngrx/store';
 import 'fabric';
-import { Observable, Subscription, fromEvent } from 'rxjs';
+import { fromEvent, Observable, Subscription } from 'rxjs';
 import { debounceTime, skip, take } from 'rxjs/operators';
+import { ArtifactService } from 'src/app/store/artifact.service';
+import {
+  AppState,
+  selectActiveSpace
+} from 'src/app/store/reducers/moodboard.reducers';
+import { SpaceService } from 'src/app/store/space.service';
+import { Artifact } from '../../models/artifact';
+import { Space } from '../../models/space';
+import { activateSpace } from 'src/app/store/actions/moodboard.actions';
 
 declare const fabric: any;
 
@@ -36,6 +35,10 @@ export class CanvasComponent implements OnInit, OnDestroy {
 
   /* left: 37, up: 38, right: 39, down: 40, spacebar: 32, pageup: 33, pagedown: 34, end: 35, home: 36 */
   private static readonly keys = { 37: 1, 38: 1, 39: 1, 40: 1 };
+
+  activeSpace: Space;
+  isSpacePressed = false;
+  isDragOver = false;
 
   private readonly attachmentImageMimeType = 'image/webp';
   private readonly attachmentImageQuality = 0.6;
@@ -63,33 +66,31 @@ export class CanvasComponent implements OnInit, OnDestroy {
   //#endregion
 
   //#region Member variables
-  spaces$: Observable<Space[]>;
-  activeSpace$: Observable<Space>;
-  artifacts$: Observable<Artifact[]>;
+  private activeSpace$: Observable<Space>;
+  private artifacts$: Observable<Artifact[]>;
 
-  artifacts: Artifact[];
-  activeSpace: Space;
+  private artifacts: Artifact[];
 
-  artifactSubscription: Subscription;
-  spaceSubscription: Subscription;
+  private artifactSubscription: Subscription;
+  private spaceSubscription: Subscription;
 
-  fabricCanvas = null;
-  domCanvas;
+  private fabricCanvas = null;
+  private domCanvas;
 
   //#endregion
 
   //#region State variables
-  lastX: number;
-  lastY: number;
-  dragStartPosition: { x: number; y: number };
-  saveProgress = 0;
-  lastCanvasViewportTransform = [];
+  private lastX: number;
+  private lastY: number;
+  private dragStartPosition: { x: number; y: number };
+  // saveProgress = 0;
+  private lastCanvasViewportTransform = [];
 
-  isSpacePressed = false;
-  isDragOver = false;
-
-  drawnPathObjects = new Array();
+  private drawnPathObjects = new Array();
   //#endregion
+
+  @ViewChild('blankDialogTemplate')
+  private blankDialogTemplate: TemplateRef<any>;
 
   //#region Disable scrolling
 
@@ -141,19 +142,25 @@ export class CanvasComponent implements OnInit, OnDestroy {
   // }
   //#endregion
 
-  //#region Component lifecylce event handlers
-  constructor(private store: Store<ArtifactState>) {}
+  //#region Lifecycle hooks
+  constructor(
+    private spaceService: SpaceService,
+    private artifactService: ArtifactService,
+    private store: Store<AppState>,
+    private dialog: MatDialog
+  ) {}
 
   ngOnInit() {
+    console.warn('enabled strict null checks');
     // CanvasComponent.disableScroll();
     this.initCanvas();
 
-    this.spaces$ = this.store.select(selectAllSpaces);
-    this.activeSpace$ = this.store.select(selectActiveSpace);
-    this.artifacts$ = this.store.select(selectAllArtifacts);
+    this.activeSpace$ = this.store.pipe(select(selectActiveSpace));
+    this.artifacts$ = this.artifactService.entities$;
 
     // Load space
-    this.store.dispatch(new spaceActions.Load());
+    // this.store.dispatch(new spaceActions.Load());
+    console.warn('Get all spaces here required?');
 
     // Load artifacts when active space is set
     this.spaceSubscription = this.activeSpace$
@@ -164,7 +171,11 @@ export class CanvasComponent implements OnInit, OnDestroy {
         if (space) {
           if (!this.activeSpace || space.id !== this.activeSpace.id) {
             this.removeAllCanvasObjects();
-            this.store.dispatch(new artifactActions.Load(space.id));
+            console.warn(
+              'artifactService.clearCache() classed - maybe there are alternatives'
+            );
+            this.artifactService.clearCache();
+            this.artifactService.getWithQuery({ spaceId: space.id });
           }
           this.activeSpace = space;
           this.lastCanvasViewportTransform = space.viewportTransform;
@@ -199,7 +210,8 @@ export class CanvasComponent implements OnInit, OnDestroy {
 
     if (!this.fabricCanvas) {
       this.fabricCanvas = new fabric.Canvas('canvas', {
-        noScaleCache: true
+        noScaleCache: true,
+        backgroundVpt: false
       });
 
       this.fabricCanvas.setBackgroundColor(
@@ -247,7 +259,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
     );
   }
 
-  viewAllObjectsOnCanvas() {
+  onZoomToFitClick() {
     const bounds = this.calculateBounds();
     const padding = 10;
     if (bounds) {
@@ -346,9 +358,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
     if (this.fabricCanvas.getActiveObjects()) {
       this.fabricCanvas
         .getActiveObjects()
-        .forEach((obj: any) =>
-          this.store.dispatch(new artifactActions.Delete(obj.id))
-        );
+        .forEach((obj: any) => this.artifactService.delete(obj as Artifact));
     }
   }
 
@@ -416,13 +426,11 @@ export class CanvasComponent implements OnInit, OnDestroy {
             ctx.drawImage(imgEl, 0, 0, canvas.width, canvas.height);
 
             const bounds = this.fabricCanvas.calcViewportBoundaries();
-            const id: string = DataService.generateArtifactId(
-              this.activeSpace.id
-            );
+            const id: string = ArtifactService.generateId(this.activeSpace.id);
             const date = new Date();
             const distance = 10 / this.fabricCanvas.getZoom();
             const artifact: Artifact = {
-              id: id,
+              id,
               name: `Artifact @${id}`,
               spaceId: this.activeSpace.id,
               transform: {
@@ -453,7 +461,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
                 };
 
                 this.addArtifactToCanvas(artifact, () => {
-                  this.store.dispatch(new artifactActions.Create(artifact));
+                  this.artifactService.add(artifact);
                 });
 
                 canvas.remove();
@@ -516,17 +524,16 @@ export class CanvasComponent implements OnInit, OnDestroy {
       const object =
         currentObjects[this.fabricCanvas.getObjects().indexOf(objects[i])];
       if (object) {
-        this.store.dispatch(
-          new artifactActions.Update(id, {
-            transform: {
-              scale: object.scaleX,
-              angle: object.angle,
-              x: object.left,
-              y: object.top,
-              order: this.fabricCanvas.getObjects().indexOf(objects[i])
-            }
-          })
-        );
+        this.artifactService.update({
+          id,
+          transform: {
+            scale: object.scaleX,
+            angle: object.angle,
+            x: object.left,
+            y: object.top,
+            order: this.fabricCanvas.getObjects().indexOf(objects[i])
+          }
+        });
       }
     }
   }
@@ -543,16 +550,19 @@ export class CanvasComponent implements OnInit, OnDestroy {
       this.lastCanvasViewportTransform = this.fabricCanvas.viewportTransform.slice();
 
       // TODO: check if needed
+      console.warn('TODO: check if needed & handle better');
       this.activeSpace$.pipe(take(1)).subscribe(space => {
         if (space) {
-          this.store.dispatch(
-            new spaceActions.Update(space.id, {
-              viewportTransform: this.lastCanvasViewportTransform,
-              updateDate: new Date()
-            })
-          );
+          this.spaceService.update({
+            id: space.id,
+            viewportTransform: this.lastCanvasViewportTransform,
+            updateDate: new Date()
+          });
         } else {
           console.warn('No space found');
+          this.dialog.open(this.blankDialogTemplate, {
+            disableClose: true
+          });
         }
       });
     }
@@ -560,6 +570,33 @@ export class CanvasComponent implements OnInit, OnDestroy {
   //#endregion
 
   //#region Event handlers
+  async onCreateSpaceClick(name?: string) {
+    const date = new Date();
+    const space: Space = {
+      id: SpaceService.generateId(),
+      name: name
+        ? name
+        : `Inspirespace (${date.toLocaleString([], {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          })})`,
+      viewportTransform: [1, 0, 0, 1, 0, 0],
+      createDate: date,
+      updateDate: date
+    };
+    this.store.dispatch(
+      activateSpace({
+        space: await this.spaceService
+          .add(space)
+          .pipe(take(1))
+          .toPromise()
+      })
+    );
+  }
+
   @HostListener('window:resize', ['$event'])
   onResize(event) {
     this.initCanvas();
@@ -687,7 +724,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
     }
   }
 
-  uploadFile(event) {
+  onUploadFileChange(event) {
     this.saveFiles(event.target.files);
   }
 

@@ -1,87 +1,100 @@
-<div ngbDropdown *ngIf="activeSpace$ | async as activeSpace;else blank" autoClose="outside" #dropdownSpaces="ngbDropdown">
-  <button ngbDropdownToggle class="btn btn-sm" [class.btn-outline-primary]="appearance === Appearance.Dark" [class.btn-outline-light]="appearance === Appearance.Light"
-    type="button" id="dropdownSpaces" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-    {{ activeSpace.name }}
-  </button>
-  <ng-container *ngIf="spaces$ | async as spaces">
-    <div ngbDropdownMenu aria-labelledby="dropdownSpaces">
-      <header class="dropdown-header">Your Spaces ({{ spaces.length }})</header>
-      <div *ngFor="let space of spaces" class="wrapper">
-        <button class="dropdown-item" [class.active]="space.id === activeSpace.id" (click)="activateSpace(space)">
-          {{ space.name }}</button>
-        <div class="actions">
-          <button class="btn btn-link" (click)="$event.stopPropagation(); openEditDialog(modalEdit, space); " aria-label="Edit space">
-            <fa-icon [icon]="['far', 'edit']" [fixedWidth]="true"></fa-icon>
-          </button>
-          <button class="btn btn-link" (click)="$event.stopPropagation(); openDeleteConfirmationDialog(modalDeleteConfirmation, space);"
-            [disabled]="spaces.length <= 1" aria-label="Delete space">
-            <fa-icon [icon]="['far', 'trash-alt']" [fixedWidth]="true"></fa-icon>
-          </button>
+<ng-container *ngIf="activeSpace$ | async as activeSpace; else blankTemplate">
+  <ng-container *ngIf="spaces$ | async as spaces">
+    <mat-selection-list
+      [multiple]="false"
+      dense
+      (selectionChange)="onSpaceSelectionChange($event.option.value)"
+      class="mat-selection-list--with-actions"
+    >
+      <header mat-subheader>Your Spaces ({{ spaces.length }})</header>
+      <mat-list-option
+        *ngFor="let space of spaces; trackBy: trackBySpace"
+        [selected]="space.id === activeSpace.id"
+        [value]="space"
+      >
+        <div fxLayout="row" fxLayoutAlign="space-between center">
+          <span fxFlex="1 0" truncate>{{ space.name }}</span>
+          <div fxLayout="row">
+            <button
+              mat-icon-button
+              (click)="
+                $event.stopPropagation();
+                onOpenDialogClick(dialogTemplateEdit, space)
+              "
+              aria-label="Edit space"
+            >
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button
+              mat-icon-button
+              (click)="
+                $event.stopPropagation();
+                onOpenDialogClick(dialogTemplateDelete, space)
+              "
+              [disabled]="spaces.length <= 1"
+              aria-label="Delete space"
+            >
+              <mat-icon>delete_forever</mat-icon>
+            </button>
+          </div>
         </div>
-      </div>
-      <div class="dropdown-divider"></div>
-      <div class="px-4 py-0 mt-3">
-        <button class="btn btn-link btn-sm pl-0 ml-0" (click)="addSpace()">Start new Space</button>
-      </div>
-    </div>
+      </mat-list-option>
+    </mat-selection-list>
   </ng-container>
-</div>
+</ng-container>
 
-<ng-template #blank>
-  <div class="text-center">
-    <h1 class="display-4 text-light mb-5">Welcome to Inspirespace.</h1>
-    <p class="lead text-light">With this app you can craft beautiful moodboads and freely zoom in and out on the canvas. Your moodboard is stored on
-      your computer - no login required!</p>
-    <h2 class="text-light h5">Usage</h2>
-    <ul class="text-light list-unstyled mb-5">
-      <li>You can
-        <kbd>drag & drop</kbd> images onto the canvas or use the
-        <kbd>Upload</kbd> button
-        <strong>to add images</strong>.</li>
-      <li>Select one or more images by making a selection on the canvas and
-        <strong>use the handles to transform images</strong>.</li>
-      <li>To
-        <strong>delete</strong> selected images simply press
-        <kbd>Delete</kbd> or
-        <kbd>Backspace</kbd> on your keyboard.</li>
-      <li>You can
-        <strong>pan the canvas</strong> by holding
-        <kbd>Space&nbsp;+&nbsp;move</kbd> with the mouse. You
-        <strong>zoom in and out</strong> by holding
-        <kbd>Space&nbsp;+&nbsp;scroll</kbd> with the mouse.</li>
-    </ul>
-    <button class="btn btn-primary btn-lg" (click)="addSpace('My first Inspirespace')">Start a Space</button>
+<ng-template #blankTemplate>
+  <section fxLayout="column" [fxLayoutGap]="layout.spacing" spacing="p">
+    <div>
+      There are no spaces yet - start a new space and upload some media.
+    </div>
+    <button
+      mat-raised-button
+      color="primary"
+      (click)="onCreateSpaceClick('My first Inspirespace')"
+    >
+      Start a Space
+    </button>
+  </section>
+</ng-template>
+
+<ng-template #dialogTemplateEdit>
+  <header mat-dialog-title>Edit {{ currentSpace.name }}</header>
+  <div mat-dialog-content matTypography>
+    <app-space-detail #spaceDetail [space]="currentSpace"></app-space-detail>
+  </div>
+  <div mat-dialog-actions fxLayout="row" fxLayoutAlign="end">
+    <button mat-flat-button mat-dialog-close>
+      Cancel
+    </button>
+    <button
+      mat-flat-button
+      color="primary"
+      mat-dialog-close
+      (click)="spaceDetail.saveSpace()"
+    >
+      Save
+    </button>
   </div>
 </ng-template>
 
-<ng-template #modalEdit let-c="close" let-d="dismiss">
-  <div class="modal-header">
-    <header class="modal-title h5">Edit {{ spaceInModel.name }}</header>
-    <button type="button" class="close" aria-label="Close" (click)="$event.stopPropagation(); d();">
-      <span aria-hidden="true">&times;</span>
+<ng-template #dialogTemplateDelete>
+  <header mat-dialog-title>Delete {{ currentSpace.name }}</header>
+  <div mat-dialog-content matTypography>
+    <p>Do you really want to delete this space?</p>
+    <p>This will permanently remove it including all containing artifacts.</p>
+  </div>
+  <div mat-dialog-actions fxLayout="row" fxLayoutAlign="end">
+    <button mat-flat-button mat-dialog-close cdkFocusInitial>
+      Cancel
     </button>
-  </div>
-  <div class="modal-body">
-    <app-space-detail #spaceDetail [space]="spaceInModel"></app-space-detail>
-  </div>
-  <div class="modal-footer">
-    <button type="button" class="btn btn-secondary" (click)="$event.stopPropagation(); c();">Cancel</button>
-    <button type="button" class="btn btn-primary" (click)="$event.stopPropagation(); spaceDetail.saveSpace(); d();">Save</button>
-  </div>
-</ng-template>
-
-<ng-template #modalDeleteConfirmation let-c="close" let-d="dismiss">
-  <div class="modal-header">
-    <header class="modal-title h5">Delete {{ spaceInModel.name }}</header>
-    <button type="button" class="close" aria-label="Close" (click)="$event.stopPropagation(); d();">
-      <span aria-hidden="true">&times;</span>
+    <button
+      mat-stroked-button
+      color="warn"
+      mat-dialog-close
+      (click)="onDeleteSpaceClick(currentSpace)"
+    >
+      Delete
     </button>
-  </div>
-  <div class="modal-body">
-    Do you really want to delete this space? This will permanently remove it including all containing artifacts.
-  </div>
-  <div class="modal-footer">
-    <button type="button" class="btn btn-secondary" (click)="$event.stopPropagation(); c();">Cancel</button>
-    <button type="button" class="btn btn-danger" (click)="$event.stopPropagation(); deleteSpace(spaceInModel); d();">Delete</button>
   </div>
 </ng-template>

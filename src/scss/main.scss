@@ -1,33 +1,113 @@
+@import 'font';
+
+// Custom Theming for Angular Material
+// For more information: https://material.angular.io/guide/theming
+@import '~@angular/material/theming';
+// Plus imports for other components in your app.
+
+$custom-typography: mat-typography-config(
+  $font-family: 'FiraGO, Helvetica, Arial, sans-serif'
+);
+
+// Include the common styles for Angular Material. We include this here so that you only
+// have to load a single css file for Angular Material in your app.
+// Be sure that you only ever include this mixin once!
+@include mat-core($custom-typography);
+
+// Background palette for dark themes.
+$mat-dark-theme-background-custom: map-merge(
+  $mat-dark-theme-background,
+  (
+    dialog: map_get($mat-grey, 900)
+  )
+);
+
+// Creates a container object for a dark theme to be given to individual component theme mixins.
+@function mat-dark-theme-custom(
+  $primary,
+  $accent,
+  $warn: mat-palette($mat-red)
+) {
+  @return (
+    primary: $primary,
+    accent: $accent,
+    warn: $warn,
+    is-dark: true,
+    foreground: $mat-dark-theme-foreground,
+    background: $mat-dark-theme-background-custom
+  );
+}
+
+// Define the palettes for your theme using the Material Design palettes available in palette.scss
+// (imported above). For each palette, you can optionally specify a default, lighter, and darker
+// hue. Available color palettes: https://material.io/design/color/
+$inspirespace-app-primary: mat-palette($mat-deep-orange);
+$inspirespace-app-accent: mat-palette($mat-deep-orange, A200, A100, A400);
+
+// The warn palette is optional (defaults to red).
+$inspirespace-app-warn: mat-palette($mat-red);
+
+// Create the theme object (a Sass map containing all of the palettes).
+$inspirespace-app-theme: mat-dark-theme-custom(
+  $inspirespace-app-primary,
+  $inspirespace-app-accent,
+  $inspirespace-app-warn
+);
+
+// Include theme styles for core and each component used in your app.
+// Alternatively, you can import and @include the theme mixins for each component
+// that you are using.
+@include angular-material-theme($inspirespace-app-theme);
+
 /* You can add global styles to this file, and also import other style files */
 
-// Import Bootstrap? -> https://stackoverflow.com/questions/45660802/how-to-use-bootstrap-4-with-sass-in-angular
+//region Angular Material Tweaks
+// .list-item-active {
+//   .mat-list-text {
+//     color: mat-color($inspirespace-app-primary) !important;
+//   }
+// }
 
-// @import "./../lib/open-sans-fontface/open-sans";
-// @import "./../lib/font-awesome/less/font-awesome";
-// @import "./../lib/bootstrap/less/bootstrap";
-// @import "./../lib/toastr/toastr";
+.mat-selection-list {
+  &--with-actions {
+    .mat-list-item-content {
+      padding-right: 4px !important;
+    }
 
-// Vars
-// @import "globals/variables";
+    .mat-list-text {
+      padding-right: 0 !important;
+    }
+  }
+}
 
-// Modules
-// @import "modules/canvas";
-// @import "modules/splash-screen";
+.mat-typography {
+  // See https://material.angular.io/guide/theming-your-components
+  $primary: map-get($inspirespace-app-theme, primary);
+  a {
+    color: mat-color($primary);
+  }
+}
+
+.mat-drawer-backdrop.mat-drawer-shown {
+  @warn ('dark backdrop color workaround active');
+  background-color: $cdk-overlay-dark-backdrop-background;
+}
+//#endregion
+
+@import '~normalize.css/normalize';
 
 @import 'variables';
-
-@import '~bootstrap/scss/bootstrap';
 
 /*****************************
 * Global
 *****************************/
 
-html,
-body {
-  height: 100vh;
-  width: 100vw;
-  overflow: hidden;
-}
+// html,
+// body {
+//   height: 100vh;
+//   width: 100vw;
+//   overflow: hidden;
+// }
 
 code {
   background-color: rgba(0, 0, 0, 0.1);
@@ -131,4 +211,16 @@ code {
   text-align: right;
   top: 10px;
   z-index: -1;
+}
+
+html,
+body {
+  height: 100%;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+body {
+  margin: 0;
+  font-family: FiraGO, Helvetica, Arial, sans-serif;
+  letter-spacing: 0.03em;
 }

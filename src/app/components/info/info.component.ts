@@ -1,17 +1,16 @@
-import { Component, OnInit } from '@angular/core';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-
+import { Component, OnInit, TemplateRef } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
 @Component({
   selector: 'app-info',
   templateUrl: './info.component.html',
   styleUrls: ['./info.component.scss']
 })
 export class InfoComponent implements OnInit {
-  constructor(private modalService: NgbModal) {}
+  constructor(private dialog: MatDialog) {}
 
   ngOnInit() {}
 
-  openInfoDialog(content) {
-    this.modalService.open(content, { centered: true, size: 'lg' });
+  onOpenInfoClick(template: TemplateRef<any>) {
+    this.dialog.open(template);
   }
 }

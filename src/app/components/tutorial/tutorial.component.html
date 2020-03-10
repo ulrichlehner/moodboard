@@ -1,37 +1,49 @@
-<button class="btn btn-link btn-sm text-light" (click)="$event.stopPropagation(); openTutorialDialog(modalTutorial);">
-  <fa-icon [icon]="['far', 'question-circle']"></fa-icon> Help
+<button
+  mat-icon-button
+  aria-label="Open tutorial dialog"
+  (click)="onOpenTutorialClick(templateTutorialDialog)"
+>
+  <mat-icon>help</mat-icon>
 </button>
-<small class="text-muted">To get started just drag some images inside</small>
-<ng-template #modalTutorial let-c="close" let-d="dismiss">
-  <div class="modal-header">
-    <header class="modal-title h2">Welcome to Inspirespace.</header>
-    <button type="button" class="close" aria-label="Close" (click)="$event.stopPropagation(); d();">
-      <span aria-hidden="true">&times;</span>
-    </button>
-  </div>
-  <div class="modal-body">
-    <p class="lead">With this app you can craft beautiful moodboards and freely zoom in and out on the canvas. Your moodboard is stored on
-      your computer - no login required!</p>
-    <h3 class="h5">Usage</h3>
+
+<span textDisabled matCaption>To get started just drag some images inside</span>
+
+<ng-template #templateTutorialDialog>
+  <header mat-dialog-title>Welcome to Inspirespace.</header>
+
+  <section mat-dialog-content matTypography>
+    <p>
+      With this app you can craft beautiful moodboards and freely zoom in and
+      out on the canvas. Your moodboard is stored on your computer - no login
+      required!
+    </p>
+    <h3>Usage</h3>
     <ul>
-      <li>You can
-        <kbd>drag & drop</kbd> images onto the canvas or use the
-        <kbd>Upload</kbd> button
-        <strong>to add images</strong>.</li>
-      <li>Select one or more images by making a selection on the canvas and
-        <strong>use the handles to transform images</strong>.</li>
-      <li>To
-        <strong>delete</strong> selected images simply press
-        <kbd>Delete</kbd> or
-        <kbd>Backspace</kbd> on your keyboard.</li>
-      <li>You can
-        <strong>pan the canvas</strong> by holding
+      <li>
+        You can <kbd>drag & drop</kbd> images onto the canvas or use the
+        <kbd>Upload</kbd> button <strong>to add images</strong>.
+      </li>
+      <li>
+        Select one or more images by making a selection on the canvas and
+        <strong>use the handles to transform images</strong>.
+      </li>
+      <li>
+        To <strong>delete</strong> selected images simply press
+        <kbd>Delete</kbd> or <kbd>Backspace</kbd> on your keyboard.
+      </li>
+      <li>
+        You can <strong>pan the canvas</strong> by holding
         <kbd>Space&nbsp;+&nbsp;move</kbd> with the mouse. You
         <strong>zoom in and out</strong> by holding
-        <kbd>Space&nbsp;+&nbsp;scroll</kbd> with the mouse.</li>
+        <kbd>Space&nbsp;+&nbsp;scroll</kbd> with the mouse.
+      </li>
     </ul>
-    <div class="alert alert-warning m-0" role="alert">
-      Please note that the app is in beta - expect that things change and can get lost from time to time!
+    <div>
+      Please note that the app is in beta - expect that things change and can
+      get lost from time to time!
     </div>
+  </section>
+  <div mat-dialog-actions fxLayout="row" fxLayoutAlign="end">
+    <button mat-button mat-dialog-close cdkFocusInitial>Close</button>
   </div>
 </ng-template>
