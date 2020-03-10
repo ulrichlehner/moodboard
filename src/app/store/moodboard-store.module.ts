@@ -17,9 +17,9 @@ import { SpaceDataService } from './space-data.service';
   declarations: [],
   imports: [
     HttpClientModule, // REMOVABLE?
-    // StoreModule.forFeature(moodboardFeatureKey, moodboardReducer),
+    StoreModule.forFeature(moodboardFeatureKey, moodboardReducer),
     // StoreModule.forRoot({ moodboard: moodboardReducer }),
-    StoreModule.forFeature('activeSpace', moodboardReducer),
+    // StoreModule.forFeature('activeSpace', moodboardReducer),
     EffectsModule.forRoot([]),
     EntityDataModule.forRoot(entityConfig),
     StoreDevtoolsModule.instrument({

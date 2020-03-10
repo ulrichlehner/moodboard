@@ -4,6 +4,10 @@ import { activateSpace } from '../actions/moodboard.actions';
 
 export const moodboardFeatureKey = 'moodboard';
 
+export interface AppState {
+  [moodboardFeatureKey]: MooodboardState;
+}
+
 export interface MooodboardState {
   activeSpace: Space | null;
 }
@@ -25,8 +29,7 @@ export function moodboardReducer(state, action) {
   return _moodboardReducer(state, action);
 }
 
-// TODO: works but doesn't look right ...
 export const selectActiveSpace = createSelector(
-  (state: any) => state.activeSpace,
-  (state: any) => state.activeSpace
+  (state: AppState) => state[moodboardFeatureKey],
+  (state: MooodboardState) => state.activeSpace
 );

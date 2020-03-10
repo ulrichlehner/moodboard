@@ -8,20 +8,20 @@ import {
   ViewChild
 } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { Store, select } from '@ngrx/store';
+import { select, Store } from '@ngrx/store';
 import 'fabric';
 import { fromEvent, Observable, Subscription } from 'rxjs';
-import { debounceTime, skip, take } from 'rxjs/operators';
+import { debounceTime, skip } from 'rxjs/operators';
+import {
+  AppState,
+  selectActiveSpace
+} from 'src/app/store/reducers/moodboard.reducers';
 import { SpaceService } from 'src/app/store/space.service';
 import { DataService } from '../../data.service';
 import { Artifact } from '../../models/artifact';
 import { Space } from '../../models/space';
 import * as artifactActions from '../../store/actions/artifact.actions';
-import {
-  ArtifactState,
-  selectAllArtifacts
-} from '../../store/reducers/artifact.reducer';
-import { selectActiveSpace } from 'src/app/store/reducers/moodboard.reducers';
+import { selectAllArtifacts } from '../../store/reducers/artifact.reducer';
 
 declare const fabric: any;
 
@@ -146,7 +146,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
   //#region Lifecycle hooks
   constructor(
     private spaceService: SpaceService,
-    private store: Store<ArtifactState>,
+    private store: Store<AppState>,
     private dialog: MatDialog
   ) {}
 

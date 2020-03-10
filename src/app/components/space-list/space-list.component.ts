@@ -8,10 +8,10 @@ import {
 import { MatDialog } from '@angular/material/dialog';
 import { select, Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
-import { take, skip } from 'rxjs/operators';
+import { take } from 'rxjs/operators';
 import { activateSpace } from 'src/app/store/actions/moodboard.actions';
 import {
-  MooodboardState,
+  AppState,
   selectActiveSpace
 } from 'src/app/store/reducers/moodboard.reducers';
 import { SpaceService } from 'src/app/store/space.service';
@@ -40,7 +40,7 @@ export class SpaceListComponent implements OnInit, OnDestroy {
 
   constructor(
     public layout: LayoutService,
-    private store: Store<MooodboardState>,
+    private store: Store<AppState>,
     private dialog: MatDialog,
     private spaceService: SpaceService
   ) {}
