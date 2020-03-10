@@ -23,9 +23,11 @@ export class SpaceDataService implements EntityCollectionDataService<Space> {
   }
 
   add(entity: Space): Observable<Space> {
-    return from(this.db.put({ ...entity, _id: entity.id })) as Observable<
-      Space
-    >;
+    return from(
+      this.db
+        .put({ ...entity, _id: entity.id })
+        .then(doc => Promise.resolve(entity))
+    ) as Observable<Space>;
   }
 
   delete(id: string | number): Observable<string | number> {

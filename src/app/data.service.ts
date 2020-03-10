@@ -8,7 +8,8 @@ import { Artifact } from './models/artifact';
 import {
   IPouchDBAllDocsResult,
   POUCH_DB_ARTIFACT_ID_PREFIX,
-  POUCH_DB_NAME
+  POUCH_DB_NAME,
+  POUCH_DB_SPACE_ID_PREFIX
 } from './store/pouch-db';
 
 @Injectable()
@@ -20,7 +21,7 @@ export class DataService {
   }
 
   public static generateSpaceId(): string {
-    return `${POUCH_DB_ARTIFACT_ID_PREFIX}:${UUID.generate()}`;
+    return `${POUCH_DB_SPACE_ID_PREFIX}:${UUID.generate()}`;
   }
 
   constructor(private messageService: MessageService) {
