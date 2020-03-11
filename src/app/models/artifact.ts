@@ -9,7 +9,7 @@ export interface Artifact {
   // PouchDB fields
   // _id?: string;
   // _rev?: string;
-  _attachments?: {
+  _attachments: {
     [index: string]: Attachment;
   };
 }

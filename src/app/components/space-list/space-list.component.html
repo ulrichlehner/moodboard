@@ -17,14 +17,20 @@
           <div fxLayout="row">
             <button
               mat-icon-button
-              (click)="onOpenDialogClick(dialogTemplateEdit, space)"
+              (click)="
+                $event.stopPropagation();
+                onOpenDialogClick(dialogTemplateEdit, space)
+              "
               aria-label="Edit space"
             >
               <mat-icon>edit</mat-icon>
             </button>
             <button
               mat-icon-button
-              (click)="onOpenDialogClick(dialogTemplateDelete, space)"
+              (click)="
+                $event.stopPropagation();
+                onOpenDialogClick(dialogTemplateDelete, space)
+              "
               [disabled]="spaces.length <= 1"
               aria-label="Delete space"
             >

@@ -1,15 +1,8 @@
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
-import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
-import { DataService } from '../../data.service';
+import { ArtifactService } from 'src/app/store/artifact.service';
 import { Artifact } from '../../models/artifact';
-import * as artifactActions from '../../store/actions/artifact.actions';
-import {
-  ArtifactState,
-  // selectActiveArtifact,
-  selectAllArtifacts
-} from '../../store/reducers/artifact.reducer';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -18,33 +11,23 @@ import {
   styleUrls: ['./artifact-list.component.scss']
 })
 export class ArtifactListComponent implements OnInit {
-  // artifacts: Artifact[];
-
   artifacts$: Observable<Artifact[]>;
 
   activeArtifact: Artifact;
 
-  // activeArtifact$: Observable<Artifact>;
-
   constructor(
-    private store: Store<ArtifactState>,
-    private dataService: DataService,
+    private artifactService: ArtifactService,
     private sanitizer: DomSanitizer
   ) {}
 
   ngOnInit() {
-    // this.getArtifacts();
-    this.artifacts$ = this.store.select(selectAllArtifacts);
-    // this.activeArtifact$ = this.store.select(selectActiveArtifact);
+    this.artifacts$ = this.artifactService.entities$;
 
-    // Dispatch LOAD_ARTIFACTS https://www.youtube.com/watch?v=xkUOQeGqIGI (2:24)
-    this.store.dispatch(new artifactActions.Load());
+    this.artifactService.getAll();
   }
 
   selectArtifact(artifact: Artifact) {
     this.activeArtifact = artifact;
-    // this.store.dispatch(new artifactActions.Select(artifact.id));
-    // console.log(`Artifact selected: ${artifact.name}`);
   }
 
   dataUrl(file: File | Blob) {

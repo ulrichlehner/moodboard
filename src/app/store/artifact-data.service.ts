@@ -1,11 +1,16 @@
 import { Injectable } from '@angular/core';
+import { EntityCollectionDataService, QueryParams } from '@ngrx/data';
+import { Update } from '@ngrx/entity';
 import PouchDB from 'pouchdb';
-import { Observable, from as fromPromise, of } from 'rxjs';
+import { from, Observable, of } from 'rxjs';
 import { catchError, concatAll, concatMap, map, reduce } from 'rxjs/operators';
-import * as UUID from 'uuidjs';
-import { MessageService } from './message.service';
-import { Artifact } from './models/artifact';
-import { Space } from './models/space';
+import { Artifact } from '../models/artifact';
+import {
+  IPouchDBAllDocsResult,
+  POUCH_DB_ARTIFACT_ID_PREFIX,
+  POUCH_DB_NAME
+} from './pouch-db';
+
 import * as mobilenet from '@tensorflow-models/mobilenet';
 import * as tfvis from '@tensorflow/tfjs-vis';
 import * as tf from '@tensorflow/tfjs';
@@ -1054,157 +1059,20 @@ const IMAGENET_CLASSES = {
   998: 'ear, spike, capitulum',
   999: 'toilet tissue, toilet paper, bathroom tissue'
 };
-//#region PouchDB interfaces
-// see https://www.bennadel.com/blog/3194-experimenting-with-simple-crud-operations-using-pouchdb-in-angular-2-1-1.htm
-
-// CAUTION: There is currently no up-to-date "Definitely Typed" set of interfaces for
-// PouchDB. So, in an effort to help me learn about the PouchDB API, I'm providing a few
-// tiny interfaces here so I can get a better idea of what data is available.
-export interface IPouchDBAllDocsResult {
-  offset: number;
-  total_rows: number;
-  rows: IPouchDBRow[];
-}
-
-export interface IPouchDBGetResult {
-  _id: string;
-  _rev: string;
-}
-
-export interface IPouchDBPutResult {
-  ok: boolean;
-  id: string;
-  rev: string;
-}
-
-export interface IPouchDBRemoveResult {
-  ok: boolean;
-  id: string;
-  rev: string;
-}
-
-export interface IPouchDBRow {
-  id: string;
-  key: string;
-  value: { rev: string };
-
-  // Only included if include_docs is set to true during query.
-  doc?: any;
-}
-
-export interface IPouchDBGetFriendResult extends IPouchDBGetResult {
-  name: string;
-}
-//#endregion
 
 @Injectable()
-export class DataService {
-  static SPACE_ID_PREFIX = 'space';
-  static ARTIFACT_ID_PREFIX = 'artifact';
-  readonly DB_NAME = 'inspirespace';
+export class ArtifactDataService
+  implements EntityCollectionDataService<Artifact> {
+  name = 'Artifact';
 
-  private db: any;
+  private db: any; // PouchDB.Database;
 
-  public static generateArtifactId(spaceId: string): string {
-    return `${this.ARTIFACT_ID_PREFIX}:${spaceId}:${UUID.generate()}`;
+  constructor() {
+    this.db = new PouchDB(POUCH_DB_NAME, { auto_compaction: true });
   }
 
-  public static generateSpaceId(): string {
-    return `${this.SPACE_ID_PREFIX}:${UUID.generate()}`;
-  }
-
-  constructor(private messageService: MessageService) {
-    this.db = new PouchDB(this.DB_NAME, { auto_compaction: true });
-  }
-
-  //#region Space
-  createSpace(space: Space): Observable<Space> {
-    return fromPromise(this.db.put({ ...space, _id: space.id })) as Observable<
-      Space
-    >;
-  }
-
-  deleteSpace(spaceId: string): Observable<any> {
-    return fromPromise(
-      this.db
-        .allDocs({
-          startkey: `${DataService.ARTIFACT_ID_PREFIX}:${spaceId}`,
-          endkey: `${DataService.ARTIFACT_ID_PREFIX}:${spaceId}\ufff0`
-        })
-        .then(allDocs => {
-          return allDocs.rows.map(row => {
-            return { _id: row.id, _rev: row.value.rev, _deleted: true };
-          });
-        })
-        .then(deleteDocs => {
-          return this.db.bulkDocs(deleteDocs);
-        })
-        .then(() => {
-          return this.db.get(spaceId);
-        })
-        .then(doc => {
-          this.db.remove(spaceId, doc._rev);
-        })
-    );
-  }
-
-  updateSpace(spaceId: string, changes: Partial<Space>): Observable<Space> {
-    return fromPromise(
-      this.db.get(spaceId).then(doc => {
-        this.db.put({ ...doc, ...changes, _rev: doc._rev });
-      })
-    ) as Observable<Space>;
-  }
-
-  getAllSpaces(): Observable<Space[]> {
-    return fromPromise(
-      this.db.allDocs({
-        include_docs: true,
-        startkey: `${DataService.SPACE_ID_PREFIX}`,
-        endkey: `${DataService.SPACE_ID_PREFIX}\ufff0`
-      })
-    ).pipe(
-      map((docs: IPouchDBAllDocsResult) => {
-        return docs.rows
-          .sort(
-            (a, b) =>
-              Date.parse(a.doc.createDate) - Date.parse(b.doc.createDate)
-          )
-          .map(row => row.doc);
-      })
-    );
-  }
-
-  getSpace(id: string): Observable<Space> {
-    return fromPromise(this.db.get(`space:${id}`)) as Observable<Space>;
-  }
-  //#endregion
-
-  private preprocessImage(image, modelName) {
-    // resize the input image to mobilenet's target size of (224, 224)
-    const tensor = tf.browser
-      .fromPixels(image)
-      .resizeNearestNeighbor([224, 224])
-      .toFloat();
-
-    // if model is not available, send the tensor with expanded dimensions
-    if (modelName === undefined) {
-      return tensor.expandDims();
-    } else if (modelName === 'mobilenet') {
-      // if model is mobilenet, feature scale tensor image to range [-1, 1]
-      const offset = tf.scalar(127.5);
-      return tensor
-        .sub(offset)
-        .div(offset)
-        .expandDims();
-    } else {
-      // else throw an error
-      alert('Unknown model name..');
-    }
-  }
-
-  //#region Artifact
-  createArtifact(artifact: Artifact): Observable<Artifact> {
+  add(entity: Artifact): Observable<Artifact> {
+    const artifact = entity;
     console.log('1', artifact._attachments);
     console.log(mobilenet);
     mobilenet
@@ -1214,6 +1082,7 @@ export class DataService {
       })
       .then(async model => {
         // https://gogul.dev/software/mobile-net-tensorflow-js
+        // tslint:disable-next-line: max-line-length
         // https://towardsdatascience.com/training-custom-image-classification-model-on-the-browser-with-tensorflow-js-and-angular-f1796ed24934
         const model2 = await tf.loadLayersModel(
           // 'https://gogul09.github.io/models/mobilenet/model.json'
@@ -1248,13 +1117,16 @@ export class DataService {
 
             const ctx = canvas.getContext('2d');
             img.onload = async () => {
-              ctx.drawImage(img, 0, 0);
+              ctx?.drawImage(img, 0, 0);
 
               const features = model.infer(img);
               console.log('features', await features.data());
               console.log('classify', await model.classify(img));
 
               const tensor = this.preprocessImage(img, 'mobilenet');
+              if (!tensor) {
+                return;
+              }
               // make predictions on the preprocessed image tensor
 
               const predictedTensor = model2.predict(tensor) as Tensor<Rank>;
@@ -1312,49 +1184,51 @@ export class DataService {
       .catch(error => {
         console.error('ohoh', error);
       });
-    return fromPromise(
+    return from(
       this.db.put({
-        ...artifact,
-        _id: artifact.id
+        ...entity,
+        _id: entity.id
       }) as Observable<Artifact>
     );
   }
 
-  deleteArtifact(artifactId: string): Observable<any> {
-    return fromPromise(
-      this.db.get(artifactId).then(doc => this.db.remove(artifactId, doc._rev))
-    );
-  }
-
-  updateArtifact(
-    artifactId: string,
-    changes: Partial<Artifact>
-  ): Observable<Artifact> {
-    return fromPromise(
+  delete(id: string | number): Observable<string | number> {
+    return from(
       this.db
-        .get(artifactId)
-        .then(doc => this.db.put({ ...doc, ...changes, _rev: doc._rev }))
-    ) as Observable<Artifact>;
+        .get(id)
+        .then(doc => this.db.remove(id, doc._rev))
+        .then(() => {
+          return Promise.resolve(id);
+        })
+    ) as Observable<string | number>;
   }
 
-  getArtifact(artifactId: string): Observable<Artifact> {
-    return fromPromise(this.db.get(artifactId)) as Observable<Artifact>;
+  getAll(): Observable<Artifact[]> {
+    throw new Error('Method not implemented.');
   }
 
-  getAllArtifacts(spaceId: string): Observable<Artifact[]> {
+  getById(id: any): Observable<Artifact> {
+    return from(this.db.get(id)) as Observable<Artifact>;
+  }
+
+  getWithQuery(params: string | QueryParams): Observable<Artifact[]> {
+    if (typeof params === 'string' || !('spaceId' in params)) {
+      throw new Error('Query not supported');
+    }
+
     // see https://codereview.stackexchange.com/questions/152897/switchmap-with-array-of-observables
-    return fromPromise(
+    return from(
       this.db.allDocs({
         include_docs: true,
-        startkey: `${DataService.ARTIFACT_ID_PREFIX}:${spaceId}`,
-        endkey: `${DataService.ARTIFACT_ID_PREFIX}:${spaceId}\ufff0`
+        startkey: `${POUCH_DB_ARTIFACT_ID_PREFIX}:${params.spaceId}`,
+        endkey: `${POUCH_DB_ARTIFACT_ID_PREFIX}:${params.spaceId}\ufff0`
       })
     ).pipe(
       map((docs: IPouchDBAllDocsResult) => {
-        return docs.rows.map(row => row.doc);
+        return docs.rows.map(row => row.doc as Artifact);
       }),
       concatAll(),
-      concatMap((artifact: any) => {
+      concatMap(artifact => {
         for (const fileName in artifact._attachments) {
           if (fileName) {
             return this.getAttachment(artifact.id, fileName).pipe(
@@ -1365,12 +1239,14 @@ export class DataService {
                 };
                 return artifact;
               }),
-              catchError((err: any) => {
+              catchError(err => {
+                console.warn('Error reading attachment.', err);
                 return of(artifact);
               })
             );
           }
         }
+        return of(artifact);
       }),
       reduce((acc: Artifact[], value: Artifact) => {
         acc.push(value);
@@ -1378,13 +1254,43 @@ export class DataService {
       }, [])
     );
   }
-  //#endregion
 
-  //#region Generic
-  getAttachment(docId: string, attachmentId): Observable<Blob> {
-    return fromPromise(
-      this.db.getAttachment(docId, attachmentId)
-    ) as Observable<Blob>;
+  update(update: Update<Artifact>): Observable<Artifact> {
+    return from(
+      this.db
+        .get(update.id)
+        .then(doc => this.db.put({ ...doc, ...update.changes, _rev: doc._rev }))
+    ) as Observable<Artifact>;
   }
-  //#endregion
+
+  upsert(entity: Artifact): Observable<Artifact> {
+    throw new Error('Method not implemented.');
+  }
+
+  private getAttachment(docId: string, attachmentId): Observable<Blob> {
+    return from(this.db.getAttachment(docId, attachmentId)) as Observable<Blob>;
+  }
+
+  private preprocessImage(image, modelName) {
+    // resize the input image to mobilenet's target size of (224, 224)
+    const tensor = tf.browser
+      .fromPixels(image)
+      .resizeNearestNeighbor([224, 224])
+      .toFloat();
+
+    // if model is not available, send the tensor with expanded dimensions
+    if (modelName === undefined) {
+      return tensor.expandDims();
+    } else if (modelName === 'mobilenet') {
+      // if model is mobilenet, feature scale tensor image to range [-1, 1]
+      const offset = tf.scalar(127.5);
+      return tensor
+        .sub(offset)
+        .div(offset)
+        .expandDims();
+    } else {
+      // else throw an error
+      alert('Unknown model name..');
+    }
+  }
 }
