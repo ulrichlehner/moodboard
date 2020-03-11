@@ -110,7 +110,7 @@ export class SpaceListComponent implements OnInit, OnDestroy {
     console.warn('setting active spaces where it should be done via an effect');
     if (space.id === this.activeSpace?.id) {
       this.store.dispatch(
-        activateSpace(this.spaces.length > 0 ? { space: this.spaces[0] } : null)
+        activateSpace({ space: this.spaces.length > 0 ? this.spaces[0] : null })
       );
     }
   }

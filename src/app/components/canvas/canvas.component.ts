@@ -5,7 +5,8 @@ import {
   OnDestroy,
   OnInit,
   TemplateRef,
-  ViewChild
+  ViewChild,
+  Inject
 } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { select, Store } from '@ngrx/store';
@@ -21,6 +22,7 @@ import { SpaceService } from 'src/app/store/space.service';
 import { Artifact } from '../../models/artifact';
 import { Space } from '../../models/space';
 import { activateSpace } from 'src/app/store/actions/moodboard.actions';
+import { DOCUMENT } from '@angular/common';
 
 declare const fabric: any;
 
@@ -66,7 +68,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
   //#endregion
 
   //#region Member variables
-  private activeSpace$: Observable<Space>;
+  private activeSpace$: Observable<Space | null>;
   private artifacts$: Observable<Artifact[]>;
 
   private artifacts: Artifact[];
@@ -74,7 +76,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
   private artifactSubscription: Subscription;
   private spaceSubscription: Subscription;
 
-  private fabricCanvas = null;
+  private fabricCanvas: any | null = null;
   private domCanvas;
 
   //#endregion
@@ -82,9 +84,9 @@ export class CanvasComponent implements OnInit, OnDestroy {
   //#region State variables
   private lastX: number;
   private lastY: number;
-  private dragStartPosition: { x: number; y: number };
+  private dragStartPosition: { x: number; y: number } | null;
   // saveProgress = 0;
-  private lastCanvasViewportTransform = [];
+  private lastCanvasViewportTransform: number[] = [];
 
   private drawnPathObjects = new Array();
   //#endregion
@@ -147,11 +149,11 @@ export class CanvasComponent implements OnInit, OnDestroy {
     private spaceService: SpaceService,
     private artifactService: ArtifactService,
     private store: Store<AppState>,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    @Inject(DOCUMENT) private document: HTMLDocument
   ) {}
 
   ngOnInit() {
-    console.warn('enabled strict null checks');
     // CanvasComponent.disableScroll();
     this.initCanvas();
 
@@ -203,10 +205,10 @@ export class CanvasComponent implements OnInit, OnDestroy {
 
   //#region Canvas initializing
   initCanvas() {
-    const canvasDomWidth = document.getElementById('canvas-wrapper')
-      .clientWidth;
-    const canvasDomHeight = document.getElementById('canvas-wrapper')
-      .clientHeight;
+    const canvasDomWidth = this.document.getElementById('canvas-wrapper')
+      ?.clientWidth;
+    const canvasDomHeight = this.document.getElementById('canvas-wrapper')
+      ?.clientHeight;
 
     if (!this.fabricCanvas) {
       this.fabricCanvas = new fabric.Canvas('canvas', {
@@ -366,7 +368,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
     if (artifact._attachments) {
       for (const key in artifact._attachments) {
         if (artifact._attachments[key]) {
-          let imgObj = new Image();
+          let imgObj: HTMLImageElement | null = new Image();
           imgObj.src = URL.createObjectURL(artifact._attachments[key].data);
           imgObj.onload = () => {
             const img = new fabric.Image(imgObj);
@@ -385,7 +387,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
             this.fabricCanvas.insertAt(img, artifact.transform.order);
 
             // Release image object
-            imgObj.remove();
+            imgObj?.remove();
             imgObj = null;
 
             if (next) {
@@ -423,7 +425,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
               canvas.width = canvas.height * (imgEl.width / imgEl.height);
             }
 
-            ctx.drawImage(imgEl, 0, 0, canvas.width, canvas.height);
+            ctx?.drawImage(imgEl, 0, 0, canvas.width, canvas.height);
 
             const bounds = this.fabricCanvas.calcViewportBoundaries();
             const id: string = ArtifactService.generateId(this.activeSpace.id);
@@ -508,7 +510,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
   }
 
   updateArtifact(selection: any | Array<any>) {
-    let objects = [];
+    let objects: any[] = [];
     if (selection._objects) {
       objects = selection._objects;
     } else if (selection.id) {
@@ -740,7 +742,11 @@ export class CanvasComponent implements OnInit, OnDestroy {
   drop(event: DragEvent) {
     event.preventDefault();
     event.stopPropagation();
-    this.saveFiles(event.dataTransfer.files);
+
+    if (event.dataTransfer) {
+      this.saveFiles(event.dataTransfer.files);
+    }
+
     this.isDragOver = false;
   }
   //#endregion
@@ -766,8 +772,8 @@ export class CanvasComponent implements OnInit, OnDestroy {
   }
 
   calculateBounds() {
-    const xCoords = [];
-    const yCoords = [];
+    const xCoords: number[] = [];
+    const yCoords: number[] = [];
 
     this.fabricCanvas.forEachObject((object: any) => {
       const c = object.aCoords;

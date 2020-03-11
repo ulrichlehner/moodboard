@@ -2,7 +2,7 @@
   <mat-form-field appearance="outline">
     <mat-label>Name</mat-label>
     <input matInput formControlName="name" required />
-    <mat-error *ngIf="spaceForm.get('name').invalid"
+    <mat-error *ngIf="spaceForm.get('name')?.invalid"
       >Please provide a name</mat-error
     >
   </mat-form-field>

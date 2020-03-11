@@ -64,10 +64,10 @@ export class ArtifactDataService
       })
     ).pipe(
       map((docs: IPouchDBAllDocsResult) => {
-        return docs.rows.map(row => row.doc);
+        return docs.rows.map(row => row.doc as Artifact);
       }),
       concatAll(),
-      concatMap((artifact: any) => {
+      concatMap(artifact => {
         for (const fileName in artifact._attachments) {
           if (fileName) {
             return this.getAttachment(artifact.id, fileName).pipe(
@@ -78,12 +78,14 @@ export class ArtifactDataService
                 };
                 return artifact;
               }),
-              catchError((err: any) => {
+              catchError(err => {
+                console.warn('Error reading attachment.', err);
                 return of(artifact);
               })
             );
           }
         }
+        return of(artifact);
       }),
       reduce((acc: Artifact[], value: Artifact) => {
         acc.push(value);
