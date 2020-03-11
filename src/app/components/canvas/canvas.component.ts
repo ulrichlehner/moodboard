@@ -1,18 +1,21 @@
+import { DOCUMENT } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
   HostListener,
+  Inject,
   OnDestroy,
   OnInit,
   TemplateRef,
-  ViewChild,
-  Inject
+  ViewChild
 } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { select, Store } from '@ngrx/store';
 import 'fabric';
 import { fromEvent, Observable, Subscription } from 'rxjs';
 import { debounceTime, skip, take } from 'rxjs/operators';
+import { ImageClusterService } from 'src/app/image-cluster.service';
+import { activateSpace } from 'src/app/store/actions/moodboard.actions';
 import { ArtifactService } from 'src/app/store/artifact.service';
 import {
   AppState,
@@ -21,8 +24,6 @@ import {
 import { SpaceService } from 'src/app/store/space.service';
 import { Artifact } from '../../models/artifact';
 import { Space } from '../../models/space';
-import { activateSpace } from 'src/app/store/actions/moodboard.actions';
-import { DOCUMENT } from '@angular/common';
 
 declare const fabric: any;
 
@@ -148,6 +149,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
   constructor(
     private spaceService: SpaceService,
     private artifactService: ArtifactService,
+    private imageCluster: ImageClusterService,
     private store: Store<AppState>,
     private dialog: MatDialog,
     @Inject(DOCUMENT) private document: HTMLDocument
@@ -192,6 +194,20 @@ export class CanvasComponent implements OnInit, OnDestroy {
       (artifacts: Artifact[]) => {
         this.artifacts = artifacts;
         this.syncCanvas(artifacts);
+
+        console.warn('EXPERIMENTAL image clustering');
+        if (artifacts.length > 0) {
+          console.warn('Attachment is stored as File but typed as Blob');
+          this.imageCluster
+            .build(
+              artifacts.map(
+                artifcat => Object.values(artifcat._attachments)[0].data as File
+              )
+            )
+            .then(result => {
+              console.log('result', result);
+            });
+        }
       }
     );
   }
