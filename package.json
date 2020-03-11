@@ -29,7 +29,7 @@
     "@ngrx/effects": "^9.0.0",
     "@ngrx/entity": "^9.0.0",
     "@ngrx/store": "^9.0.0",
-    "@ngrx/store-devtools": "^8.6.0",
+    "@ngrx/store-devtools": "^9.0.0",
     "fabric": "^3.6.1",
     "material-design-icons": "^3.0.1",
     "normalize.css": "^8.0.1",
