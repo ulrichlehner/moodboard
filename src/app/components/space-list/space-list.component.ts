@@ -85,7 +85,7 @@ export class SpaceListComponent implements OnInit, OnDestroy {
     this.store.dispatch(activateSpace({ space }));
   }
 
-  onCreateSpaceClick(name?: string) {
+  async onCreateSpaceClick(name?: string) {
     const date = new Date();
     const space: Space = {
       id: SpaceService.generateId(),
@@ -102,7 +102,14 @@ export class SpaceListComponent implements OnInit, OnDestroy {
       createDate: date,
       updateDate: date
     };
-    this.spaceService.add(space);
+    this.store.dispatch(
+      activateSpace({
+        space: await this.spaceService
+          .add(space)
+          .pipe(take(1))
+          .toPromise()
+      })
+    );
   }
 
   onDeleteSpaceClick(space: Space) {
