@@ -78,7 +78,7 @@ export class ArtifactDataService
               map(attachment => {
                 artifact._attachments[fileName] = {
                   content_type: attachment.type,
-                  data: new File([attachment], fileName)
+                  data: attachment
                 };
                 return artifact;
               }),
