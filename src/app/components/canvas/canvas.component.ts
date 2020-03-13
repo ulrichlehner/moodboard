@@ -88,8 +88,6 @@ export class CanvasComponent implements OnInit, OnDestroy {
   private dragStartPosition: { x: number; y: number } | null;
   // saveProgress = 0;
   private lastCanvasViewportTransform: number[] = [];
-
-  private drawnPathObjects = new Array();
   //#endregion
 
   @ViewChild('blankDialogTemplate')
@@ -265,7 +263,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
 
   //#region Canvas manipulation
   translate(x, y) {
-    this.fabricCanvas.relativePan({ x: x, y: y });
+    this.fabricCanvas.relativePan({ x, y });
   }
 
   zoom(originX, originY, delta) {
@@ -811,8 +809,8 @@ export class CanvasComponent implements OnInit, OnDestroy {
       return {
         left: minX,
         top: minY,
-        width: width,
-        height: height
+        width,
+        height
       };
     } else {
       return null;
