@@ -24,10 +24,14 @@ export class ArtifactDataService
 
   add(entity: Artifact): Observable<Artifact> {
     return from(
-      this.db.put({
-        ...entity,
-        _id: entity.id
-      }) as Observable<Artifact>
+      this.db
+        .put({
+          ...entity,
+          _id: entity.id
+        })
+        .then(() => {
+          return Promise.resolve(entity);
+        }) as Observable<Artifact>
     );
   }
 
@@ -74,7 +78,7 @@ export class ArtifactDataService
               map(attachment => {
                 artifact._attachments[fileName] = {
                   content_type: attachment.type,
-                  data: new File([attachment], fileName)
+                  data: attachment
                 };
                 return artifact;
               }),

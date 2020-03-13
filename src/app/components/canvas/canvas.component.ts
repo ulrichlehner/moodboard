@@ -74,8 +74,8 @@ export class CanvasComponent implements OnInit, OnDestroy {
 
   private artifacts: Artifact[];
 
-  private artifactSubscription: Subscription;
-  private spaceSubscription: Subscription;
+  private artifactsSubscription: Subscription;
+  private activeSpaceSubscription: Subscription;
 
   private fabricCanvas: any | null = null;
   private domCanvas;
@@ -155,19 +155,15 @@ export class CanvasComponent implements OnInit, OnDestroy {
     @Inject(DOCUMENT) private document: HTMLDocument
   ) {}
 
-  ngOnInit() {
+  async ngOnInit() {
     // CanvasComponent.disableScroll();
     this.initCanvas();
 
     this.activeSpace$ = this.store.pipe(select(selectActiveSpace));
     this.artifacts$ = this.artifactService.entities$;
 
-    // Load space
-    // this.store.dispatch(new spaceActions.Load());
-    console.warn('Get all spaces here required?');
-
     // Load artifacts when active space is set
-    this.spaceSubscription = this.activeSpace$
+    this.activeSpaceSubscription = this.activeSpace$
       // skip(1) as this is called initially
       // see https://stackoverflow.com/questions/42698785/ngrx-subscription-to-store-called-once-its-created
       .pipe(skip(1))
@@ -175,9 +171,6 @@ export class CanvasComponent implements OnInit, OnDestroy {
         if (space) {
           if (!this.activeSpace || space.id !== this.activeSpace.id) {
             this.removeAllCanvasObjects();
-            console.warn(
-              'artifactService.clearCache() classed - maybe there are alternatives'
-            );
             this.artifactService.clearCache();
             this.artifactService.getWithQuery({ spaceId: space.id });
           }
@@ -190,7 +183,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
       });
 
     // Sync canvas when artifacts change
-    this.artifactSubscription = this.artifacts$.subscribe(
+    this.artifactsSubscription = this.artifacts$.subscribe(
       (artifacts: Artifact[]) => {
         this.artifacts = artifacts;
         this.syncCanvas(artifacts);
@@ -210,12 +203,32 @@ export class CanvasComponent implements OnInit, OnDestroy {
         }
       }
     );
+
+    // Activate first space or show onboarding message when no space exists
+    try {
+      const [spaces] = await Promise.all([
+        this.spaceService
+          .getAll()
+          .pipe(take(1))
+          .toPromise(),
+        this.spaceService.loaded$.pipe(take(1)).toPromise()
+      ]);
+      if (spaces.length > 0) {
+        this.store.dispatch(activateSpace({ space: spaces[0] }));
+      } else {
+        this.dialog.open(this.blankDialogTemplate, {
+          disableClose: true
+        });
+      }
+    } catch (e) {
+      console.error('Error loading spaces', e);
+    }
   }
 
   ngOnDestroy() {
     // CanvasComponent.enableScroll();
-    this.artifactSubscription.unsubscribe();
-    this.spaceSubscription.unsubscribe();
+    this.artifactsSubscription.unsubscribe();
+    this.activeSpaceSubscription.unsubscribe();
   }
   //#endregion
 
@@ -380,8 +393,12 @@ export class CanvasComponent implements OnInit, OnDestroy {
     }
   }
 
-  addArtifactToCanvas(artifact: Artifact, next?: Function) {
-    if (artifact._attachments) {
+  private addArtifactToCanvas(artifact: Artifact) {
+    return new Promise<void>((resolve, reject) => {
+      if (!artifact._attachments) {
+        reject('No attachments provided');
+      }
+
       for (const key in artifact._attachments) {
         if (artifact._attachments[key]) {
           let imgObj: HTMLImageElement | null = new Image();
@@ -406,92 +423,102 @@ export class CanvasComponent implements OnInit, OnDestroy {
             imgObj?.remove();
             imgObj = null;
 
-            if (next) {
-              next();
-            }
+            resolve();
           };
         }
       }
-    }
+    });
   }
 
   saveFiles(fileList: FileList) {
-    if (fileList.length) {
-      let artifactCnt = 0;
-      const startOffsetY = this.artifacts.filter(
-        (a: Artifact) =>
-          a.updateDate > this.activeSpace.updateDate &&
-          a.updateDate === a.createDate
-      ).length;
-      for (let i = 0; i < fileList.length; i++) {
-        const file: File = fileList[i];
-        if (this.acceptedMimeTypes[file.type]) {
-          const imgEl: HTMLImageElement = new Image();
-          imgEl.src = URL.createObjectURL(file);
-          imgEl.onload = () => {
-            // Resize image
-            const canvas: HTMLCanvasElement = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
+    if (!fileList.length) {
+      console.warn('No files provided');
+      return;
+    }
 
-            if (imgEl.width > imgEl.height) {
-              canvas.width = this.attachmentImageMaxSide;
-              canvas.height = canvas.width * (imgEl.height / imgEl.width);
-            } else {
-              canvas.height = this.attachmentImageMaxSide;
-              canvas.width = canvas.height * (imgEl.width / imgEl.height);
-            }
+    let artifactCnt = 0;
+    const startOffsetY = this.artifacts.filter(
+      (a: Artifact) =>
+        a.updateDate > this.activeSpace.updateDate &&
+        a.updateDate === a.createDate
+    ).length;
 
-            ctx?.drawImage(imgEl, 0, 0, canvas.width, canvas.height);
+    // tslint:disable-next-line: prefer-for-of
+    for (let i = 0; i < fileList.length; i++) {
+      const file = fileList.item(i);
 
-            const bounds = this.fabricCanvas.calcViewportBoundaries();
-            const id: string = ArtifactService.generateId(this.activeSpace.id);
-            const date = new Date();
-            const distance = 10 / this.fabricCanvas.getZoom();
-            const artifact: Artifact = {
-              id,
-              name: `Artifact @${id}`,
-              spaceId: this.activeSpace.id,
-              transform: {
-                order: this.artifacts.length + artifactCnt,
-                x: bounds.tl.x + distance,
-                y:
-                  bounds.tl.y +
-                  (startOffsetY + artifactCnt++) * distance +
-                  this.attachmentImageInitialPositionOffsetY +
-                  distance,
-                angle: 0,
-                scale:
-                  this.artifactInitialSize /
-                  this.attachmentImageMaxSide /
-                  this.fabricCanvas.getZoom()
-              },
-              createDate: date,
-              updateDate: date,
-              _attachments: {}
-            };
-            canvas.toBlob(
-              (result: Blob) => {
-                artifact._attachments[
-                  `${id}${this.getExtensionFromType(result.type)}`
-                ] = {
-                  content_type: result.type,
-                  data: result
-                };
-
-                this.addArtifactToCanvas(artifact, () => {
-                  this.artifactService.add(artifact);
-                });
-
-                canvas.remove();
-              },
-              this.attachmentImageMimeType,
-              this.attachmentImageQuality
-            );
-          };
-        } else {
-          console.warn(`File type ${file.type} is not supported`);
-        }
+      if (!file) {
+        console.warn(`Cannot access file`);
+        continue;
       }
+
+      if (!this.acceptedMimeTypes[file.type]) {
+        console.warn(`File type ${file.type} is not supported`);
+        continue;
+      }
+
+      const imgEl: HTMLImageElement = new Image();
+      imgEl.src = URL.createObjectURL(file);
+      imgEl.onload = () => {
+        // Resize image
+        const canvas: HTMLCanvasElement = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+
+        if (imgEl.width > imgEl.height) {
+          canvas.width = this.attachmentImageMaxSide;
+          canvas.height = canvas.width * (imgEl.height / imgEl.width);
+        } else {
+          canvas.height = this.attachmentImageMaxSide;
+          canvas.width = canvas.height * (imgEl.width / imgEl.height);
+        }
+
+        if (!ctx) {
+          console.warn('Cannot render image');
+        }
+
+        ctx?.drawImage(imgEl, 0, 0, canvas.width, canvas.height);
+
+        const bounds = this.fabricCanvas.calcViewportBoundaries();
+        const id: string = ArtifactService.generateId(this.activeSpace.id);
+        const date = new Date();
+        const distance = 10 / this.fabricCanvas.getZoom();
+        const artifact: Artifact = {
+          id,
+          name: `Artifact @${id}`,
+          spaceId: this.activeSpace.id,
+          transform: {
+            order: this.artifacts.length + artifactCnt,
+            x: bounds.tl.x + distance,
+            y:
+              bounds.tl.y +
+              (startOffsetY + artifactCnt++) * distance +
+              this.attachmentImageInitialPositionOffsetY +
+              distance,
+            angle: 0,
+            scale:
+              this.artifactInitialSize /
+              this.attachmentImageMaxSide /
+              this.fabricCanvas.getZoom()
+          },
+          createDate: date,
+          updateDate: date,
+          _attachments: {}
+        };
+        canvas.toBlob(
+          async (result: Blob) => {
+            artifact._attachments[
+              `${id}${this.getExtensionFromType(result.type)}`
+            ] = {
+              content_type: result.type,
+              data: result
+            };
+            canvas.remove();
+            this.artifactService.add(artifact);
+          },
+          this.attachmentImageMimeType,
+          this.attachmentImageQuality
+        );
+      };
     }
   }
 
@@ -566,23 +593,6 @@ export class CanvasComponent implements OnInit, OnDestroy {
       )
     ) {
       this.lastCanvasViewportTransform = this.fabricCanvas.viewportTransform.slice();
-
-      // TODO: check if needed
-      console.warn('TODO: check if needed & handle better');
-      this.activeSpace$.pipe(take(1)).subscribe(space => {
-        if (space) {
-          this.spaceService.update({
-            id: space.id,
-            viewportTransform: this.lastCanvasViewportTransform,
-            updateDate: new Date()
-          });
-        } else {
-          console.warn('No space found');
-          this.dialog.open(this.blankDialogTemplate, {
-            disableClose: true
-          });
-        }
-      });
     }
   }
   //#endregion

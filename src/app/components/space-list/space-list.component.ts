@@ -50,7 +50,7 @@ export class SpaceListComponent implements OnInit, OnDestroy {
     private spaceService: SpaceService
   ) {}
 
-  async ngOnInit() {
+  ngOnInit() {
     this.spaces$ = this.spaceService.entities$;
     this.activeSpace$ = this.store.pipe(select(selectActiveSpace));
     this.activeSpaceSubscription = this.activeSpace$.subscribe(
@@ -59,21 +59,6 @@ export class SpaceListComponent implements OnInit, OnDestroy {
     this.spacesSubscription = this.spaces$.subscribe(
       spaces => (this.spaces = spaces)
     );
-
-    try {
-      const [spaces] = await Promise.all([
-        this.spaceService
-          .getAll()
-          .pipe(take(1))
-          .toPromise(),
-        this.spaceService.loaded$.pipe(take(1)).toPromise()
-      ]);
-      if (spaces.length > 0) {
-        this.store.dispatch(activateSpace({ space: spaces[0] }));
-      }
-    } catch (e) {
-      console.error('Error loading spaces', e);
-    }
   }
 
   ngOnDestroy() {
@@ -85,7 +70,7 @@ export class SpaceListComponent implements OnInit, OnDestroy {
     this.store.dispatch(activateSpace({ space }));
   }
 
-  onCreateSpaceClick(name?: string) {
+  async onCreateSpaceClick(name?: string) {
     const date = new Date();
     const space: Space = {
       id: SpaceService.generateId(),
@@ -102,12 +87,18 @@ export class SpaceListComponent implements OnInit, OnDestroy {
       createDate: date,
       updateDate: date
     };
-    this.spaceService.add(space);
+    this.store.dispatch(
+      activateSpace({
+        space: await this.spaceService
+          .add(space)
+          .pipe(take(1))
+          .toPromise()
+      })
+    );
   }
 
   onDeleteSpaceClick(space: Space) {
     this.spaceService.delete(space);
-    console.warn('setting active spaces where it should be done via an effect');
     if (space.id === this.activeSpace?.id) {
       this.store.dispatch(
         activateSpace({ space: this.spaces.length > 0 ? this.spaces[0] : null })
