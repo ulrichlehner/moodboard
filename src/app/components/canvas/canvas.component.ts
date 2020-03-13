@@ -337,7 +337,8 @@ export class CanvasComponent implements OnInit, OnDestroy {
   }
 
   syncCanvas(artifacts: Artifact[]) {
-    if (artifacts.length < this.fabricCanvas.getObjects().length) {
+    const canvasObjectsLength = this.fabricCanvas.getObjects().length;
+    if (artifacts.length < canvasObjectsLength) {
       if (artifacts.length === 0) {
         this.removeAllCanvasObjects();
       } else {
@@ -352,7 +353,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
           }
         });
       }
-    } else {
+    } else if (artifacts.length > canvasObjectsLength) {
       artifacts.forEach((artifact: Artifact) => {
         const object = this.fabricCanvas
           .getObjects()
@@ -361,6 +362,22 @@ export class CanvasComponent implements OnInit, OnDestroy {
         if (object.length === 0) {
           this.addArtifactToCanvas(artifact);
         }
+      });
+    } else {
+      artifacts.forEach((artifact: Artifact) => {
+        const object = this.fabricCanvas
+          .getObjects()
+          .filter(obj => obj.id === artifact.id)[0];
+
+        if (!object) {
+          return;
+        }
+
+        object.angle = artifact.transform.angle;
+        object.left = artifact.transform.x;
+        object.top = artifact.transform.y;
+        object.scaleX = artifact.transform.scale;
+        object.scaleY = artifact.transform.scale;
       });
     }
     this.fabricCanvas.renderAll();
@@ -821,8 +838,44 @@ export class CanvasComponent implements OnInit, OnDestroy {
     console.warn('EXPERIMENTAL image clustering');
 
     if (this.artifacts.length > 0) {
+      const bounds = this.calculateBounds();
+      console.log('bounds', bounds);
+
+      if (!bounds) {
+        console.warn('Cannot get bounds');
+        return;
+      }
+
       const result = await this.imageCluster.build(this.artifacts);
       console.log('result', result);
+
+      const clusterSize = result.cluster.centroids.length;
+      const xStep = bounds.width / clusterSize;
+      const yStep = (bounds.height / clusterSize) * 0.2;
+      const artifactsInCluster = Array<number>(clusterSize).fill(0);
+      console.log(artifactsInCluster);
+
+      let idx = 0;
+      result.data.forEach((item, artifactId) => {
+        const clusterLabel = result.cluster.clusters[idx];
+
+        this.artifactService.update({
+          id: artifactId,
+          transform: {
+            x: bounds.left + xStep * clusterLabel,
+            y: bounds.top + yStep * artifactsInCluster[clusterLabel],
+            order: idx,
+            angle: 0,
+            scale: 0.2
+          }
+        });
+
+        artifactsInCluster[clusterLabel]++;
+        console.log(
+          `${artifactId}: ${clusterLabel} (${artifactsInCluster[clusterLabel]})`
+        );
+        idx++;
+      });
     }
   }
   //#endregion

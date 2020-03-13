@@ -5,6 +5,16 @@ import kmeans from 'ml-kmeans';
 import { Artifact } from './models/artifact';
 
 /**
+ * Interface for the kmeans result
+ */
+export interface KMeansResult {
+  clusters: number[];
+  centroids: { centroid: number[]; error: number; size: number }[];
+  converged: boolean;
+  iterations: number;
+}
+
+/**
  * This service can be used to build an image cluster based on machine learning
  *
  * @remarks
@@ -58,7 +68,7 @@ export class ImageClusterService {
     const cluster = kmeans(
       Array.from(data).map(([key, value]) => value.features),
       clusterSize
-    );
+    ) as KMeansResult;
 
     return { cluster, data };
   }
