@@ -65,6 +65,14 @@
     <div *ngIf="activeSpace" style="right: 10px; top: 10px">
       <button
         mat-icon-button
+        (click)="onClusterImagesClick()"
+        title="Auto-cluster images"
+        aria-label="Auto-cluster images"
+      >
+        <mat-icon>mood</mat-icon>
+      </button>
+      <button
+        mat-icon-button
         (click)="onZoomToFitClick()"
         title="Zoom to fit"
         aria-label="Zoom to fit"

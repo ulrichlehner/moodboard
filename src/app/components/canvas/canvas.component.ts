@@ -187,14 +187,6 @@ export class CanvasComponent implements OnInit, OnDestroy {
       (artifacts: Artifact[]) => {
         this.artifacts = artifacts;
         this.syncCanvas(artifacts);
-
-        console.warn('EXPERIMENTAL image clustering');
-        if (artifacts.length > 0) {
-          console.warn('Attachment is stored as File but typed as Blob');
-          this.imageCluster.build(artifacts).then(result => {
-            console.log('result', result);
-          });
-        }
       }
     );
 
@@ -824,6 +816,15 @@ export class CanvasComponent implements OnInit, OnDestroy {
       };
     } else {
       return null;
+    }
+  }
+
+  async onClusterImagesClick() {
+    console.warn('EXPERIMENTAL image clustering');
+
+    if (this.artifacts.length > 0) {
+      const result = await this.imageCluster.build(this.artifacts);
+      console.log('result', result);
     }
   }
   //#endregion
