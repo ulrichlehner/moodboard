@@ -400,82 +400,94 @@ export class CanvasComponent implements OnInit, OnDestroy {
   }
 
   saveFiles(fileList: FileList) {
-    if (fileList.length) {
-      let artifactCnt = 0;
-      const startOffsetY = this.artifacts.filter(
-        (a: Artifact) =>
-          a.updateDate > this.activeSpace.updateDate &&
-          a.updateDate === a.createDate
-      ).length;
-      for (let i = 0; i < fileList.length; i++) {
-        const file: File = fileList[i];
-        if (this.acceptedMimeTypes[file.type]) {
-          const imgEl: HTMLImageElement = new Image();
-          imgEl.src = URL.createObjectURL(file);
-          imgEl.onload = () => {
-            // Resize image
-            const canvas: HTMLCanvasElement = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
+    if (!fileList.length) {
+      console.warn('No files provided');
+      return;
+    }
 
-            if (imgEl.width > imgEl.height) {
-              canvas.width = this.attachmentImageMaxSide;
-              canvas.height = canvas.width * (imgEl.height / imgEl.width);
-            } else {
-              canvas.height = this.attachmentImageMaxSide;
-              canvas.width = canvas.height * (imgEl.width / imgEl.height);
-            }
+    let artifactCnt = 0;
+    const startOffsetY = this.artifacts.filter(
+      (a: Artifact) =>
+        a.updateDate > this.activeSpace.updateDate &&
+        a.updateDate === a.createDate
+    ).length;
 
-            ctx?.drawImage(imgEl, 0, 0, canvas.width, canvas.height);
+    // tslint:disable-next-line: prefer-for-of
+    for (let i = 0; i < fileList.length; i++) {
+      const file = fileList.item(i);
 
-            const bounds = this.fabricCanvas.calcViewportBoundaries();
-            const id: string = ArtifactService.generateId(this.activeSpace.id);
-            const date = new Date();
-            const distance = 10 / this.fabricCanvas.getZoom();
-            const artifact: Artifact = {
-              id,
-              name: `Artifact @${id}`,
-              spaceId: this.activeSpace.id,
-              transform: {
-                order: this.artifacts.length + artifactCnt,
-                x: bounds.tl.x + distance,
-                y:
-                  bounds.tl.y +
-                  (startOffsetY + artifactCnt++) * distance +
-                  this.attachmentImageInitialPositionOffsetY +
-                  distance,
-                angle: 0,
-                scale:
-                  this.artifactInitialSize /
-                  this.attachmentImageMaxSide /
-                  this.fabricCanvas.getZoom()
-              },
-              createDate: date,
-              updateDate: date,
-              _attachments: {}
-            };
-            canvas.toBlob(
-              (result: Blob) => {
-                artifact._attachments[
-                  `${id}${this.getExtensionFromType(result.type)}`
-                ] = {
-                  content_type: result.type,
-                  data: result
-                };
-
-                this.addArtifactToCanvas(artifact, () => {
-                  this.artifactService.add(artifact);
-                });
-
-                canvas.remove();
-              },
-              this.attachmentImageMimeType,
-              this.attachmentImageQuality
-            );
-          };
-        } else {
-          console.warn(`File type ${file.type} is not supported`);
-        }
+      if (!file) {
+        console.warn(`Cannot access file`);
+        continue;
       }
+
+      if (!this.acceptedMimeTypes[file.type]) {
+        console.warn(`File type ${file.type} is not supported`);
+        continue;
+      }
+
+      const imgEl: HTMLImageElement = new Image();
+      imgEl.src = URL.createObjectURL(file);
+      imgEl.onload = () => {
+        // Resize image
+        const canvas: HTMLCanvasElement = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+
+        if (imgEl.width > imgEl.height) {
+          canvas.width = this.attachmentImageMaxSide;
+          canvas.height = canvas.width * (imgEl.height / imgEl.width);
+        } else {
+          canvas.height = this.attachmentImageMaxSide;
+          canvas.width = canvas.height * (imgEl.width / imgEl.height);
+        }
+
+        ctx?.drawImage(imgEl, 0, 0, canvas.width, canvas.height);
+
+        const bounds = this.fabricCanvas.calcViewportBoundaries();
+        const id: string = ArtifactService.generateId(this.activeSpace.id);
+        const date = new Date();
+        const distance = 10 / this.fabricCanvas.getZoom();
+        const artifact: Artifact = {
+          id,
+          name: `Artifact @${id}`,
+          spaceId: this.activeSpace.id,
+          transform: {
+            order: this.artifacts.length + artifactCnt,
+            x: bounds.tl.x + distance,
+            y:
+              bounds.tl.y +
+              (startOffsetY + artifactCnt++) * distance +
+              this.attachmentImageInitialPositionOffsetY +
+              distance,
+            angle: 0,
+            scale:
+              this.artifactInitialSize /
+              this.attachmentImageMaxSide /
+              this.fabricCanvas.getZoom()
+          },
+          createDate: date,
+          updateDate: date,
+          _attachments: {}
+        };
+        canvas.toBlob(
+          (result: Blob) => {
+            artifact._attachments[
+              `${id}${this.getExtensionFromType(result.type)}`
+            ] = {
+              content_type: result.type,
+              data: result
+            };
+
+            this.addArtifactToCanvas(artifact, () => {
+              this.artifactService.add(artifact);
+            });
+
+            canvas.remove();
+          },
+          this.attachmentImageMimeType,
+          this.attachmentImageQuality
+        );
+      };
     }
   }
 
