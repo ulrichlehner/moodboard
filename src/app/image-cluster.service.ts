@@ -2,6 +2,7 @@ import { DOCUMENT } from '@angular/common';
 import { Inject, Injectable } from '@angular/core';
 import * as mobilenet from '@tensorflow-models/mobilenet';
 import kmeans from 'ml-kmeans';
+import { Artifact } from './models/artifact';
 
 /**
  * This service can be used to build an image cluster based on machine learning
@@ -23,10 +24,10 @@ export class ImageClusterService {
   /**
    * Builds the image cluster
    *
-   * @param fileList An array of blobs with image data
+   * @param artifacts An array of blobs with image data
    * @param [clusterSize=5] The number of cluster that should be built
    */
-  public async build(fileList: File[], clusterSize = 5) {
+  public async build(artifacts: Artifact[], clusterSize = 5) {
     const model = await this.modelLoaded;
     const data: Map<
       string,
@@ -37,14 +38,16 @@ export class ImageClusterService {
     > = new Map();
 
     // Extract features and classify
-    for (const file of fileList) {
-      const img = await this.convertBlogToImage(file);
+    for (const artifact of artifacts) {
+      const img = await this.convertBlogToImage(
+        Object.values(artifact._attachments)[0].data
+      );
       const logits = model.infer(img);
       const [features, classification] = await Promise.all([
         logits.data(),
         model.classify(img)
       ]);
-      data.set(file.name, { features, classification });
+      data.set(artifact.id, { features, classification });
     }
 
     // Cluster features

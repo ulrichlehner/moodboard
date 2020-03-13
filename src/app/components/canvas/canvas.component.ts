@@ -191,15 +191,9 @@ export class CanvasComponent implements OnInit, OnDestroy {
         console.warn('EXPERIMENTAL image clustering');
         if (artifacts.length > 0) {
           console.warn('Attachment is stored as File but typed as Blob');
-          this.imageCluster
-            .build(
-              artifacts.map(
-                artifcat => Object.values(artifcat._attachments)[0].data as File
-              )
-            )
-            .then(result => {
-              console.log('result', result);
-            });
+          this.imageCluster.build(artifacts).then(result => {
+            console.log('result', result);
+          });
         }
       }
     );
