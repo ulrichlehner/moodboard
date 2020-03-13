@@ -73,8 +73,8 @@ export class CanvasComponent implements OnInit, OnDestroy {
 
   private artifacts: Artifact[];
 
-  private artifactSubscription: Subscription;
-  private spaceSubscription: Subscription;
+  private artifactsSubscription: Subscription;
+  private activeSpaceSubscription: Subscription;
 
   private fabricCanvas: any | null = null;
   private domCanvas;
@@ -153,19 +153,15 @@ export class CanvasComponent implements OnInit, OnDestroy {
     @Inject(DOCUMENT) private document: HTMLDocument
   ) {}
 
-  ngOnInit() {
+  async ngOnInit() {
     // CanvasComponent.disableScroll();
     this.initCanvas();
 
     this.activeSpace$ = this.store.pipe(select(selectActiveSpace));
     this.artifacts$ = this.artifactService.entities$;
 
-    // Load space
-    // this.store.dispatch(new spaceActions.Load());
-    console.warn('Get all spaces here required?');
-
     // Load artifacts when active space is set
-    this.spaceSubscription = this.activeSpace$
+    this.activeSpaceSubscription = this.activeSpace$
       // skip(1) as this is called initially
       // see https://stackoverflow.com/questions/42698785/ngrx-subscription-to-store-called-once-its-created
       .pipe(skip(1))
@@ -173,9 +169,6 @@ export class CanvasComponent implements OnInit, OnDestroy {
         if (space) {
           if (!this.activeSpace || space.id !== this.activeSpace.id) {
             this.removeAllCanvasObjects();
-            console.warn(
-              'artifactService.clearCache() classed - maybe there are alternatives'
-            );
             this.artifactService.clearCache();
             this.artifactService.getWithQuery({ spaceId: space.id });
           }
@@ -188,18 +181,38 @@ export class CanvasComponent implements OnInit, OnDestroy {
       });
 
     // Sync canvas when artifacts change
-    this.artifactSubscription = this.artifacts$.subscribe(
+    this.artifactsSubscription = this.artifacts$.subscribe(
       (artifacts: Artifact[]) => {
         this.artifacts = artifacts;
         this.syncCanvas(artifacts);
       }
     );
+
+    // Activate first space or show onboarding message when no space exists
+    try {
+      const [spaces] = await Promise.all([
+        this.spaceService
+          .getAll()
+          .pipe(take(1))
+          .toPromise(),
+        this.spaceService.loaded$.pipe(take(1)).toPromise()
+      ]);
+      if (spaces.length > 0) {
+        this.store.dispatch(activateSpace({ space: spaces[0] }));
+      } else {
+        this.dialog.open(this.blankDialogTemplate, {
+          disableClose: true
+        });
+      }
+    } catch (e) {
+      console.error('Error loading spaces', e);
+    }
   }
 
   ngOnDestroy() {
     // CanvasComponent.enableScroll();
-    this.artifactSubscription.unsubscribe();
-    this.spaceSubscription.unsubscribe();
+    this.artifactsSubscription.unsubscribe();
+    this.activeSpaceSubscription.unsubscribe();
   }
   //#endregion
 
@@ -564,23 +577,6 @@ export class CanvasComponent implements OnInit, OnDestroy {
       )
     ) {
       this.lastCanvasViewportTransform = this.fabricCanvas.viewportTransform.slice();
-
-      // TODO: check if needed
-      console.warn('TODO: check if needed & handle better');
-      this.activeSpace$.pipe(take(1)).subscribe(space => {
-        if (space) {
-          this.spaceService.update({
-            id: space.id,
-            viewportTransform: this.lastCanvasViewportTransform,
-            updateDate: new Date()
-          });
-        } else {
-          console.warn('No space found');
-          this.dialog.open(this.blankDialogTemplate, {
-            disableClose: true
-          });
-        }
-      });
     }
   }
   //#endregion
