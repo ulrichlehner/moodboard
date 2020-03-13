@@ -28,6 +28,10 @@ export class ImageClusterService {
    * @param [clusterSize=5] The number of cluster that should be built
    */
   public async build(artifacts: Artifact[], clusterSize = 5) {
+    if (!artifacts.length) {
+      return Promise.reject();
+    }
+
     const model = await this.modelLoaded;
     const data: Map<
       string,
