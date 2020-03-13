@@ -364,8 +364,12 @@ export class CanvasComponent implements OnInit, OnDestroy {
     }
   }
 
-  addArtifactToCanvas(artifact: Artifact, next?: Function) {
-    if (artifact._attachments) {
+  private addArtifactToCanvas(artifact: Artifact) {
+    return new Promise<void>((resolve, reject) => {
+      if (!artifact._attachments) {
+        reject('No attachments provided');
+      }
+
       for (const key in artifact._attachments) {
         if (artifact._attachments[key]) {
           let imgObj: HTMLImageElement | null = new Image();
@@ -390,13 +394,11 @@ export class CanvasComponent implements OnInit, OnDestroy {
             imgObj?.remove();
             imgObj = null;
 
-            if (next) {
-              next();
-            }
+            resolve();
           };
         }
       }
-    }
+    });
   }
 
   saveFiles(fileList: FileList) {
@@ -441,6 +443,10 @@ export class CanvasComponent implements OnInit, OnDestroy {
           canvas.width = canvas.height * (imgEl.width / imgEl.height);
         }
 
+        if (!ctx) {
+          console.warn('Cannot render image');
+        }
+
         ctx?.drawImage(imgEl, 0, 0, canvas.width, canvas.height);
 
         const bounds = this.fabricCanvas.calcViewportBoundaries();
@@ -470,19 +476,15 @@ export class CanvasComponent implements OnInit, OnDestroy {
           _attachments: {}
         };
         canvas.toBlob(
-          (result: Blob) => {
+          async (result: Blob) => {
             artifact._attachments[
               `${id}${this.getExtensionFromType(result.type)}`
             ] = {
               content_type: result.type,
               data: result
             };
-
-            this.addArtifactToCanvas(artifact, () => {
-              this.artifactService.add(artifact);
-            });
-
             canvas.remove();
+            this.artifactService.add(artifact);
           },
           this.attachmentImageMimeType,
           this.attachmentImageQuality

@@ -24,10 +24,14 @@ export class ArtifactDataService
 
   add(entity: Artifact): Observable<Artifact> {
     return from(
-      this.db.put({
-        ...entity,
-        _id: entity.id
-      }) as Observable<Artifact>
+      this.db
+        .put({
+          ...entity,
+          _id: entity.id
+        })
+        .then(() => {
+          return Promise.resolve(entity);
+        }) as Observable<Artifact>
     );
   }
 
