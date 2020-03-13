@@ -38,7 +38,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
   /* left: 37, up: 38, right: 39, down: 40, spacebar: 32, pageup: 33, pagedown: 34, end: 35, home: 36 */
   private static readonly keys = { 37: 1, 38: 1, 39: 1, 40: 1 };
 
-  activeSpace: Space;
+  activeSpace?: Space;
   isSpacePressed = false;
   isDragOver = false;
 
@@ -418,11 +418,16 @@ export class CanvasComponent implements OnInit, OnDestroy {
       return;
     }
 
+    if (!this.activeSpace) {
+      console.warn('No active space is set');
+      return;
+    }
+
+    const activeSpace = this.activeSpace;
     let artifactCnt = 0;
     const startOffsetY = this.artifacts.filter(
       (a: Artifact) =>
-        a.updateDate > this.activeSpace.updateDate &&
-        a.updateDate === a.createDate
+        a.updateDate > activeSpace.updateDate && a.updateDate === a.createDate
     ).length;
 
     // tslint:disable-next-line: prefer-for-of
@@ -461,13 +466,13 @@ export class CanvasComponent implements OnInit, OnDestroy {
         ctx?.drawImage(imgEl, 0, 0, canvas.width, canvas.height);
 
         const bounds = this.fabricCanvas.calcViewportBoundaries();
-        const id: string = ArtifactService.generateId(this.activeSpace.id);
+        const id: string = ArtifactService.generateId(activeSpace.id);
         const date = new Date();
         const distance = 10 / this.fabricCanvas.getZoom();
         const artifact: Artifact = {
           id,
           name: `Artifact @${id}`,
-          spaceId: this.activeSpace.id,
+          spaceId: activeSpace.id,
           transform: {
             order: this.artifacts.length + artifactCnt,
             x: bounds.tl.x + distance,
@@ -575,6 +580,15 @@ export class CanvasComponent implements OnInit, OnDestroy {
       )
     ) {
       this.lastCanvasViewportTransform = this.fabricCanvas.viewportTransform.slice();
+
+      // Update space
+      if (this.activeSpace) {
+        this.spaceService.update({
+          id: this.activeSpace.id,
+          viewportTransform: this.lastCanvasViewportTransform,
+          updateDate: new Date()
+        });
+      }
     }
   }
   //#endregion
