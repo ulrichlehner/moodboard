@@ -1,18 +1,20 @@
+import { DOCUMENT } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
   HostListener,
+  Inject,
   OnDestroy,
   OnInit,
   TemplateRef,
-  ViewChild,
-  Inject
+  ViewChild
 } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { select, Store } from '@ngrx/store';
 import 'fabric';
 import { fromEvent, Observable, Subscription } from 'rxjs';
 import { debounceTime, skip, take } from 'rxjs/operators';
+import { activateSpace } from 'src/app/store/actions/moodboard.actions';
 import { ArtifactService } from 'src/app/store/artifact.service';
 import {
   AppState,
@@ -21,8 +23,6 @@ import {
 import { SpaceService } from 'src/app/store/space.service';
 import { Artifact } from '../../models/artifact';
 import { Space } from '../../models/space';
-import { activateSpace } from 'src/app/store/actions/moodboard.actions';
-import { DOCUMENT } from '@angular/common';
 
 declare const fabric: any;
 
