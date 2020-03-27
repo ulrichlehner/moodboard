@@ -22,6 +22,7 @@ import { SpaceListComponent } from './components/space-list/space-list.component
 import { TutorialComponent } from './components/tutorial/tutorial.component';
 import { LayoutModule } from './layout/layout.module';
 import { MessageService } from './message.service';
+import { SelectableDirective } from './selectable.directive';
 import { MoodboardStoreModule } from './store/moodboard-store.module';
 
 @NgModule({
@@ -34,7 +35,8 @@ import { MoodboardStoreModule } from './store/moodboard-store.module';
     CanvasComponent,
     TutorialComponent,
     SpaceDetailComponent,
-    InfoComponent
+    InfoComponent,
+    SelectableDirective
   ],
   imports: [
     BrowserModule,

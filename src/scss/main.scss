@@ -122,6 +122,15 @@ body {
   letter-spacing: 0.03em;
 }
 
+.enable-selection {
+  -webkit-touch-callout: default;
+  user-select: text;
+
+  &--all {
+    user-select: all;
+  }
+}
+
 ::selection {
   color: #ffffff;
   background: mat-color(map-get($inspirespace-app-theme, primary));
