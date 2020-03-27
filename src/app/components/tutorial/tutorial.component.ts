@@ -12,6 +12,8 @@ export class TutorialComponent implements OnInit {
   ngOnInit() {}
 
   onOpenTutorialClick(template: TemplateRef<any>) {
-    this.dialog.open(template);
+    this.dialog.open(template, {
+      maxWidth: 640
+    });
   }
 }

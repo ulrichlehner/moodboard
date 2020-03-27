@@ -11,6 +11,8 @@ export class InfoComponent implements OnInit {
   ngOnInit() {}
 
   onOpenInfoClick(template: TemplateRef<any>) {
-    this.dialog.open(template);
+    this.dialog.open(template, {
+      maxWidth: 640
+    });
   }
 }

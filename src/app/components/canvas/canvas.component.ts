@@ -199,7 +199,8 @@ export class CanvasComponent implements OnInit, OnDestroy {
         this.store.dispatch(activateSpace({ space: spaces[0] }));
       } else {
         this.dialog.open(this.blankDialogTemplate, {
-          disableClose: true
+          disableClose: true,
+          maxWidth: 480
         });
       }
     } catch (e) {
