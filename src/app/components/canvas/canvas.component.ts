@@ -249,7 +249,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
     }
 
     // take index [1] since fabric.js produces an extra canvas (buffer technique?)
-    this.domCanvas = document.getElementsByTagName('canvas')[1];
+    this.domCanvas = this.document.getElementsByTagName('canvas')[1];
     this.domCanvas.width = canvasDomWidth;
     this.domCanvas.height = canvasDomHeight;
     this.fabricCanvas.setWidth(canvasDomWidth);
@@ -449,7 +449,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
       imgEl.src = URL.createObjectURL(file);
       imgEl.onload = () => {
         // Resize image
-        const canvas: HTMLCanvasElement = document.createElement('canvas');
+        const canvas: HTMLCanvasElement = this.document.createElement('canvas');
         const ctx = canvas.getContext('2d');
 
         if (imgEl.width > imgEl.height) {
@@ -717,7 +717,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
 
   mouseDown(event) {
     if (this.isSpacePressed) {
-      document.body.style.msUserSelect = document.body.style.webkitUserSelect = document.body.style.userSelect =
+      document.body.style.msUserSelect = this.document.body.style.webkitUserSelect = this.document.body.style.userSelect =
         'none';
       this.lastX = event.offsetX || event.pageX - this.domCanvas.offsetLeft;
       this.lastY = event.offsetY || event.pageY - this.domCanvas.offsetTop;
