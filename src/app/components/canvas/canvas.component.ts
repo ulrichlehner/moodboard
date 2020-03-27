@@ -23,8 +23,7 @@ import {
 import { SpaceService } from 'src/app/store/space.service';
 import { Artifact } from '../../models/artifact';
 import { Space } from '../../models/space';
-
-declare const fabric: any;
+import { fabric } from 'fabric';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -76,7 +75,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
   private artifactsSubscription: Subscription;
   private activeSpaceSubscription: Subscription;
 
-  private fabricCanvas: any | null = null;
+  private fabricCanvas: fabric.Canvas;
   private domCanvas;
 
   //#endregion
@@ -635,6 +634,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
         this.isSpacePressed = false;
         this.dragStartPosition = null;
         this.setCanvasObjectsSelectable(true);
+        this.fabricCanvas.defaultCursor = 'default';
         break;
     }
   }
@@ -653,6 +653,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
         case 32: // SPACE
           this.isSpacePressed = true;
           this.setCanvasObjectsSelectable(false);
+          this.fabricCanvas.defaultCursor = 'grab';
           break;
         case 88: // 'x'
           this.deleteSelectedArtifacts();
@@ -730,6 +731,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
 
   mouseMove(event) {
     if (this.dragStartPosition) {
+      this.fabricCanvas.defaultCursor = 'grabbing';
       this.lastX = event.offsetX || event.pageX - this.domCanvas.offsetLeft;
       this.lastY = event.offsetY || event.pageY - this.domCanvas.offsetTop;
       this.translate(
