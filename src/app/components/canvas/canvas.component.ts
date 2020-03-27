@@ -223,15 +223,15 @@ export class CanvasComponent implements OnInit, OnDestroy {
 
     if (!this.fabricCanvas) {
       this.fabricCanvas = new fabric.Canvas('canvas', {
-        noScaleCache: true,
+        // noScaleCache: true,
         backgroundVpt: false
       });
 
       this.fabricCanvas.setBackgroundColor(
-        {
+        new fabric.Pattern({
           source: this.canvasBackgroundImage,
           repeat: 'repeat'
-        },
+        }),
         this.fabricCanvas.renderAll.bind(this.fabricCanvas)
       );
 
@@ -240,7 +240,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
       });
 
       // Debounce time to prevent fireing too often
-      fromEvent(this.fabricCanvas, 'after:render')
+      fromEvent(this.fabricCanvas as any, 'after:render')
         .pipe(debounceTime(250))
         .subscribe(() => {
           this.updateCanvasViewportTransform();
@@ -251,8 +251,8 @@ export class CanvasComponent implements OnInit, OnDestroy {
     this.domCanvas = this.document.getElementsByTagName('canvas')[1];
     this.domCanvas.width = canvasDomWidth;
     this.domCanvas.height = canvasDomHeight;
-    this.fabricCanvas.setWidth(canvasDomWidth);
-    this.fabricCanvas.setHeight(canvasDomHeight);
+    this.fabricCanvas.setWidth(canvasDomWidth ? canvasDomWidth : 0);
+    this.fabricCanvas.setHeight(canvasDomHeight ? canvasDomHeight : 0);
 
     this.lastX = this.domCanvas.width / 2;
     this.lastY = this.domCanvas.height / 2;
@@ -261,13 +261,13 @@ export class CanvasComponent implements OnInit, OnDestroy {
 
   //#region Canvas manipulation
   translate(x, y) {
-    this.fabricCanvas.relativePan({ x, y });
+    this.fabricCanvas.relativePan(new fabric.Point(x, y));
   }
 
   zoom(originX, originY, delta) {
     const zoom = this.fabricCanvas.getZoom() + delta / 20;
     this.fabricCanvas.zoomToPoint(
-      { x: originX, y: originY },
+      new fabric.Point(originX, originY),
       zoom < this.canvasMinZoom ? this.canvasMinZoom : zoom
     );
   }
@@ -300,10 +300,10 @@ export class CanvasComponent implements OnInit, OnDestroy {
       this.fabricCanvas.setZoom(1);
       this.fabricCanvas.absolutePan(new fabric.Point(-dx, -dy));
       this.fabricCanvas.zoomToPoint(
-        {
-          x: this.fabricCanvas.getWidth() / 2,
-          y: this.fabricCanvas.getHeight() / 2
-        },
+        new fabric.Point(
+          this.fabricCanvas.getWidth() / 2,
+          this.fabricCanvas.getHeight() / 2
+        ),
         s
       );
     }
@@ -354,7 +354,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
       artifacts.forEach((artifact: Artifact) => {
         const object = this.fabricCanvas
           .getObjects()
-          .filter(obj => obj.id === artifact.id);
+          .filter(obj => (obj as any).id === artifact.id);
 
         if (object.length === 0) {
           this.addArtifactToCanvas(artifact);
@@ -383,11 +383,11 @@ export class CanvasComponent implements OnInit, OnDestroy {
 
       for (const key in artifact._attachments) {
         if (artifact._attachments[key]) {
-          let imgObj: HTMLImageElement | null = new Image();
+          const imgObj: HTMLImageElement = new Image();
           imgObj.src = URL.createObjectURL(artifact._attachments[key].data);
           imgObj.onload = () => {
             const img = new fabric.Image(imgObj);
-            img
+            (img as any)
               .set({
                 id: artifact.id,
                 angle: artifact.transform.angle,
@@ -399,11 +399,10 @@ export class CanvasComponent implements OnInit, OnDestroy {
               })
               .scale(artifact.transform.scale)
               .setShadow(this.artifactShadow);
-            this.fabricCanvas.insertAt(img, artifact.transform.order);
+            this.fabricCanvas.insertAt(img, artifact.transform.order, false);
 
             // Release image object
-            imgObj?.remove();
-            imgObj = null;
+            imgObj.remove();
 
             resolve();
           };
@@ -549,8 +548,14 @@ export class CanvasComponent implements OnInit, OnDestroy {
       objects = selection;
     }
 
-    // save data
-    const currentObjects = this.fabricCanvas.toJSON().objects; // needed for correct coordinates
+    // Save data
+    console.log(
+      'toJSON',
+      typeof this.fabricCanvas.toJSON(),
+      this.fabricCanvas.toJSON()
+    );
+    const currentObjects = (this.fabricCanvas.toJSON() as any).objects as any[]; // needed for correct coordinates
+    // tslint:disable-next-line: prefer-for-of
     for (let i = 0; i < objects.length; i++) {
       const id = objects[i].id;
       const object =
@@ -573,13 +578,15 @@ export class CanvasComponent implements OnInit, OnDestroy {
   updateCanvasViewportTransform() {
     if (
       this.lastCanvasViewportTransform.length !==
-        this.fabricCanvas.viewportTransform.length ||
+        this.fabricCanvas.viewportTransform?.length ||
       !this.isArrayEqual(
         this.lastCanvasViewportTransform,
         this.fabricCanvas.viewportTransform
       )
     ) {
-      this.lastCanvasViewportTransform = this.fabricCanvas.viewportTransform.slice();
+      this.lastCanvasViewportTransform = this.fabricCanvas.viewportTransform
+        ? this.fabricCanvas.viewportTransform.slice()
+        : [];
 
       // Update space
       if (this.activeSpace) {
@@ -812,12 +819,12 @@ export class CanvasComponent implements OnInit, OnDestroy {
       yCoords.push(c.bl.y);
     });
 
-    const minX = fabric.util.array.min(xCoords);
-    const maxX = fabric.util.array.max(xCoords);
+    const minX = fabric.util.array.min(xCoords, '');
+    const maxX = fabric.util.array.max(xCoords, '');
     const width = Math.abs(minX - maxX);
 
-    const minY = fabric.util.array.min(yCoords);
-    const maxY = fabric.util.array.max(yCoords);
+    const minY = fabric.util.array.min(yCoords, '');
+    const maxY = fabric.util.array.max(yCoords, '');
     const height = Math.abs(minY - maxY);
 
     if (minX && minY && width && height) {
