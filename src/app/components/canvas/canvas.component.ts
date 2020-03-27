@@ -46,6 +46,8 @@ export class CanvasComponent implements OnInit, OnDestroy {
   private readonly attachmentImageMaxSide = 1600;
   private readonly attachmentImageInitialPositionOffsetY = 40;
 
+  private readonly primaryColor = '#ff2800';
+
   private readonly canvasBackgroundImage =
     '/assets/img/background-pattern/background-pattern-14.png';
   private readonly canvasMinZoom = 0.05;
@@ -222,9 +224,18 @@ export class CanvasComponent implements OnInit, OnDestroy {
       ?.clientHeight;
 
     if (!this.fabricCanvas) {
+      // For customization apporach see https://github.com/fabricjs/fabric.js/issues/484
+      fabric.Object.prototype.cornerSize = 8;
+      fabric.Object.prototype.borderColor = this.primaryColor + '88';
+      fabric.Object.prototype.cornerColor = this.primaryColor + 'aa';
+      fabric.Object.prototype.cornerStrokeColor = this.primaryColor;
+
       this.fabricCanvas = new fabric.Canvas('canvas', {
         // noScaleCache: true,
-        backgroundVpt: false
+        backgroundVpt: false,
+        stopContextMenu: true,
+        selectionColor: this.primaryColor + '22',
+        selectionBorderColor: this.primaryColor + 'bb'
       });
 
       this.fabricCanvas.setBackgroundColor(
