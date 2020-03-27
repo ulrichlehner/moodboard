@@ -23,17 +23,17 @@ export class SelectableDirective implements OnChanges {
    */
   @Input('selectable')
   get isSelectable() {
-    return this._isSelectable;
+    return this.#isSelectable;
   }
   set isSelectable(value: SelectableType) {
     if (value === 'all') {
-      this._isSelectable = value;
+      this.#isSelectable = value;
     } else {
-      this._isSelectable = toBoolean(value);
+      this.#isSelectable = toBoolean(value);
     }
   }
-  // tslint:disable-next-line: variable-name
-  private _isSelectable: SelectableType = false;
+
+  #isSelectable: SelectableType = false;
 
   constructor(
     private el: ElementRef<HTMLElement>,
