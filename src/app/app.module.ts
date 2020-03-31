@@ -11,6 +11,7 @@ import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { MatomoModule } from 'ngx-matomo';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { ArtifactDetailComponent } from './components/artifact-detail/artifact-detail.component';
@@ -45,6 +46,7 @@ import { MoodboardStoreModule } from './store/moodboard-store.module';
     ReactiveFormsModule,
     AppRoutingModule,
     BrowserAnimationsModule,
+    MatomoModule,
     MatButtonModule,
     MatDialogModule,
     MatFormFieldModule,
