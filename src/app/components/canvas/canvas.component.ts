@@ -736,7 +736,7 @@ export class CanvasComponent implements OnInit, OnDestroy {
 
   mouseDown(event) {
     if (this.isSpacePressed) {
-      document.body.style.msUserSelect = this.document.body.style.webkitUserSelect = this.document.body.style.userSelect =
+      (<any>document.body.style).msUserSelect = this.document.body.style.webkitUserSelect = this.document.body.style.userSelect =
         'none';
       this.lastX = event.offsetX || event.pageX - this.domCanvas.offsetLeft;
       this.lastY = event.offsetY || event.pageY - this.domCanvas.offsetTop;
