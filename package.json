@@ -9,7 +9,6 @@
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e",
-    "deploy": "npm run build && git-directory-deploy --repo https://github.com/ulrichson/moodboard.inspirespace.app.git --branch stage --directory dist/inspirespace-app",
     "favicon": "node ./tools/favicon.js"
   },
   "private": true,
