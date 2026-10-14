@@ -9,7 +9,6 @@
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e",
-    "deploy": "npm run build && git-directory-deploy --repo https://github.com/ulrichson/moodboard.inspirespace.app.git --branch stage --directory dist/inspirespace-app",
     "favicon": "node ./tools/favicon.js"
   },
   "private": true,
@@ -32,7 +31,6 @@
     "@ngrx/store-devtools": "^9.2.0",
     "fabric": "^3.6.3",
     "material-design-icons": "^3.0.1",
-    "ngx-matomo": "^0.1.4",
     "normalize.css": "^8.0.1",
     "pouchdb": "^7.2.1",
     "rxjs": "~6.5.5",

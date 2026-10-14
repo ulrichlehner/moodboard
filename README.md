@@ -4,7 +4,7 @@ This project was generated with [Angular CLI](https://github.com/angular/angular
 
 ## Deploy
 
-Run `npm run deploy` and merge `stage` into `master` on GitHub via pull request.
+Pushes to `master` are built and published to the `gh-pages` branch by the GitHub Action in `.github/workflows/deploy.yml`. The site is served at https://moodboard.inspirespace.co (see `src/CNAME`).
 
 ## Development server
 
